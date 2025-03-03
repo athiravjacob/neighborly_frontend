@@ -1,7 +1,8 @@
 // Settings.tsx
 import React from "react";
 import BasicInfo from "../../components/settings/BasicInfo";
-import Address from "../../components/settings/Address"; // Import the new component
+import Address from "../../components/settings/Address"; 
+import VerifyAdhaar from "../../components/settings/VerifyAdhaar";
 import { Button } from "@mui/material";
 import { BasicInfoData } from "../../types/settings";
 const Settings: React.FC = () => {
@@ -26,8 +27,7 @@ const Settings: React.FC = () => {
         <BasicInfo onSave={handleSaveBasicInfo} />
         <Address />
 
-        {/* Placeholder for future components */}
-        {/* <VerifyAadhaar /> */}
+        <VerifyAdhaar />
 
         {/* Save Button */}
         <div className="p-6">

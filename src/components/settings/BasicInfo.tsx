@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { TextField, Button } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import axios from "axios";
+import { uploadImageToCloudinary } from "../../utilis/UploadImageTocloudinary";
 import * as Yup from "yup";
 import { BasicInfoProps, BasicInfoData } from "../../types/settings"; // Adjusted import
 import { BasicInfoSchema } from "../../validations/schemas/BasicInfoSchema";
@@ -52,24 +52,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  // Upload image to Cloudinary
-  const uploadImageToCloudinary = async (file: File): Promise<string | null> => {
-    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`;
-    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", uploadPreset);
-
-    try {
-      const response = await axios.post(cloudinaryUrl, formData);
-      return response.data.secure_url;
-    } catch (error) {
-      console.error("Error uploading image to Cloudinary:", error);
-      setErrors((prev) => ({ ...prev, imageUrl: "Failed to upload image." }));
-      return null;
-    }
-  };
+  
 
   // Handle save with Yup validation
   const handleSave = async () => {
@@ -78,7 +61,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
 
       let imageUrl: string | null = null;
       if (imageFile) {
-        imageUrl = await uploadImageToCloudinary(imageFile);
+        imageUrl = await uploadImageToCloudinary(imageFile,setErrors);
         if (!imageUrl) return;
       }
 
