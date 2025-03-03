@@ -1,12 +1,19 @@
-// src/components/Sidebar.tsx
 import React, { useState } from "react";
 import MenuItem from "./MenuItems";
 import {  useNavigate } from "react-router-dom";
+import PersonIcon from "@mui/icons-material/Person";
+import SettingsIcon from "@mui/icons-material/Settings";
+import TaskIcon from "@mui/icons-material/Task";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const navigate = useNavigate()
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
+  const user = {
+        name: "John Doe",
+        avatar: "https://api.dicebear.com/7.x/initials/svg?seed=JD",
+      };
 
   return (
     <aside
@@ -14,42 +21,69 @@ const Sidebar: React.FC = () => {
         isCollapsed ? "w-16" : "w-64"
       }`}
     >
-      {/* Toggle Button */}
-      <div className="p-4 flex justify-end">
-        <button
-          onClick={toggleSidebar}
-          className="text-white hover:text-gray-200 transition-colors"
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-{isCollapsed ? "☰" : "✖"}        </button>
-      </div>
+      <div className="p-6 border-b border-gray-800">
+        <div className="flex items-center gap-4">
+          <img
+            src={user.avatar}
+            alt="User avatar"
+            className={`rounded-full border-2 border-indigo-500 transition-all duration-300 ${
+              isCollapsed ? "w-10 h-10" : "w-12 h-12"
+            }`}
+          />
+          {!isCollapsed && (
+            <div className="flex-1 animate-fadeIn">
+              <h3 className="text-lg font-semibold text-white">{user.name}</h3>
+              <p className="text-sm text-gray-400">Online</p>
+            </div>
+          )}
+        </div>
+        {/* Toggle Button */}
+        <button
+          onClick={toggleSidebar}
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-800 transition-colors"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? (
+            <span className="text-xl">→</span>
+          ) : (
+            <span className="text-xl">←</span>
+          )}
+        </button>
+      </div>
+
+     
 
       {/* Menu Items */}
-      <nav className="flex flex-col gap-2">
+      <nav className="flex flex-col h-[calc(100%-8rem)] justify-between py-6">
+        <div className="space-y-1">
         <MenuItem
-          icon="👤"
+          icon={<PersonIcon />}
           label="Profile"
           isCollapsed={isCollapsed}
-          onClick={() => console.log("Go to Profile")} // Replace with navigation later
+          onClick={() => navigate("profile")} // Replace with navigation later
         />
         <MenuItem
-          icon="⚙️"
+          icon={<SettingsIcon />}
           label="Settings"
           isCollapsed={isCollapsed}
-          onClick={() => console.log("Go to Settings")}
+          onClick={() =>navigate("settings")}
         />
         <MenuItem
-          icon="📋"
+          icon={<TaskIcon />}
           label="Tasks"
           isCollapsed={isCollapsed}
-          onClick={() => console.log("Go to Tasks")}
+          onClick={() => navigate("task-list")}
         />
-        <MenuItem
-          icon="🚪"
-          label="Logout"
-          isCollapsed={isCollapsed}
-          onClick={() => navigate("/login")}
-        />
+        
+          </div>
+        <div className="mt-auto">
+          <MenuItem
+            icon={<LogoutIcon />}
+            label="Logout"
+            isCollapsed={isCollapsed}
+            onClick={() => navigate("/login")}
+          />
+        </div>
       </nav>
     </aside>
   );

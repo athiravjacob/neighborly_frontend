@@ -2,7 +2,7 @@
 import React from "react";
 
 interface MenuItemProps {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   isCollapsed: boolean;
   onClick: () => void;

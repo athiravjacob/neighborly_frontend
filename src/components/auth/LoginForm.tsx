@@ -63,7 +63,8 @@ const LoginForm = () => {
   const handleGoogleLogin = async() => {
     console.log('Continue with Google clicked');
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      
       navigate("/home")
 
     } catch (error) {

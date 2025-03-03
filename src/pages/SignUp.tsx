@@ -1,7 +1,7 @@
 import React from 'react';
 import signupImage from '../assets/Team work-bro.png';
-import SignupForm from '../components/signup/SignupForm';
-import LoginForm from '../components/signup/LoginForm';
+import SignupForm from '../components/auth/SignupForm';
+import LoginForm from '../components/auth/LoginForm';
 import { useLocation } from 'react-router-dom';
 
 const SignUpPage: React.FC = () => {

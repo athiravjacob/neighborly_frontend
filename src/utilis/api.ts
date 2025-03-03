@@ -69,3 +69,16 @@ export const login =async (email:string,password:string) => {
            
     }
 }
+
+export const loginWithGoogle = async (googleId: string) => {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/login/google`, { googleId })
+        console.log(response)
+        return response.data
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.message || 'Failed to send OTP');
+          }
+          throw new Error('An unexpected error occurred');
+    }
+}
