@@ -19,7 +19,7 @@ const LocationInput: React.FC = () => {
                 .then((data) => {
                 console.log(data)
               if (data.display_name) {
-                setLocation(`${data.address.suburb} ,${data.address.state_district}`);
+                setLocation(`${data.address.county} ,${data.address.state_district}`);
               }
             })
             .catch((error) => console.error('Error fetching location:', error));

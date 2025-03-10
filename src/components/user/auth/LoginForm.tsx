@@ -1,9 +1,12 @@
 import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
-import { login } from '../../utilis/api'; 
+import { login } from '../../../api/apiRequests'; 
 import { signInWithPopup } from 'firebase/auth';
-import { auth,googleProvider } from '../../config/firebase';
+import { auth, googleProvider } from '../../../config/firebase';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../../../redux/slices/authSlice';
+
 const loginSchema = yup.object().shape({
   email: yup.string().email('Invalid email address').required('Email is required'),
   password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
@@ -18,6 +21,7 @@ const LoginForm = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [generalError, setGeneralError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const dispatch = useDispatch();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,8 +42,9 @@ const LoginForm = () => {
       
       await loginSchema.validate(formData, { abortEarly: false });
       setLoading(true);
-      const response = await login(formData.email, formData.password);
-      console.log('Login successful:', response);
+      const { accessToken, user } = await login(formData.email, formData.password);
+      dispatch(setCredentials({ user, accessToken }));
+      console.log('Login successful:', user);
       navigate("/home")
 
     } catch (err) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SignupFormData } from '../../types/auth';
+import { SignupFormData } from '../../../types/auth';
 
 interface OTPFormProps {
   formData: SignupFormData;

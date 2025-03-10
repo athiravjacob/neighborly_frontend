@@ -2,12 +2,12 @@ import React, { useState, FormEvent, useEffect } from 'react'
 import * as yup from 'yup';
 import { useNavigate } from "react-router-dom";
 
-import { SignupFormData } from '../../types/auth';
+import { SignupFormData } from '../../../types/auth';
 import BasicInfoForm from './Basic';
 import OTPForm from './OTPform';
 import PasswordForm from './PasswordForm';
-import { signupBasicInfoSchema, signupOTPSchema, signupPasswordSchema } from '../../validations/schemas/SignupSchema';
-import { sendMail, verifyOTP, signup } from '../../utilis/api'; // Fixed typo: 'utilis' -> 'utils'
+import { signupBasicInfoSchema, signupOTPSchema, signupPasswordSchema } from '../../../validations/schemas/SignupSchema';
+import { sendMail, verifyOTP, signup } from '../../../api/apiRequests'; // Fixed typo: 'utilis' -> 'utils'
 
 
 const SignupForm = () => {

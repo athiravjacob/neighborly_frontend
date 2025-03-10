@@ -1,8 +1,8 @@
 // src/pages/Main/TaskList/TaskList.tsx
 import React, { useState } from "react";
-import TaskCard from "../../components/task/TaskCard";
-import TaskFilters from "../../components/task/TaskFilters";
-import TaskSort from "../../components/task/TaskSort";
+import TaskCard from "../../../components/user/task/TaskCard";
+import TaskFilters from "../../../components/user/task/TaskFilters";
+import TaskSort from "../../../components/user/task/TaskSort";
 import { useNavigate } from "react-router-dom";
 
 // Sample task data (replace with real data from an API or state management)
@@ -114,7 +114,7 @@ const TaskList: React.FC = () => {
           <h2 className="text-3xl font-bold text-gray-900">Available Tasks</h2>
           <button
             onClick={handlePostTask}
-            className="bg-violet-950 text-white px-6 py-3 rounded-xl font-medium hover:bg-violet-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+            className="bg-violet-950 text-white px-6 py-3 rounded-xl font-medium hover:bg-violet-700  shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
           >
             Post a Task
           </button>

@@ -1,7 +1,9 @@
 // src/App.tsx
-import Navbar from "../components/common/Navbar";
-import Sidebar from "../components/common/Sidebar";
-import MainContent from "../components/common/MainContent";
+
+import MainContent from "../../components/user/common/MainContent";
+import Navbar from "../../components/user/common/Navbar";
+import Sidebar from "../../components/user/common/Sidebar";
+
 
 
 const Home: React.FC = () => {
@@ -12,6 +14,7 @@ const Home: React.FC = () => {
       <Navbar />
       <Sidebar />
       <MainContent/>
+      
 
       
     </div>

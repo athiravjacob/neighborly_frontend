@@ -1,87 +1,101 @@
-// BasicInfo.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { TextField, Button } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { uploadImageToCloudinary } from "../../utilis/UploadImageTocloudinary";
+import { uploadImageToCloudinary } from "../../../utilis/UploadImageTocloudinary";
 import * as Yup from "yup";
-import { BasicInfoProps, BasicInfoData } from "../../types/settings"; // Adjusted import
-import { BasicInfoSchema } from "../../validations/schemas/BasicInfoSchema";
+import { BasicInfoProps, UserInfo } from "../../../types/settings";
+import { BasicInfoSchema } from "../../../validations/schemas/BasicInfoSchema";
+import { saveBasicInfo } from "../../../api/apiRequests";
 
-
-const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+const BasicInfo: React.FC<BasicInfoProps> = ({ User }) => {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(User?.profile_pic || null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    dob: "",
-    bio: "",
+    phone: User?.phone || "",
+    dob: "", // Initialize as empty, will be set in useEffect
+    bio: User?.bio || "",
   });
-  const [errors, setErrors] = useState<Partial<BasicInfoData>>({});
+  const [errors, setErrors] = useState<Partial<UserInfo>>({});
+  const [isEdited, setIsEdited] = useState(false);
   const profileInputRef = useRef<HTMLInputElement>(null);
 
-  // Clean up preview URL
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
+  // Updated function to handle string | Date | null | undefined
+  const formatDateForInput = (dateInput: string | Date | null | undefined): string => {
+    if (!dateInput) return ""; // Handle null or undefined
+    const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+    if (!(date instanceof Date) || isNaN(date.getTime())) return ""; // Invalid date
+    return date.toISOString().split("T")[0]; // Returns YYYY-MM-DD
+  };
 
-  // Handle image upload
+  useEffect(() => {
+    setFormData({
+      phone: User?.phone || "",
+      dob: formatDateForInput(User?.DOB), // Pass User?.DOB directly
+      bio: User?.bio || "",
+    });
+    setPreviewUrl(User?.profile_pic || null);
+  }, [User]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
+    setIsEdited(true);
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.type.startsWith("image/") && file.size <= 5 * 1024 * 1024) {
         setImageFile(file);
         setPreviewUrl(URL.createObjectURL(file));
-        setErrors((prev) => ({ ...prev, imageUrl: undefined }));
+        setErrors((prev) => ({ ...prev, profile_pic: undefined }));
+        setIsEdited(true);
       } else {
         setErrors((prev) => ({
           ...prev,
-          imageUrl: "Please upload a valid image (max 5MB).",
+          profile_pic: "Please upload a valid image (max 5MB).",
         }));
       }
     }
   };
 
-  // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
-  };
-
-  
-
-  // Handle save with Yup validation
   const handleSave = async () => {
     try {
       await BasicInfoSchema.validate(formData, { abortEarly: false });
 
-      let imageUrl: string | null = null;
+      let imageUrl: string | null = previewUrl;
       if (imageFile) {
-        imageUrl = await uploadImageToCloudinary(imageFile,setErrors);
-        if (!imageUrl) return;
+        imageUrl = await uploadImageToCloudinary(imageFile, setErrors);
+        if (!imageUrl) {
+          console.error("Image upload failed");
+          return;
+        }
+        setPreviewUrl(imageUrl);
       }
 
-      const dataToSave: BasicInfoData = {
-        imageUrl,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        dob: formData.dob,
+      const UserBasicInfo = {
+        id: User?._id,
+        image: imageUrl,
         bio: formData.bio,
+        dob: formData.dob,
+        phone: formData.phone,
       };
 
-      onSave(dataToSave);
-    } catch (validationError) {
-      if (Yup.ValidationError.isError(validationError)) {
-        const newErrors: Partial<BasicInfoData> = {};
-        validationError.inner.forEach((error) => {
-          if (error.path) newErrors[error.path as keyof BasicInfoData] = error.message;
+      const res = await saveBasicInfo(UserBasicInfo);
+      console.log("Save successful:", res);
+
+      setImageFile(null);
+      setIsEdited(false); // Hide save button on success
+    } catch (error) {
+      if (Yup.ValidationError.isError(error)) {
+        const newErrors: Partial<UserInfo> = {};
+        error.inner.forEach((err) => {
+          // if (err.path) newErrors[err.path as keyof UserInfo] = err.message;
         });
         setErrors(newErrors);
+      } else {
+        console.error("Save error:", error);
       }
     }
   };
@@ -93,7 +107,15 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
         <div className="flex flex-col items-center">
           <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center mb-4">
             {previewUrl ? (
-              <img src={previewUrl} alt="Profile Preview" className="w-full h-full object-cover" />
+              <img
+                src={previewUrl}
+                alt="Profile Preview"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.error("Image failed to load:", previewUrl);
+                  setPreviewUrl(null);
+                }}
+              />
             ) : (
               <CloudUploadIcon className="text-gray-400" fontSize="large" />
             )}
@@ -112,7 +134,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
           >
             {previewUrl ? "Change Photo" : "Upload Photo"}
           </Button>
-          {errors.imageUrl && <p className="text-red-600 text-sm mt-2">{errors.imageUrl}</p>}
+          {errors.profile_pic && <p className="text-red-600 text-sm mt-2">{errors.profile_pic}</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -122,12 +144,9 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
               variant="outlined"
               fullWidth
               name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter your full name"
+              value={User?.name || ""}
               size="small"
-              error={!!errors.name}
-              helperText={errors.name}
+              disabled
             />
           </div>
           <div>
@@ -138,10 +157,10 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
               type="date"
               name="dob"
               value={formData.dob}
-              onChange={handleChange}
+              onChange={handleInputChange}
               size="small"
-              error={!!errors.dob}
-              helperText={errors.dob}
+              error={!!errors.DOB}
+              // helperText={errors.dob}
             />
           </div>
         </div>
@@ -154,11 +173,9 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
               fullWidth
               type="email"
               name="email"
-              value={formData.email}
-              onChange={handleChange}
+              value={User?.email || ""}
               size="small"
-              error={!!errors.email}
-              helperText={errors.email}
+              disabled
               InputProps={{ startAdornment: <div className="text-gray-400 mr-2">@</div> }}
             />
           </div>
@@ -170,10 +187,8 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
               type="tel"
               name="phone"
               value={formData.phone}
-              onChange={handleChange}
               size="small"
-              error={!!errors.phone}
-              helperText={errors.phone}
+              disabled
               InputProps={{ startAdornment: <div className="text-gray-400 mr-2">📱</div> }}
             />
           </div>
@@ -188,7 +203,7 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
             rows={3}
             name="bio"
             value={formData.bio}
-            onChange={handleChange}
+            onChange={handleInputChange}
             placeholder="Tell us about yourself"
             size="small"
             error={!!errors.bio}
@@ -196,16 +211,18 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ onSave }) => {
           />
         </div>
 
-        <div className="flex justify-end">
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={handleSave}
-            className="bg-indigo-600 hover:bg-indigo-700"
-          >
-            Save Basic Info
-          </Button>
-        </div>
+        {isEdited && (
+          <div className="flex justify-end">
+            <Button
+              variant="contained"
+              disableElevation
+              onClick={handleSave}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              Save Basic Info
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
