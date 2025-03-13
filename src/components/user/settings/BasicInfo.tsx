@@ -1,36 +1,40 @@
 import React, { useState, useEffect, useRef } from "react";
-import { TextField, Button } from "@mui/material";
+import { TextField, Button, CircularProgress } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { uploadImageToCloudinary } from "../../../utilis/UploadImageTocloudinary";
 import * as Yup from "yup";
 import { BasicInfoProps, UserInfo } from "../../../types/settings";
-import { BasicInfoSchema } from "../../../validations/schemas/BasicInfoSchema";
 import { saveBasicInfo } from "../../../api/apiRequests";
+
+// Simple Loader component (you can customize this)
+const Loader = () => (
+  <CircularProgress size={24} className="ml-2" />
+);
 
 const BasicInfo: React.FC<BasicInfoProps> = ({ User }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(User?.profile_pic || null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     phone: User?.phone || "",
-    dob: "", // Initialize as empty, will be set in useEffect
+    dob: "", 
     bio: User?.bio || "",
   });
   const [errors, setErrors] = useState<Partial<UserInfo>>({});
   const [isEdited, setIsEdited] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // New loading state
   const profileInputRef = useRef<HTMLInputElement>(null);
 
-  // Updated function to handle string | Date | null | undefined
   const formatDateForInput = (dateInput: string | Date | null | undefined): string => {
-    if (!dateInput) return ""; // Handle null or undefined
+    if (!dateInput) return ""; 
     const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
-    if (!(date instanceof Date) || isNaN(date.getTime())) return ""; // Invalid date
-    return date.toISOString().split("T")[0]; // Returns YYYY-MM-DD
+    if (!(date instanceof Date) || isNaN(date.getTime())) return ""; 
+    return date.toISOString().split("T")[0]; 
   };
 
   useEffect(() => {
     setFormData({
       phone: User?.phone || "",
-      dob: formatDateForInput(User?.DOB), // Pass User?.DOB directly
+      dob: formatDateForInput(User?.DOB),
       bio: User?.bio || "",
     });
     setPreviewUrl(User?.profile_pic || null);
@@ -61,32 +65,34 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ User }) => {
   };
 
   const handleSave = async () => {
+    setIsLoading(true); // Start loading
     try {
-      await BasicInfoSchema.validate(formData, { abortEarly: false });
-
+      console.log("save basic");
       let imageUrl: string | null = previewUrl;
       if (imageFile) {
         imageUrl = await uploadImageToCloudinary(imageFile, setErrors);
         if (!imageUrl) {
           console.error("Image upload failed");
+          setIsLoading(false);
           return;
         }
         setPreviewUrl(imageUrl);
       }
 
+      console.log("hello")
       const UserBasicInfo = {
-        id: User?._id,
+        id: User?.id,
         image: imageUrl,
         bio: formData.bio,
         dob: formData.dob,
         phone: formData.phone,
       };
-
+      console.log(UserBasicInfo);
       const res = await saveBasicInfo(UserBasicInfo);
       console.log("Save successful:", res);
 
       setImageFile(null);
-      setIsEdited(false); // Hide save button on success
+      setIsEdited(false);
     } catch (error) {
       if (Yup.ValidationError.isError(error)) {
         const newErrors: Partial<UserInfo> = {};
@@ -97,6 +103,8 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ User }) => {
       } else {
         console.error("Save error:", error);
       }
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
@@ -160,7 +168,6 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ User }) => {
               onChange={handleInputChange}
               size="small"
               error={!!errors.DOB}
-              // helperText={errors.dob}
             />
           </div>
         </div>
@@ -212,15 +219,17 @@ const BasicInfo: React.FC<BasicInfoProps> = ({ User }) => {
         </div>
 
         {isEdited && (
-          <div className="flex justify-end">
+          <div className="flex justify-end items-center">
             <Button
               variant="contained"
               disableElevation
               onClick={handleSave}
               className="bg-indigo-600 hover:bg-indigo-700"
+              disabled={isLoading} // Disable button while loading
             >
               Save Basic Info
             </Button>
+            {isLoading && <Loader />}
           </div>
         )}
       </div>

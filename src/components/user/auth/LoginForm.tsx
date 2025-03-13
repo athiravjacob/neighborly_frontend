@@ -116,6 +116,7 @@ const LoginForm = () => {
           />
           {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
         </div>
+        
         <button
           type="submit"
           className="w-full bg-violet-950 text-white py-2 rounded-md hover:bg-violet-800 transition duration-200 disabled:bg-violet-700 disabled:cursor-not-allowed"

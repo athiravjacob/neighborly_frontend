@@ -81,7 +81,7 @@ const ChangePassword: React.FC<BasicInfoProps> = ({ User }) => {
 
   // Handle password change submission
   const handleSubmit = async () => {
-    if (!User?._id) {
+    if (!User?.id) {
       setError('User ID not found');
       return;
     }

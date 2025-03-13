@@ -13,7 +13,7 @@ const VerifygovtId: React.FC<BasicInfoProps> = ({ User }) => {
   const [govtIdNumber, setgovtIdNumber] = useState<string>('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isVerified, setIsVerified] = useState<boolean>(false);
+  const [isVerified, setIsVerified] = useState<boolean>(User?.isVerified ?? false);
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -77,9 +77,9 @@ const VerifygovtId: React.FC<BasicInfoProps> = ({ User }) => {
     return (
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-indigo-900">Government Id Verification</h2>
+          <h2 className="text-lg font-bold text-indigo-900">Verify ID</h2>
         </div>
-        <div className="text-green-600 font-medium">Government Id Verified</div>
+        <div className="text-green-600 font-medium">ID Verified</div>
       </div>
     );
   }

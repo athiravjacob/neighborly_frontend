@@ -8,6 +8,15 @@ import Profile from './pages/user/Main/Profile';
 import Settings from './pages/user/Main/Settings';
 import ProtectedRoutes from './components/user/common/ProtectedRoutes';
 import AdminLogin from './pages/admin/Login';
+import Home from './pages/admin/AdminHome';
+import ProtectedRoutes_admin from './components/admin/common/ProtectedRoutes-admin';
+import UserList from './pages/admin/Main/UserList';
+import UserDetails from './pages/admin/Main/UserDetailedView';
+import { ForgotPassword } from './components/user/auth/ForgotPassword';
+import { ResetPassword } from './components/user/auth/ResetPassword';
+import LandingPage from './pages/user/LandingPage';
+import TaskCreationPage from './pages/user/TaskCreationPage';
+import BecomeANeighbor from './pages/neighbor/BecomeNeighborPage';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -15,7 +24,14 @@ const AppRoutes: React.FC = () => {
       {/* User Routes */}
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/login" element={<SignUpPage />} /> 
-      <Route path="/" element={<SignUpPage />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} /> 
+      <Route path="/resetPassword" element={<ResetPassword />} /> 
+      <Route path="/create-task" element={<TaskCreationPage />} /> 
+      <Route path="/become-a-neighbor" element={<BecomeANeighbor />} /> 
+
+      BecomeANeighbor
+
+      <Route path="/" element={<LandingPage />} />
 
       {/* Protected User Routes */}
       <Route element={<ProtectedRoutes />}>
@@ -28,10 +44,18 @@ const AppRoutes: React.FC = () => {
       </Route>
 
       {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/" element={<AdminLogin />} />
+      <Route path="/admin" element={<AdminLogin />} />
+      <Route element={<ProtectedRoutes_admin />}>
+        <Route path="/admin/dashboard" element={<Home />}>
+          <Route path="users" element={<UserList />} />
+          <Route path="users/details" element={<UserDetails />} />
 
-      {/* Add more admin routes later, e.g., /admin/dashboard */}
+          
+        </Route>
+      </Route>
+
+          <Route path="/admin/login" element={<AdminLogin />} />
+
     </Routes>
   );
 };

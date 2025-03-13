@@ -4,7 +4,7 @@ import { store } from "../redux/store"; // Your store with redux-persist
 const API_BASE_URL = "http://localhost:4000";
 
 // Create Axios instance
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
@@ -12,11 +12,9 @@ const api = axios.create({
 api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       const { accessToken } = store.getState().auth;
-      console.log(accessToken, "token in interceptor");
       if (accessToken) {
         config.headers = config.headers || {};
         config.headers["Authorization"] = `Bearer ${accessToken}`;
-        console.log("Request Headers:", config.headers); // New log
       }
       return config;
     },

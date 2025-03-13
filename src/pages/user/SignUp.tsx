@@ -3,6 +3,7 @@ import signupImage from '../../assets/Team work-bro.png';
 import SignupForm from '../../components/user/auth/SignupForm';
 import LoginForm from '../../components/user/auth/LoginForm';
 import { useLocation } from 'react-router-dom';
+import NavbarLanding from '../../components/user/common/Navbar-Landing';
 
 const SignUpPage: React.FC = () => {
   const location = useLocation()
@@ -10,7 +11,8 @@ const SignUpPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-gray-100 flex flex-col">
-      <h1 className="text-4xl font-bold text-violet-950 pt-6 pl-6">Neighborly</h1>
+      <NavbarLanding></NavbarLanding>
+      {/* <h1 className="text-4xl font-bold text-violet-950 pt-6 pl-6">Neighborly</h1> */}
       <div className="w-full flex-grow flex flex-col md:flex-row">
         <div className="w-full md:w-1/2 flex">
           <img

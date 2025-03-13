@@ -1,6 +1,6 @@
 
 export interface UserInfo {
-    _id?: string | null;
+    id: string ;
     profile_pic?: string | null;
     name: string;
     email: string;
@@ -13,6 +13,8 @@ export interface UserInfo {
         state: string | null;
         pincode: string | null
     };
+    role: 'user' | 'admin';
+    govtId: string | null;
     isVerified?: boolean; 
 }
   
@@ -21,6 +23,3 @@ export interface BasicInfoProps {
 }
   
 
-export interface addressInfo{
-    
-}

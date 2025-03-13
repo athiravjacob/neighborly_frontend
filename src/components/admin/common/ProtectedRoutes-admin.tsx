@@ -4,16 +4,15 @@ import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 import { RootState } from "../../../redux/store";
 
-const ProtectedRoutes: React.FC = () => {
+const ProtectedRoutes_admin: React.FC = () => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
 
-  console.log("ProtectedRoute - accessToken:", accessToken); 
 
   if (!accessToken) {
-    return <Navigate to="/signup" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
-  return <Outlet />; 
+  return <Outlet />;
 };
 
-export default ProtectedRoutes;
+export default ProtectedRoutes_admin;

@@ -70,7 +70,7 @@ const Address: React.FC<BasicInfoProps> = ({ User }) => {
 
   // Handle save action
   const handleSave = async () => {
-    if (!User?._id) {
+    if (!User?.id) {
       setError("User ID not found.");
       return;
     }
@@ -81,7 +81,7 @@ const Address: React.FC<BasicInfoProps> = ({ User }) => {
     setError(null);
 
     try {
-      const updatedAddress = await saveAddress(User._id, address);
+      const updatedAddress = await saveAddress(User.id, address);
       console.log(updatedAddress)
       setAddress({
         street: updatedAddress?.street || address.street,

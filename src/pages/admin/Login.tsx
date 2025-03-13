@@ -1,21 +1,24 @@
 // src/pages/AdminLogin.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { adminLogin } from '../../api/adminApiRequests';
+import { setCredentials } from '../../redux/slices/authSlice';
+import { useDispatch } from 'react-redux';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/admin/login', { email, password });
-      const { accessToken, user } = response.data.data; // Adjust based on your backend response
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('user', JSON.stringify(user));
+      const { accessToken, user } = await adminLogin(email, password);
+      console.log(user)
+      dispatch(setCredentials({ user, accessToken }));
+      console.log('Login successful:', user);
       navigate('/admin/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');

@@ -1,10 +1,8 @@
 // Settings.tsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import BasicInfo from "../../../components/user/settings/BasicInfo";
 import Address from "../../../components/user/settings/Address"; 
 import VerifyAdhaar from "../../../components/user/settings/VerifyGovtId";
-import { Button } from "@mui/material";
 import { UserInfo } from "../../../types/settings";
 import { getUser } from "../../../api/apiRequests";
 import {  useSelector } from "react-redux";
@@ -36,12 +34,11 @@ const Settings: React.FC = () => {
     }
   };
   
-  // Fetch user details when component mounts or user.id changes
   useEffect(() => {
     if (accessToken && user?.id) {
-      getUserDetails(user.id); // Fetch using the user.id from Redux
+      getUserDetails(user.id); 
     }
-  }, [user?.id,accessToken]); // Re-run if user.id changes (e.g., login/logout)
+  }, [user?.id,accessToken]); 
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -61,7 +58,7 @@ const Settings: React.FC = () => {
         {userDetails && <Address User={userDetails} />}
         {userDetails && <VerifyAdhaar User={userDetails} />}
 
-        <ChangePassword/>
+        {/* <ChangePassword/> */}
 
        
       </div>

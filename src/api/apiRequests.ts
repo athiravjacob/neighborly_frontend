@@ -62,7 +62,29 @@ export const login = async (email: string, password: string): Promise<AuthRespon
     throw new Error("An unexpected error occurred");
   }
 };
+export const forgotPassword = async (email: string): Promise<void> => {
+  try {
+    const response = await api.post("/forgotPassword", { email })
+    console.log(response.data.data)
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "sending reset link to given email failed");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
 
+export const resetPassword = async (token: string,newPassword:string): Promise<void> => {
+  try {
+    const response = await api.post("/resetPassword", { token,newPassword })
+    console.log(response.data.data)
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "sending reset link to given email failed");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
 export const loginWithGoogle = async (googleId: string): Promise<AuthResponse> => {
   try {
     const response = await api.post("/login/google", { googleId });
@@ -89,8 +111,10 @@ export const getUser = async (userId: string): Promise<UserInfo> => {
 };
 
 export const saveBasicInfo = async (userBasicInfo: object): Promise<any> => {
+  console.log("save basic api")
   try {
     const response = await api.patch("/user/update_basic_info", { userBasicInfo });
+    console.log(response)
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -124,3 +148,4 @@ export const verifyId = async (govtId:string,imageUrl: string): Promise<any> => 
   }
 };
   
+
