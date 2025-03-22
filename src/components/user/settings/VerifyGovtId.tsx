@@ -7,7 +7,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { uploadImageToCloudinary } from '../../../utilis/UploadImageTocloudinary';
 import { verifyId } from '../../../api/apiRequests';
 import { BasicInfoProps } from '../../../types/settings';
-import Loader from '../../ui/loader';
 
 const VerifygovtId: React.FC<BasicInfoProps> = ({ User }) => {
   const [govtIdNumber, setgovtIdNumber] = useState<string>('');
@@ -156,7 +155,6 @@ const VerifygovtId: React.FC<BasicInfoProps> = ({ User }) => {
         {error && <div className="text-red-600 text-sm">{error}</div>}
 
         <div className="flex justify-end items-center space-x-4">
-          {isLoading && <Loader />}
           <Button
             variant="contained"
             disableElevation

@@ -40,9 +40,9 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
-      <div className="bg-violet-700 text-white p-6">
-        <h2 className="text-2xl font-bold mb-2">Describe Your Task</h2>
-        <p className="opacity-90">
+      <div className=" text-black p-6">
+        {/* <h2 className="text-2xl  font-bold mb-2">Describe Your Task</h2> */}
+        <p className="opacity-90 bg-gray-100 p-4 rounded-l">
           Tell us about your task. We use these details to show Taskers in your area who fit your needs.
         </p>
       </div>
@@ -102,10 +102,11 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
         {/* Task Details */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">Tell us the details of your task</label>
+          <p className='text-gray-500 pb-4 text-md'>Start the conversation and tell your Tasker what you need done. This helps us show you only qualified and available Taskers for the job. Don't worry, you can edit this later."</p>
           <textarea
             value={taskDetails}
             onChange={(e) => setTaskDetails(e.target.value)}
-            placeholder="Start the conversation and tell your Tasker what you need done. This helps us show you only qualified and available Taskers for the job. Don't worry, you can edit this later."
+            placeholder="Provide a summary of what you need done for your Tasker. Be sure to include details like the size of your space, any equipment/tools needed, and how to get in."
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 h-32"
           />
         </div>

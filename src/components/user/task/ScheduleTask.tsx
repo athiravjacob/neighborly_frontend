@@ -85,9 +85,9 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
-      <div className="bg-violet-700 text-white p-6">
-        <h2 className="text-2xl font-bold mb-2">Schedule Your Task</h2>
-        <p className="opacity-90">
+      <div className=" text-black p-6">
+        {/* <h2 className="text-2xl font-bold mb-2">Schedule Your Task</h2> */}
+        <p className="opacity-90 p-4 bg-gray-100 rounded-lg">
           Choose when you'd like your task completed
         </p>
       </div>
@@ -251,7 +251,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
           <div className="mt-4">
             <button
               onClick={handleContinue}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-violet-600 hover:bg-violet-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
             >
               Schedule and Continue
             </button>

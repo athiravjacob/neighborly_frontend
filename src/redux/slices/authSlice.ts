@@ -1,37 +1,30 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserDTO } from '../../types/UserDTO';
 
-// Define the auth state shape
 interface AuthState {
   user: UserDTO | null;
-  accessToken: string | null;
-}
+  isAuthenticated: boolean,}
 
-// Initial state
 const initialState: AuthState = {
   user: null,
-  accessToken: null,
-};
+  isAuthenticated: false,};
 
-// Create the slice
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{ user: UserDTO; accessToken: string;}>
+      action: PayloadAction<{ user: UserDTO; }>
     ) => {
       state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
+      state.isAuthenticated = true;
     },
     clearCredentials: (state) => {
       state.user = null;
-      state.accessToken = null;
-    },
+      state.isAuthenticated = false;    },
   },
 });
 
-// Export actions and reducer
 export const { setCredentials, clearCredentials } = authSlice.actions;
 export default authSlice.reducer;

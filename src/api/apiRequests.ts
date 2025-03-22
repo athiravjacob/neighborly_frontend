@@ -1,16 +1,17 @@
 import { UserInfo } from "../types/settings";
 import api from "./apiConfig";
 import axios from "axios";
-// Define response types
+
 interface AuthResponse {
-  user: UserInfo;
-  accessToken: string;
+  id: string,
+  name: string,
+  email: string,
+  type:string
 }
 
-// Public endpoints (no token required initially)
 export const sendMail = async (email: string): Promise<void> => {
   try {
-    const response = await api.post("/sendMail", { email });
+    const response = await api.post("/auth/send-otp", { email });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -22,7 +23,7 @@ export const sendMail = async (email: string): Promise<void> => {
 
 export const verifyOTP = async (email: string, otp: string): Promise<void> => {
   try {
-    const response = await api.post("/verifyOTP", { email, otp });
+    const response = await api.post("/auth/verify-otp", { email, otp });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -39,8 +40,9 @@ export const signup = async (
   password: string
 ): Promise<AuthResponse> => {
   try {
-    const response = await api.post("/signup", { name, email, phone, password });
-    return response.data; // Expecting { user, accessToken }
+    const user={name,email,phone,password}
+    const response = await api.post("/auth/signup", { user });
+    return response.data; 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message || "Signup failed");
@@ -51,7 +53,7 @@ export const signup = async (
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
   try {
-      const response = await api.post("/login", { email, password });
+      const response = await api.post("/auth/login", { email, password },{ withCredentials: true });
       console.log(response.data.data)
       return response.data.data;
       
@@ -62,9 +64,23 @@ export const login = async (email: string, password: string): Promise<AuthRespon
     throw new Error("An unexpected error occurred");
   }
 };
+
+export const logout = async (): Promise<void> => {
+  try {
+      const response = await api.post("/auth/logout",{ withCredentials: true });
+      return response.data.data;
+      
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Logout failed");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
 export const forgotPassword = async (email: string): Promise<void> => {
   try {
-    const response = await api.post("/forgotPassword", { email })
+    const response = await api.post("/auth/forgot-password", { email })
     console.log(response.data.data)
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -74,9 +90,9 @@ export const forgotPassword = async (email: string): Promise<void> => {
   }
 }
 
-export const resetPassword = async (token: string,newPassword:string): Promise<void> => {
+export const resetPassword = async (email:string,token: string,newPassword:string): Promise<void> => {
   try {
-    const response = await api.post("/resetPassword", { token,newPassword })
+    const response = await api.post("/auth/reset-password", {email,token,newPassword })
     console.log(response.data.data)
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {

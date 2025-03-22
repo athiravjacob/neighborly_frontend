@@ -9,7 +9,7 @@ export const ResetPassword: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     const token = new URLSearchParams(window.location.search).get("token") || "";
-
+    const email = new URLSearchParams(window.location.search).get("email") || "";
     async function handleResetPassword(event: React.FormEvent): Promise<void> {
         event.preventDefault();
         setError(null);
@@ -24,7 +24,6 @@ export const ResetPassword: React.FC = () => {
             return;
         }
 
-        // Basic password strength check
         if (newPassword.length < 8) {
             setError("Password must be at least 8 characters long");
             return;
@@ -37,7 +36,7 @@ export const ResetPassword: React.FC = () => {
 
         setIsLoading(true);
         try {
-            await resetPassword(token, newPassword);
+            await resetPassword(email,token, newPassword);
             setIsSuccess(true);
         } catch (error: any) {
             setIsLoading(false);

@@ -13,7 +13,8 @@ export const signupOTPSchema = yup.object().shape({
   otp: yup
     .string()
     .required('OTP is required')
-    .matches(/^\d{4}$/, 'OTP must be 4 digits'),
+    .matches(/^[A-Za-z0-9]{6}$/
+    , 'OTP must be 6 digits or alphabets or both '),
 });
 
 export const signupPasswordSchema = yup.object().shape({

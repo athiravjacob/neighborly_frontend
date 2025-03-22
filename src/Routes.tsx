@@ -17,7 +17,8 @@ import { ResetPassword } from './components/user/auth/ResetPassword';
 import LandingPage from './pages/user/LandingPage';
 import TaskCreationPage from './pages/user/TaskCreationPage';
 import BecomeANeighbor from './pages/neighbor/BecomeNeighborPage';
-
+import Calendar from './pages/neighbor/Calendar';
+import NeighborHome from './pages/neighbor/Neighbor-home';
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
@@ -25,11 +26,11 @@ const AppRoutes: React.FC = () => {
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/login" element={<SignUpPage />} /> 
       <Route path="/forgot-password" element={<ForgotPassword />} /> 
-      <Route path="/resetPassword" element={<ResetPassword />} /> 
+      <Route path="/reset-password" element={<ResetPassword />} /> 
       <Route path="/create-task" element={<TaskCreationPage />} /> 
-      <Route path="/become-a-neighbor" element={<BecomeANeighbor />} /> 
-
-      BecomeANeighbor
+      <Route path="/neighbor" element={<BecomeANeighbor />}/>   
+      
+      <Route path="/neighbor/home" element={<NeighborHome/>}></Route>
 
       <Route path="/" element={<LandingPage />} />
 
@@ -55,8 +56,11 @@ const AppRoutes: React.FC = () => {
       </Route>
 
           <Route path="/admin/login" element={<AdminLogin />} />
-
+          
+        
     </Routes>
+
+   
   );
 };
 

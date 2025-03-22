@@ -27,14 +27,14 @@ const NavbarLanding: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <a href="/login" className="font-medium text-[#2E1065] hover:text-violet-800 transition-colors duration-200">
+              <p onClick={()=>navigate("/login")} className="font-medium text-[#2E1065] hover:text-violet-800 transition-colors duration-200">
                 Log in
-              </a>
+              </p>
               <button onClick={()=>navigate("/signup")} className="px-5 py-2.5 rounded-lg font-medium bg-white text-violet-800 border-2 border-violet-800 hover:bg-violet-50 transition-colors duration-200">
                 Sign up
               </button>
-              <button className="px-5 py-2.5 rounded-lg font-medium bg-violet-800 text-white hover:bg-violet-900 transition-colors duration-200 shadow-sm">
-                Become a Helper
+              <button onClick={()=>navigate("/neighbor")} className="px-5 py-2.5 rounded-lg font-medium bg-violet-800 text-white hover:bg-violet-900 transition-colors duration-200 shadow-sm">
+                Become a Neighbor
               </button>
             </div>
           </div>

@@ -3,19 +3,7 @@ import { UserInfo } from '../types/settings';
 import api from './apiConfig';
 import axios from 'axios';
 
-// interface UserInfo {
-//   id: string;
-//   name: string;
-//   email: string;
-//   phone: string;
-//   address: object;
-//   isVerified: boolean;
-//   createdAt: string;
-//   updatedAt: string;
-//   govtId: string;
-//   role: 'user' | 'admin';
-//   profilePicUrl?: string;
-// }
+
 
 interface AuthResponse {
   user: UserInfo;

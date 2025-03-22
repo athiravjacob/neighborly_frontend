@@ -5,11 +5,10 @@ import { Navigate, Outlet } from "react-router-dom";
 import { RootState } from "../../../redux/store";
 
 const ProtectedRoutes: React.FC = () => {
-  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
-  console.log("ProtectedRoute - accessToken:", accessToken); 
 
-  if (!accessToken) {
+  if (!isAuthenticated) {
     return <Navigate to="/signup" replace />;
   }
 

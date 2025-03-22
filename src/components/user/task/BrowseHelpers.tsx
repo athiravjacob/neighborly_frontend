@@ -144,9 +144,9 @@ export const BrowseHelpers: React.FC<BrowseHelpersProps> = ({ onContinue, taskDa
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
-    <div className="bg-violet-700 text-white p-6">
-      <h2 className="text-2xl font-bold mb-2">Browse Taskers and prices</h2>
-      <p className="opacity-90">
+    <div className=" text-black p-6">
+      {/* <h2 className="text-2xl font-bold mb-2">Browse Taskers and prices</h2> */}
+      <p className="opacity-90 p-4 bg-gray-100">
         Filter and sort to find your Tasker. Then view their availability to request your date and time.
       </p>
     </div>

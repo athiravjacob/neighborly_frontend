@@ -64,7 +64,7 @@ const CategorySection: React.FC = () => {
     <section className="py-16 bg-gradient-to-b from-white to-violet-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#2E1065] mb-4">Explore Our Services</h2>
+          <h2 className="text-4xl font-bold text-[#2E1065] mb-4">Explore Our Services</h2>
           <div className="w-24 h-1 bg-violet-600 mx-auto rounded-full"></div>
         </div>
 
@@ -85,10 +85,10 @@ const CategorySection: React.FC = () => {
                       : "bg-white text-gray-700 shadow-md hover:shadow-lg hover:bg-violet-50"
                   }`}
                 >
-                  <div className={`p-3 rounded-full mb-3 ${isSelected ? "bg-violet-500" : "bg-violet-100"}`}>
-                    <Icon className={`w-6 h-6 ${isSelected ? "text-white" : "text-violet-600"}`} />
+                  <div className={`p-4 rounded-full mb-3 ${isSelected ? "bg-violet-500" : "bg-violet-100"}`}>
+                    <Icon className={`w-10 h-10 ${isSelected ? "text-white" : "text-violet-600"}`} />
                   </div>
-                  <span className="text-sm font-medium whitespace-nowrap">{category.name}</span>
+                  <span className="text-xl font-medium whitespace-nowrap">{category.name}</span>
                 </button>
               )
             })}

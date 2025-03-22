@@ -1,7 +1,6 @@
 export interface UserDTO {
-    id?: string;
-    email: string;
+  id: string;
   name: string;
-  role?: string;
-    profilePicUrl?: string;
-  }
+  email: string;
+  type: string;
+}
