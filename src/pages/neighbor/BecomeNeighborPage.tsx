@@ -11,52 +11,115 @@ import {
   CheckSquare,
   CreditCard,
   Calendar,
-  MapPin,
   Star,
   Shield,
 } from "lucide-react";
 import neighbors from "../../assets/team.png";
 import group from '../../assets/group-help.png'
+import { NeighborLogin, NeighborSignup } from "../../api/neighborApiRequests";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../redux/slices/authSlice";
 
 const BecomeANeighbor: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(false);
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
-    firstName: "",
-    lastName: "",
     phone: "",
     password: "",
     confirmPassword: "",
-    zipCode: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(null);
+  };
+
+  const handleSignup = async () => {
+    setLoading(true);
+    setError(null);
+    const neighbor = {
+      name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+    }
+    try {
+      const response = await NeighborSignup(neighbor)
+      console.log('Signup successful:', response);
+      alert('Signup successful! Please log in.');
+      setIsLogin(true); 
+      setFormData({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
+      
+    } catch (err: unknown) { 
+      if (err instanceof Error) {
+        setError(err.message || 'An error occurred during signup');
+      } else {
+        setError('An unexpected error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await NeighborLogin(formData.email, formData.password)
+      const neighbor = {id:response.id,name:response.name,email:response.email,type:response.type}
+      dispatch(setCredentials({user:neighbor}))
+      navigate("/neighbor/home")
+      
+    } catch (err: unknown) { // Use `unknown`
+      if (err instanceof Error) {
+        setError(err.message || 'An error occurred during signup');
+      } else {
+        setError('An unexpected error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+    
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      setError("Passwords don't match!");
       return;
     }
-    // Add signup logic here (e.g., API call)
-    console.log("Form submitted:", formData);
+
+    if (isLogin) {
+      handleLogin();
+    } else {
+      handleSignup();
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white">
       {/* Navbar */}
       <nav className="flex items-center justify-between p-6 bg-white shadow-sm border-b border-violet-100">
-        <div className="text-2xl font-bold text-violet-900">Neighborly</div>
+        <div onClick={()=>navigate("/")} className="text-2xl font-bold text-violet-900">Neighborly</div>
         <div className="flex gap-4">
-          <a href="#" className="text-violet-700 hover:text-violet-900">
-            Log In
-          </a>
+          <button 
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-violet-700 hover:text-violet-900"
+          >
+            {isLogin ? "Sign Up" : "Log In"}
+          </button>
           <a
             href="#"
             className="px-4 py-2 bg-violet-700 text-white rounded-lg hover:bg-violet-800 transition"
           >
-            Sign Up
+            {isLogin ? "Log In" : "Sign Up"}
           </a>
         </div>
       </nav>
@@ -71,14 +134,11 @@ const BecomeANeighbor: React.FC = () => {
                 <h2 className="text-3xl font-bold mb-4">
                   Join our community of helpful neighbors
                 </h2>
-                {/* <p className="text-lg mb-6">Become A neighbor and earn on your schedule</p> */}
                 <div className="flex gap-4 flex-wrap">
                   <div className="flex items-center">
                     <Star className="text-yellow-400 mr-2" size={20} />
-                    {/* <span>4.8/5 Average Rating</span> */}
                   </div>
                   <div className="flex items-center">
-                    {/* <Shield className="text-yellow-400 mr-2" size={20} /> */}
                     <span>Secure Payments</span>
                   </div>
                 </div>
@@ -90,48 +150,42 @@ const BecomeANeighbor: React.FC = () => {
               />
             </div>
 
-            {/* Right: Signup Form */}
+            {/* Right: Form */}
             <div className="md:w-7/12 p-8 md:p-12">
               <h1 className="text-3xl font-bold text-violet-900 mb-2">
-               Become A neighbor
+                {isLogin ? "Log In" : "Become A Neighbor"}
               </h1>
               <p className="text-gray-600 mb-8">
-                Start helping your community and earning on your schedule
+                {isLogin 
+                  ? "Welcome back to Neighborly"
+                  : "Start helping your community and earning on your schedule"}
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="flex gap-4 flex-col sm:flex-row">
-                  <div className="flex-1">
-                    <label className="block text-gray-700 font-medium mb-1 flex items-center">
-                      <User size={16} className="mr-2 text-violet-700" />
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      placeholder="First name"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-                      required
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-gray-700 font-medium mb-1 flex items-center">
-                      <User size={16} className="mr-2 text-violet-700" />
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      placeholder="Last name"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-                      required
-                    />
-                  </div>
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+                  {error}
                 </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {!isLogin && (
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-1 flex items-center">
+                      <User size={16} className="mr-2 text-violet-700" />
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="Your name"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-gray-700 font-medium mb-1 flex items-center">
@@ -146,11 +200,12 @@ const BecomeANeighbor: React.FC = () => {
                     placeholder="Enter your email"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
                     required
+                    disabled={loading}
                   />
                 </div>
 
-                <div className="flex gap-4 flex-col sm:flex-row">
-                  <div className="flex-1">
+                {!isLogin && (
+                  <div>
                     <label className="block text-gray-700 font-medium mb-1 flex items-center">
                       <Phone size={16} className="mr-2 text-violet-700" />
                       Phone Number
@@ -163,42 +218,30 @@ const BecomeANeighbor: React.FC = () => {
                       placeholder="(555) 555-5555"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
                       required
+                      disabled={loading}
                     />
                   </div>
-                  <div className="flex-1">
-                    <label className="block text-gray-700 font-medium mb-1 flex items-center">
-                      <MapPin size={16} className="mr-2 text-violet-700" />
-                      Zip Code
-                    </label>
-                    <input
-                      type="text"
-                      name="zipCode"
-                      value={formData.zipCode}
-                      onChange={handleInputChange}
-                      placeholder="Your service area"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-                      required
-                    />
-                  </div>
+                )}
+
+                <div>
+                  <label className="block text-gray-700 font-medium mb-1 flex items-center">
+                    <Lock size={16} className="mr-2 text-violet-700" />
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder={isLogin ? "Enter your password" : "Create a password"}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
+                    required
+                    disabled={loading}
+                  />
                 </div>
 
-                <div className="flex gap-4 flex-col sm:flex-row">
-                  <div className="flex-1">
-                    <label className="block text-gray-700 font-medium mb-1 flex items-center">
-                      <Lock size={16} className="mr-2 text-violet-700" />
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder="Create a password"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-                      required
-                    />
-                  </div>
-                  <div className="flex-1">
+                {!isLogin && (
+                  <div>
                     <label className="block text-gray-700 font-medium mb-1 flex items-center">
                       <Lock size={16} className="mr-2 text-violet-700" />
                       Confirm Password
@@ -211,35 +254,49 @@ const BecomeANeighbor: React.FC = () => {
                       placeholder="Confirm password"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
                       required
+                      disabled={loading}
                     />
                   </div>
-                </div>
+                )}
 
                 <div className="pt-2">
                   <button
                     type="submit"
-                    className="w-full px-6 py-4 bg-violet-700 text-white rounded-lg hover:bg-violet-800 transition text-lg font-medium"
+                    className="w-full px-6 py-4 bg-violet-700 text-white rounded-lg hover:bg-violet-800 transition text-lg font-medium disabled:bg-violet-400"
+                    disabled={loading}
                   >
-                    Join Neighborly
+                    {loading ? 'Processing...' : (isLogin ? "Log In" : "Join Neighborly")}
                   </button>
                 </div>
 
                 <p className="text-sm text-gray-500 text-center">
-                  By signing up, you agree to our{" "}
-                  <a href="#" className="text-violet-700 hover:underline">
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a href="#" className="text-violet-700 hover:underline">
-                    Privacy Policy
-                  </a>
+                  {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+                  <button
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="text-violet-700 hover:underline"
+                    disabled={loading}
+                  >
+                    {isLogin ? "Sign Up" : "Log In"}
+                  </button>
                 </p>
+
+                {!isLogin && (
+                  <p className="text-sm text-gray-500 text-center">
+                    By signing up, you agree to our{" "}
+                    <a href="#" className="text-violet-700 hover:underline">
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a href="#" className="text-violet-700 hover:underline">
+                      Privacy Policy
+                    </a>
+                  </p>
+                )}
               </form>
             </div>
           </div>
         </div>
       </section>
-
       {/* Benefits Section */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
@@ -451,3 +508,7 @@ const BecomeANeighbor: React.FC = () => {
 };
 
 export default BecomeANeighbor;
+
+function setError(arg0: any) {
+  throw new Error("Function not implemented.");
+}

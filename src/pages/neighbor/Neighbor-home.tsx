@@ -1,10 +1,21 @@
 import { useState } from "react";
 import { Bell, Home, Calendar, Award, User, LogOut } from "lucide-react";
 import CalendarSection from "./Calendar";
+import SkillsSection from "./Skills";
+import ServiceLocation from "./ServiceLocation";
+import { useSelector } from "react-redux";
+import { RootState, persistor } from "../../redux/store";
+import { useNavigate } from "react-router-dom";
+import { clearCredentials } from "../../redux/slices/authSlice";
+import { logout } from "../../api/apiRequests";
+import { useDispatch } from "react-redux";
 
 const NeighborHome = () => {
   const [activeSection, setActiveSection] = useState("tasks");
   const [activeTaskTab, setActiveTaskTab] = useState("scheduled");
+  const { user ,isAuthenticated} = useSelector((state: RootState) => state.auth);
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const renderContent = () => {
     switch (activeSection) {
@@ -14,11 +25,27 @@ const NeighborHome = () => {
         return <CalendarSection />;
       case "skills":
         return <SkillsSection />;
+      case "location":
+        return <ServiceLocation />;
+      
       default:
         return <TasksSection activeTab={activeTaskTab} setActiveTab={setActiveTaskTab} />;
     }
   };
+  if (!isAuthenticated || !user ||user.type !== 'neighbor') {
+    navigate('/neighbor'); 
+    return null;
+  }
 
+  const handleLogout = async () => {
+    
+    dispatch(clearCredentials());
+    await persistor.purge(); 
+    await logout()
+    navigate('/neighbor');
+  };
+
+  
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar Navigation */}
@@ -55,7 +82,16 @@ const NeighborHome = () => {
             Skills
           </button>
           <button
-            onClick={() => alert("Logging out...")}
+            onClick={() => setActiveSection("location")}
+            className={`w-full flex items-center px-6 py-3 text-left ${
+              activeSection === "location" ? "bg-violet-50 text-violet-950" : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <Award size={20} className="mr-3" />
+            Location
+          </button>
+          <button
+            onClick={handleLogout}
             className="w-full flex items-center px-6 py-3 text-left text-gray-600 hover:bg-gray-100 mt-auto absolute bottom-6"
           >
             <LogOut size={20} className="mr-3" />
@@ -69,17 +105,17 @@ const NeighborHome = () => {
         {/* Top Navigation */}
         <header className="bg-white shadow-sm sticky top-0 z-10">
           <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="text-lg font-semibold text-gray-700">Welcome back, Tasker!</div>
+            <div className="text-lg font-semibold text-gray-700">Welcome back, {user?.name} </div>
             <div className="flex items-center space-x-4">
-              <button className="p-2 rounded-full bg-gray-100 text-gray-600 relative hover:bg-gray-200">
+              {/* <button className="p-2 rounded-full bg-gray-100 text-gray-600 relative hover:bg-gray-200">
                 <Bell size={20} />
                 <span className="absolute top-0 right-0 w-2 h-2 bg-violet-500 rounded-full"></span>
-              </button>
+              </button> */}
               <div className="flex items-center space-x-2">
                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                   <User size={20} className="text-gray-600" />
                 </div>
-                <span className="text-gray-700 font-medium">John Doe</span>
+                <span className="text-gray-700 font-medium">{user.name }</span>
               </div>
             </div>
           </div>
@@ -94,6 +130,13 @@ const NeighborHome = () => {
 
 // Tasks Section Component
 const TasksSection = ({ activeTab, setActiveTab }) => {
+  const scheduledTasks: any[] = []; 
+  const previousTasks = [
+    { title: "Furniture Assembly Help", date: "Mar 18, 2025", earnings: "$45" },
+    { title: "Yard Cleanup", date: "Mar 15, 2025", earnings: "$35" },
+    { title: "Pet Sitting", date: "Mar 12, 2025", earnings: "$20" },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Tabs */}
@@ -123,29 +166,38 @@ const TasksSection = ({ activeTab, setActiveTab }) => {
       {/* Content */}
       <div className="bg-white rounded-b-xl shadow-sm p-6">
         {activeTab === "scheduled" ? (
-          <div className="space-y-4">
-            <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-600 border-b pb-2">
-              <div className="col-span-4">Task</div>
-              <div className="col-span-3">Time</div>
-              <div className="col-span-2">Rate</div>
-              <div className="col-span-2">Distance</div>
-              <div className="col-span-1"></div>
+          scheduledTasks.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600 text-lg">No tasks scheduled yet</p>
+              <p className="text-gray-500 mt-2">
+                Please complete your profile to get matched with tasks
+              </p>
+              <button className="mt-4 px-4 py-2 bg-violet-700 text-white rounded-md hover:bg-violet-900">
+                Complete Profile
+              </button>
             </div>
-            {[
-              { title: "Grocery Shopping for Mrs. Johnson", time: "Today, 2:00 PM", rate: "$25/hr", distance: "0.5 miles" },
-              { title: "Lawn Mowing at 123 Oak St", time: "Tomorrow, 10:00 AM", rate: "$30/hr", distance: "1.2 miles" },
-            ].map((task, i) => (
-              <div key={i} className="grid grid-cols-12 gap-4 items-center py-3 border-b border-gray-100">
-                <div className="col-span-4 font-semibold text-gray-800">{task.title}</div>
-                <div className="col-span-3 text-gray-600">{task.time}</div>
-                <div className="col-span-2 text-violet-700 font-medium">{task.rate}</div>
-                <div className="col-span-2 text-gray-500">{task.distance}</div>
-                <div className="col-span-1">
-                  <button className="text-sm text-violet-700 hover:text-violet-900 font-medium">Details</button>
-                </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-600 border-b pb-2">
+                <div className="col-span-4">Task</div>
+                <div className="col-span-3">Time</div>
+                <div className="col-span-2">Rate</div>
+                <div className="col-span-2">Distance</div>
+                <div className="col-span-1"></div>
               </div>
-            ))}
-          </div>
+              {scheduledTasks.map((task, i) => (
+                <div key={i} className="grid grid-cols-12 gap-4 items-center py-3 border-b border-gray-100">
+                  <div className="col-span-4 font-semibold text-gray-800">{task.title}</div>
+                  <div className="col-span-3 text-gray-600">{task.time}</div>
+                  <div className="col-span-2 text-violet-700 font-medium">{task.rate}</div>
+                  <div className="col-span-2 text-gray-500">{task.distance}</div>
+                  <div className="col-span-1">
+                    <button className="text-sm text-violet-700 hover:text-violet Mathew font-medium">Details</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-600 border-b pb-2">
@@ -154,11 +206,7 @@ const TasksSection = ({ activeTab, setActiveTab }) => {
               <div className="col-span-2">Earnings</div>
               <div className="col-span-2"></div>
             </div>
-            {[
-              { title: "Furniture Assembly Help", date: "Mar 18, 2025", earnings: "$45" },
-              { title: "Yard Cleanup", date: "Mar 15, 2025", earnings: "$35" },
-              { title: "Pet Sitting", date: "Mar 12, 2025", earnings: "$20" },
-            ].map((task, i) => (
+            {previousTasks.map((task, i) => (
               <div key={i} className="grid grid-cols-12 gap-4 items-center py-3 border-b border-gray-100">
                 <div className="col-span-5 font-medium text-gray-800">{task.title}</div>
                 <div className="col-span-3 text-gray-600">{task.date}</div>
@@ -175,128 +223,6 @@ const TasksSection = ({ activeTab, setActiveTab }) => {
   );
 };
 
-// Calendar Section Component
-// const CalendarSection = () => (
-//   <div className="bg-white rounded-xl shadow-sm p-6">
-//     <h2 className="text-xl font-bold text-violet-950 mb-4">Your Schedule</h2>
-//     <div className="text-gray-500">Your upcoming tasks and appointments will appear here in a calendar view.</div>
-//     {/* Placeholder for actual calendar implementation */}
-//     <div className="mt-4 h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-//       <span className="text-gray-400">Calendar Coming Soon</span>
-//     </div>
-//   </div>
-// );
 
 
-// Skills Section Component
-const SkillsSection = () => {
-  const [isAddingSkill, setIsAddingSkill] = useState(false);
-  const [newSkill, setNewSkill] = useState("");
-
-  const handleAddSkill = () => {
-    if (newSkill.trim()) {
-      console.log("Adding skill:", newSkill);
-      setNewSkill("");
-      setIsAddingSkill(false);
-    }
-  };
-
-  return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-violet-950">Your Skills</h2>
-        <button
-          onClick={() => setIsAddingSkill(true)}
-          className="px-4 py-2 bg-violet-950 text-white rounded-lg text-sm font-medium hover:bg-violet-800"
-        >
-          Add Skill
-        </button>
-      </div>
-
-      {/* Add Skill Form */}
-      {isAddingSkill && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex items-center space-x-4">
-            <input
-              type="text"
-              value={newSkill}
-              onChange={(e) => setNewSkill(e.target.value)}
-              placeholder="Enter new skill (e.g., Plumbing)"
-              className="flex-1 py-2 px-4 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-            />
-            <button
-              onClick={() => setIsAddingSkill(false)}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleAddSkill}
-              className="px-4 py-2 bg-violet-950 text-white rounded-lg text-sm font-medium hover:bg-violet-800"
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Skill Ratings */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-violet-800">Skill Ratings</h3>
-            <p className="text-sm text-gray-500">Based on 28 completed tasks</p>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-violet-800">4.8</div>
-            <div className="text-sm text-gray-500">Average Rating</div>
-          </div>
-        </div>
-        <div className="space-y-4">
-          {[
-            { skill: "Home Cleaning", rating: 4.9, tasks: 12 },
-            { skill: "Furniture Assembly", rating: 4.7, tasks: 8 },
-            { skill: "Yard Work", rating: 4.5, tasks: 5 },
-          ].map((skill) => (
-            <div key={skill.skill} className="flex items-center justify-between py-2 border-b border-gray-100">
-              <div>
-                <div className="font-medium text-gray-700">{skill.skill}</div>
-                <div className="text-sm text-gray-500">{skill.tasks} tasks completed</div>
-              </div>
-              <div className="flex items-center">
-                <span className="text-sm font-semibold mr-2">{skill.rating}</span>
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      xmlns="http://www.w3.org/2000/svg"
-                      className={`h-5 w-5 ${star <= Math.floor(skill.rating) ? "text-violet-500" : "text-gray-200"}`}
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-          <div className="text-4xl font-bold text-violet-800 mb-2">28</div>
-          <div className="text-base text-gray-700">Tasks Completed</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-          <div className="text-4xl font-bold text-violet-800 mb-2">$850</div>
-          <div className="text-base text-gray-700">Earned this month</div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default NeighborHome;
+export default NeighborHome

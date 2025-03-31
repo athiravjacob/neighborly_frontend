@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { Calendar, momentLocalizer, SlotInfo } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import { FetchAvailability, ScheduleTimeslots } from "../../api/neighborApiRequests";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const localizer = momentLocalizer(moment);
 
@@ -17,43 +21,73 @@ const CalendarSection = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const queryClient = useQueryClient(); // Access QueryClient for cache management
+
+  // Fetch availability with React Query
+  const { data: fetchedEvents = [], isLoading: isFetching, error } = useQuery({
+    queryKey: ['availability', user?.id],
+    queryFn: () => FetchAvailability(user!.id),
+    enabled: !!user?.id,
+    placeholderData: [], // Start with empty array if no data yet
+  });
+
+  // Sync fetched events with local events state
+  useEffect(() => {
+    if (fetchedEvents) {
+      const now = moment();
+      setEvents(fetchedEvents.filter((event) => moment(event.end).isAfter(now)));
+    }
+  }, [fetchedEvents]);
+
+  // Save availability with useMutation
+  const saveMutation = useMutation({
+    mutationFn: (availability: { date: string; timeSlots: { startTime: number; endTime: number }[] }[]) =>
+      ScheduleTimeslots(user!.id, availability),
+    onSuccess: () => {
+      // Refetch availability after saving
+      queryClient.invalidateQueries({ queryKey: ['availability', user?.id] });
+      const notification = document.getElementById("success-notification");
+      if (notification) {
+        notification.classList.remove("hidden");
+        setTimeout(() => notification.classList.add("hidden"), 3000);
+      }
+    },
+    onError: (error) => {
+      console.error("Error saving availability:", error);
+    },
+    onSettled: () => {
+      setIsLoading(false);
+    },
+  });
 
   // Handle window resize for responsive view
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Helper function to generate a unique ID for each event
   const generateEventId = (start: Date, end: Date) => {
     return `${start.toISOString()}-${end.toISOString()}`;
   };
 
   const handleSelectSlot = ({ start, end }: SlotInfo) => {
-    // Normalize to exact hour boundaries
+    const now = moment();
+    if (moment(start).isBefore(now)) return;
+
     const startTime = moment(start).startOf("hour").toDate();
     let endTime = moment(end).startOf("hour").toDate();
-    
-    // Ensure minimum 1-hour slot
-    if (moment(endTime).diff(startTime, 'hours') < 1) {
+    if (moment(endTime).diff(startTime, "hours") < 1) {
       endTime = moment(startTime).add(1, "hour").toDate();
     }
 
-    // Generate unique ID for this time slot
     const slotId = generateEventId(startTime, endTime);
-
-    // Check if this slot or part of it is already selected
     const isOverlapping = events.some((event) => {
       const eventStart = moment(event.start);
       const eventEnd = moment(event.end);
       const newStart = moment(startTime);
       const newEnd = moment(endTime);
-
-      // Check for any overlap
       return (
         (newStart.isSameOrAfter(eventStart) && newStart.isBefore(eventEnd)) ||
         (newEnd.isAfter(eventStart) && newEnd.isSameOrBefore(eventEnd)) ||
@@ -62,14 +96,12 @@ const CalendarSection = () => {
     });
 
     if (isOverlapping) {
-      // Remove all overlapping events
       setEvents((prev) =>
         prev.filter((event) => {
           const eventStart = moment(event.start);
           const eventEnd = moment(event.end);
           const newStart = moment(startTime);
           const newEnd = moment(endTime);
-
           return !(
             (newStart.isSameOrAfter(eventStart) && newStart.isBefore(eventEnd)) ||
             (newEnd.isAfter(eventStart) && newEnd.isSameOrBefore(eventEnd)) ||
@@ -78,63 +110,51 @@ const CalendarSection = () => {
         })
       );
     } else {
-      // Add new event
-      const newEvent: AvailabilityEvent = { 
-        id: slotId, 
-        start: startTime, 
-        end: endTime, 
-        title: "Available" 
+      const newEvent: AvailabilityEvent = {
+        id: slotId,
+        start: startTime,
+        end: endTime,
+        title: "Available",
       };
       setEvents((prev) => [...prev, newEvent]);
     }
   };
 
   const handleSelectEvent = (event: AvailabilityEvent) => {
-    // Remove the clicked event
     setEvents((prev) => prev.filter((e) => e.id !== event.id));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsLoading(true);
-    
-    // Convert events to hourly slots with proper formatting
-    const availableSlots = events.flatMap((event) => {
-      const slots = [];
+    const availabilityByDate: { [key: string]: { startTime: number; endTime: number }[] } = {};
+
+    events.forEach((event) => {
       let current = moment(event.start);
       const end = moment(event.end);
-
+      const dateKey = current.format("YYYY-MM-DD");
+      if (!availabilityByDate[dateKey]) {
+        availabilityByDate[dateKey] = [];
+      }
       while (current.isBefore(end)) {
-        slots.push({
-          date: current.format("YYYY-MM-DD"),
-          start: current.unix(),
-          end: current.clone().add(1, "hour").unix(),
-          formattedTime: `${current.format("h:mm A")} - ${current.clone().add(1, "hour").format("h:mm A")}`
+        availabilityByDate[dateKey].push({
+          startTime: current.unix(),
+          endTime: current.clone().add(1, "hour").unix(),
         });
         current.add(1, "hour");
       }
-      return slots;
     });
-    
-    console.log("Available Slots:", availableSlots);
-    // Here you would typically send this data to your backend
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Show success notification
-      const notification = document.getElementById('success-notification');
-      if (notification) {
-        notification.classList.remove('hidden');
-        setTimeout(() => {
-          notification.classList.add('hidden');
-        }, 3000);
-      }
-    }, 800);
+
+    const availability = Object.entries(availabilityByDate).map(([date, timeSlots]) => ({
+      date: moment(date).toISOString(),
+      timeSlots,
+    }));
+
+    if (!user?.id) return;
+    saveMutation.mutate(availability);
   };
 
   const handleClearAll = () => {
     if (events.length === 0) return;
-    
     if (confirm("Are you sure you want to clear all your availability slots?")) {
       setEvents([]);
     }
@@ -189,7 +209,7 @@ const CalendarSection = () => {
           </button>
         </div>
       </div>
-      
+
       <div className="mb-8 p-5 bg-violet-50 rounded-xl border border-violet-100 flex items-start gap-4">
         <div className="text-violet-600 bg-violet-100 p-2 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -229,6 +249,20 @@ const CalendarSection = () => {
         </div>
       </div>
 
+      {isFetching && (
+        <div className="text-center text-gray-500 mb-4">Loading availability...</div>
+      )}
+      {error && (
+        <div className="text-center text-red-500 mb-4">
+          Failed to load availability: {(error as Error).message}
+        </div>
+      )}
+      {!isFetching && !error && fetchedEvents.length === 0 && (
+        <div className="text-center text-gray-500 mb-4">
+          No availability set yet. Select time slots and save to get started!
+        </div>
+      )}
+
       <div className="calendar-container rounded-xl overflow-hidden border border-gray-100 shadow-md">
         <Calendar
           localizer={localizer}
@@ -246,7 +280,7 @@ const CalendarSection = () => {
           step={60}
           timeslots={1}
           date={selectedDate}
-          onNavigate={date => setSelectedDate(date)}
+          onNavigate={(date) => setSelectedDate(date)}
           style={{ height: 600 }}
           eventPropGetter={() => ({
             style: {
@@ -263,31 +297,28 @@ const CalendarSection = () => {
           dayPropGetter={(date) => ({
             style: {
               backgroundColor: moment(date).isSame(new Date(), "day") ? "#f5f3ff" : "white",
-              borderLeft: moment(date).day() === 0 || moment(date).day() === 6 
-                ? "2px solid #f3f4f6" 
-                : undefined,
+              borderLeft:
+                moment(date).day() === 0 || moment(date).day() === 6
+                  ? "2px solid #f3f4f6"
+                  : undefined,
             },
           })}
           slotPropGetter={(date) => ({
             style: {
-              backgroundColor: 
-                moment(date).hours() < 9 || moment(date).hours() >= 17 
-                  ? "#f9fafb" 
+              backgroundColor:
+                moment(date).hours() < 9 || moment(date).hours() >= 17
+                  ? "#f9fafb"
                   : "white",
-              borderTop: "1px solid #f3f4f6"
-            }
+              borderTop: "1px solid #f3f4f6",
+            },
           })}
           dayLayoutAlgorithm="no-overlap"
           components={{
-            toolbar: (props) => 
-              <CustomToolbar 
-                {...props} 
-                isMobile={isMobile} 
-              />,
+            toolbar: (props) => <CustomToolbar {...props} isMobile={isMobile} />,
           }}
         />
       </div>
-      
+
       <div className="mt-8 flex flex-col md:flex-row md:items-center gap-6 justify-between">
         <div className="bg-violet-50 p-4 rounded-xl flex items-center gap-3 flex-1">
           <div className="bg-violet-100 p-2 rounded-lg text-violet-700">
@@ -302,7 +333,6 @@ const CalendarSection = () => {
             <p className="text-violet-900 font-medium">{Intl.DateTimeFormat().resolvedOptions().timeZone}</p>
           </div>
         </div>
-        
         <div className="bg-violet-50 p-4 rounded-xl flex items-center gap-3 flex-1">
           <div className="bg-violet-100 p-2 rounded-lg text-violet-700">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -322,25 +352,25 @@ const CalendarSection = () => {
   );
 };
 
-// Enhanced custom toolbar component
+// CustomToolbar remains unchanged
 const CustomToolbar = ({ date, onNavigate, isMobile }: any) => {
   const goToBack = () => {
-    onNavigate('PREV');
+    onNavigate("PREV");
   };
 
   const goToNext = () => {
-    onNavigate('NEXT');
+    onNavigate("NEXT");
   };
 
   const goToCurrent = () => {
-    onNavigate('TODAY');
+    onNavigate("TODAY");
   };
 
   const label = () => {
     const dateObj = moment(date);
     return (
       <span className="text-violet-800 font-semibold text-lg">
-        {dateObj.format(isMobile ? 'MMMM D, YYYY' : 'MMMM YYYY')}
+        {dateObj.format(isMobile ? "MMMM D, YYYY" : "MMMM YYYY")}
       </span>
     );
   };
@@ -369,13 +399,11 @@ const CustomToolbar = ({ date, onNavigate, isMobile }: any) => {
         <button
           onClick={goToCurrent}
           className="ml-1 px-4 py-1.5 text-sm text-violet-700 bg-violet-50 rounded-lg hover:bg-violet-100 transition-colors font-medium"
-        >
+        >``
           Today
         </button>
       </div>
-      <div className="text-base">
-        {label()}
-      </div>
+      <div className="text-base">{label()}</div>
       {!isMobile && (
         <div className="flex items-center gap-2 bg-violet-100 px-4 py-2 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-violet-700">

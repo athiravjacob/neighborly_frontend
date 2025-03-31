@@ -67,7 +67,9 @@ export const login = async (email: string, password: string): Promise<AuthRespon
 
 export const logout = async (): Promise<void> => {
   try {
-      const response = await api.post("/auth/logout",{ withCredentials: true });
+    console.log("hello")
+    const response = await api.post("/auth/logout", { withCredentials: true });
+    console.log(response)
       return response.data.data;
       
   } catch (error) {

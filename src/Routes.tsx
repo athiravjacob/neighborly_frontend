@@ -19,6 +19,8 @@ import TaskCreationPage from './pages/user/TaskCreationPage';
 import BecomeANeighbor from './pages/neighbor/BecomeNeighborPage';
 import Calendar from './pages/neighbor/Calendar';
 import NeighborHome from './pages/neighbor/Neighbor-home';
+import CompleteYourProfile from './pages/neighbor/CompleteProfile';
+// import NeighborProfile from './pages/neighbor/Profile';
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
@@ -31,6 +33,8 @@ const AppRoutes: React.FC = () => {
       <Route path="/neighbor" element={<BecomeANeighbor />}/>   
       
       <Route path="/neighbor/home" element={<NeighborHome/>}></Route>
+      <Route path="/neighbor/complete-your-profile" element={<CompleteYourProfile/>}></Route>
+      {/* <Route path="/neighbor/profile" element={<NeighborProfile/>}></Route> */}
 
       <Route path="/" element={<LandingPage />} />
 
