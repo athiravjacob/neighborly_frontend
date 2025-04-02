@@ -1,260 +1,247 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSaveLocationMutation } from "../../hooks/useSaveLocationMutation";
+import { useServiceLocation } from "../../hooks/useServiceLocation";
+import { MapPin, Save, Loader2, Navigation } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Circle, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { Coordinates } from "../../types/locationDTO";
+import { useFetchServiceLocation } from "../../hooks/useFetchServiceLocation";
 
-interface Coordinates {
-  lat: number | null;
-  lng: number | null;
-}
+const MapUpdater = ({ coordinates, radius }: { coordinates: Coordinates; radius: number }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (coordinates?.lat && coordinates?.lng) {
+      map.setView([coordinates.lat, coordinates.lng], 12);
+    }
+  }, [coordinates, map]);
+  return null;
+};
 
-const ServiceLocation: React.FC = () => {
-  // Available locations
-  const locations = [
-    "Kochi", "Aluva", "Muvattupuzha", "Eloor", "Kakkanadu", "Thripunnithura",
-    "Perumbavoor", "Angamaly", "Vyttila", "Edappally"
-  ];
+const ServiceLocation = () => {
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [showMap, setShowMap] = useState(false); // Controls map visibility
+  const {
+    locations,
+    selectedLocation,
+    setSelectedLocation,
+    radius,
+    setRadius,
+    coordinates,
+    setCoordinates,
+    handleGetLocation,
+    user,
+  } = useServiceLocation();
 
-  // Radius options in km
-  const radiusOptions = [5, 10, 15];
+  const { data: serviceLocation, isLoading, isSuccess, isError, error } = useFetchServiceLocation(user?.id);
+  const mutation = useSaveLocationMutation(user?.id, selectedLocation, radius, coordinates);
 
-  // State management
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
-  const [radius, setRadius] = useState<number>(10);
-  const [coordinates, setCoordinates] = useState<Coordinates>({ lat: null, lng: null });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
+  useEffect(() => {
+    if (isSuccess && serviceLocation) {
+      setSelectedLocation(serviceLocation.city || "");
+      setRadius(serviceLocation.radius || 5);
+      if (serviceLocation.coordinates && serviceLocation.coordinates.length === 2) {
+        setCoordinates({
+          lat: serviceLocation.coordinates[0],
+          lng: serviceLocation.coordinates[1],
+        });
+        setShowMap(true); // Show map if coordinates exist from saved data
+      } else {
+        setShowMap(false); // Hide map if no coordinates in saved data
+      }
+    }
+  }, [isSuccess, serviceLocation, setSelectedLocation, setRadius, setCoordinates]);
 
-  // Get current location
-  const handleGetLocation = () => {
-    setIsLoading(true);
-    setError(null);
-    
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoordinates({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setIsLoading(false);
-        },
-        (error) => {
-          console.error("Error fetching location:", error);
-          setError("Could not retrieve your location. Please check your permissions.");
-          setIsLoading(false);
-        }
-      );
-    } else {
-      setError("Geolocation is not supported by this browser.");
-      setIsLoading(false);
+  useEffect(() => {
+    if (coordinates.lat !== 0 && coordinates.lng !== 0) {
+      const timer = setTimeout(() => setIsMapReady(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [coordinates]);
+
+  const hasValidCoordinates = coordinates.lat !== 0 && coordinates.lng !== 0;
+
+  const handleCitySelection = (city: string) => {
+    if (city) {
+      setSelectedLocation(city);
     }
   };
 
-  // Save location data
-  const handleSave = () => {
-    if (!selectedLocation) {
-      setError("Please select a location");
-      return;
-    }
-    
-    console.log("Selected Location:", selectedLocation);
-    console.log("Radius:", radius + " km");
-    console.log("Coordinates:", coordinates.lat, coordinates.lng);
-    
-    // Show success message temporarily
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
-    
-    setError(null);
+  const handleGetCurrentLocation = () => {
+    handleGetLocation();
+    setShowMap(true); // Show map when getting current location
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8 bg-white rounded-lg border border-gray-100">
+        <Loader2 className="h-8 w-8 text-violet-600 animate-spin mr-2" />
+        <p className="text-gray-600">Loading service location...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 p-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-violet-950">Service Location</h1>
+    <div className="max-w-4xl mx-auto bg-gray-50 rounded-xl shadow-md overflow-hidden p-6">
+      <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
+        <div className="flex items-center gap-2">
+          <MapPin className="text-violet-600 h-6 w-6" />
+          <h1 className="text-2xl font-bold text-gray-800">Set Your Service Location</h1>
+        </div>
         <button
-          onClick={handleSave}
-          className={`px-4 py-2 bg-violet-700 text-white rounded-lg text-sm font-medium hover:bg-violet-800 flex items-center gap-2 shadow-sm ${
-            !selectedLocation ? 'opacity-50 cursor-not-allowed' : ''
+          onClick={() => mutation.mutate()}
+          className={`px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors flex items-center gap-2 ${
+            !selectedLocation || !hasValidCoordinates ? "opacity-50 cursor-not-allowed" : ""
           }`}
-          disabled={!selectedLocation}
+          disabled={!selectedLocation || !hasValidCoordinates || mutation.isPending}
         >
-          Save Location
+          {mutation.isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4" />
+              <span>Save Location</span>
+            </>
+          )}
         </button>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Location Selection Card */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="bg-violet-100 p-3 rounded-full text-violet-800 text-xl">
-              📍
-            </div>
-            <div>
-              <h3 className="font-semibold text-violet-800 text-lg">Select Service Area</h3>
-              <p className="text-sm text-gray-600 mt-1">Choose a location and service radius</p>
-            </div>
-          </div>
-
-          {/* Location Dropdown */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Location
-            </label>
-            <div className="relative">
-              <select
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="w-full py-2 px-4 bg-gray-50 border border-gray-200 rounded-lg focus:ring-violet-500 focus:border-violet-500 appearance-none"
-              >
-                <option value="" disabled>Select a location</option>
-                {locations.map((loc) => (
-                  <option key={loc} value={loc}>{loc}</option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Radius Selection */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Service Radius: {radius} km
-            </label>
-            <div className="flex items-center space-x-4">
-              <input
-                type="range"
-                min="5"
-                max="25"
-                step="5"
-                value={radius}
-                onChange={(e) => setRadius(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer"
-              />
-            </div>
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              {radiusOptions.map((r) => (
-                <span key={r}>{r}km</span>
-              ))}
-            </div>
-          </div>
-
-          {/* Radius Visualization */}
-          <div className="mt-6 pt-4 border-t border-gray-100">
-            <div className="flex justify-between text-sm text-gray-700 mb-2">
-              <span>Coverage Area</span>
-              <span className="font-semibold text-violet-900">{Math.PI * radius * radius} km²</span>
-            </div>
-            
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-violet-600 rounded-full" 
-                style={{ width: `${(radius / 25) * 100}%` }}
-              ></div>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              {radius < 10 ? "Small" : radius < 20 ? "Medium" : "Large"} coverage area
-            </p>
-          </div>
+      {isError ? (
+        <div className="bg-red-50 text-red-800 p-4 rounded-lg border border-red-200">
+          Failed to load service location: {error?.message || "Unknown error"}
         </div>
-
-        {/* Current Location Card */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="bg-violet-100 p-3 rounded-full text-violet-800 text-xl">
-              🔍
-            </div>
-            <div>
-              <h3 className="font-semibold text-violet-800 text-lg">Current Location</h3>
-              <p className="text-sm text-gray-600 mt-1">Get your precise coordinates</p>
+      ) : !isSuccess && !serviceLocation && !selectedLocation && !hasValidCoordinates ? (
+        <div className="bg-yellow-50 text-yellow-800 p-4 rounded-lg border border-yellow-200">
+          You haven’t set a service location yet. Please select a city or use your current location, then save.
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <h3 className="font-semibold text-violet-700 text-lg mb-4 flex items-center">
+              <MapPin className="h-5 w-5 mr-2 text-violet-600" />
+              Service Area Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Current Location: <span className="text-violet-600 font-semibold">{selectedLocation || "Not set"}</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedLocation || ""}
+                    onChange={(e) => handleCitySelection(e.target.value)}
+                    className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 appearance-none text-gray-800"
+                  >
+                    <option value="" disabled>
+                      Select a city (optional)
+                    </option>
+                    {locations.map((loc) => (
+                      <option key={loc} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Service Radius: <span className="text-violet-600 font-semibold">{radius} km</span>
+                </label>
+                <input
+                  type="range"
+                  min="5"
+                  max="15"
+                  step="1"
+                  value={radius}
+                  onChange={(e) => setRadius(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-violet-500"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>5 km</span>
+                  <span>10 km</span>
+                  <span>15 km</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {coordinates.lat && coordinates.lng ? (
-            <div className="bg-gray-50 p-4 rounded-lg mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Latitude</span>
-                <span className="text-sm text-violet-800 font-mono">{coordinates.lat.toFixed(6)}</span>
+          {showMap && hasValidCoordinates && (
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h3 className="font-semibold text-violet-700 text-lg mb-4">Service Area Map</h3>
+              {isMapReady ? (
+                <div className="h-96 w-full rounded-lg overflow-hidden">
+                  <MapContainer center={[coordinates.lat, coordinates.lng]} zoom={12} style={{ height: "100%", width: "100%" }}>
+                    <TileLayer
+                      attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={[coordinates.lat, coordinates.lng]} />
+                    <Circle
+                      center={[coordinates.lat, coordinates.lng]}
+                      radius={radius * 1000}
+                      pathOptions={{ color: "violet", fillColor: "violet", fillOpacity: 0.2 }}
+                    />
+                    <MapUpdater coordinates={coordinates} radius={radius} />
+                  </MapContainer>
+                </div>
+              ) : (
+                <div className="h-96 w-full rounded-lg flex items-center justify-center bg-gray-100">
+                  <Loader2 className="h-8 w-8 text-violet-600 animate-spin mr-2" />
+                  <p className="text-gray-500">Loading map...</p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <p className="text-sm text-gray-500">Latitude</p>
+                  <p className="font-medium">{coordinates.lat.toFixed(6)}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <p className="text-sm text-gray-500">Longitude</p>
+                  <p className="font-medium">{coordinates.lng.toFixed(6)}</p>
+                </div>
               </div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Longitude</span>
-                <span className="text-sm text-violet-800 font-mono">{coordinates.lng.toFixed(6)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">Status</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  ● Active
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gray-50 p-4 rounded-lg text-center mb-6">
-              <div className="text-gray-400 text-5xl mb-4">📱</div>
-              <h3 className="text-lg font-medium text-gray-700 mb-2">No location data</h3>
-              <p className="text-sm text-gray-500 mb-2">Click the button below to fetch your current coordinates</p>
             </div>
           )}
 
           <button
-            onClick={handleGetLocation}
-            disabled={isLoading}
-            className="w-full py-2 px-4 border border-violet-200 text-violet-700 rounded-lg text-sm font-medium hover:bg-violet-50 transition flex items-center justify-center gap-2"
+            onClick={handleGetCurrentLocation}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
           >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin h-4 w-4 text-violet-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Detecting Location...</span>
-              </>
-            ) : (
-              <>
-                <span>📍</span>
-                <span>Get Current Location</span>
-              </>
-            )}
+            <Navigation className="h-5 w-5" />
+            <span>Use My Current Location</span>
           </button>
 
-          {error && (
-            <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-              {error}
+          {mutation.isSuccess && (
+            <div className="bg-green-50 text-green-800 p-4 rounded-lg border border-green-200 flex items-center">
+              <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Location saved successfully!
             </div>
           )}
-
-          {success && (
-            <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm">
-              Location settings saved successfully!
+          {mutation.isError && (
+            <div className="bg-red-50 text-red-800 p-4 rounded-lg border border-red-200">
+              Failed to save location: {mutation.error?.message || "Unknown error"}
             </div>
           )}
-
-          <div className="mt-6 pt-4 border-t border-gray-100">
-            <p className="text-xs text-gray-500 italic">
-              Your location data is only used to provide service in your area and will not be shared with third parties.
-            </p>
-          </div>
         </div>
-      </div>
-
-      {/* Info Section */}
-      <div className="bg-violet-50 rounded-xl p-4 border border-violet-100">
-        <div className="flex items-start gap-3">
-          <div className="text-violet-600 text-xl mt-1">ℹ️</div>
-          <div>
-            <h4 className="font-medium text-violet-900 mb-1">Service Area Information</h4>
-            <p className="text-sm text-violet-700">
-              Setting a larger service radius increases your chances of receiving service requests, but may require longer travel times. Choose a radius that matches your mobility capabilities.
-            </p>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
-
 export default ServiceLocation;

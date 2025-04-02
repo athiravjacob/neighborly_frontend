@@ -1,5 +1,6 @@
 import { UserDTO } from "../types/UserDTO";
 import { AvailabilityEvent } from "../types/availabilityEvent";
+import { Location } from "../types/locationDTO";
 import { skillsDTO } from "../types/skillsDTO";
 import api from "./apiConfig";
 import axios from "axios";
@@ -117,3 +118,35 @@ export const FetchSkills = async (neighborId: string): Promise<skillsDTO[]> => {
   }
   }
 
+
+//*********************************Add Service Location ********************** */
+export const AddServiceLocation = async (neighborId:string,location:Location): Promise<Location> => {
+  try {
+    console.log(location)
+    const response = await api.post("/neighbor/location", { neighborId, location }, { withCredentials: true, });
+    console.log(response.data.data,"response from add loc")
+    return response.data.data
+      
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to add skills");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}; 
+//********************** Fetch Service Location ********************** */
+
+export const FetchServiceLocation = async (neighborId: string): Promise<Location> => {
+  try {
+    console.log(neighborId,"location")
+    const response = await api.get(`/neighbor/location/${neighborId}`)
+    console.log(response.data.data,"fetch location")
+    return response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to add skills");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+  }

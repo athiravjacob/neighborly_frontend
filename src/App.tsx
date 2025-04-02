@@ -1,4 +1,6 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AppRoutes from './Routes';
 const theme = createTheme({
   palette: {
@@ -12,6 +14,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <AppRoutes></AppRoutes>
+      <ToastContainer position="top-right" autoClose={3000} />
     </ThemeProvider>
   );
 }
