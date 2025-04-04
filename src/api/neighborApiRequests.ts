@@ -140,7 +140,7 @@ export const FetchServiceLocation = async (neighborId: string): Promise<Location
   try {
     console.log(neighborId,"location")
     const response = await api.get(`/neighbor/location/${neighborId}`)
-    console.log(response.data.data,"fetch location")
+    console.log(response.data.data, "fetch location")
     return response.data.data
     
   } catch (error) {
@@ -149,4 +149,20 @@ export const FetchServiceLocation = async (neighborId: string): Promise<Location
     }
     throw new Error("An unexpected error occurred");
   }
+}
+  
+// ********** Check Service Availability ***********************/
+export const CheckCityAvailability = async (city: string): Promise<Boolean> => {
+  try {
+    const response = await api.get(`/neighbor/check-service-availability?city=${city}`)
+    console.log(response.data.data, "check service availble")
+    return response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to check service availability in your area");
+    }
+    throw new Error("An unexpected error occurred");
   }
+}
+  

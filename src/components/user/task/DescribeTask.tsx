@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import useServiceAvailability from '../../../hooks/useServiceAvailability';
 
 interface DescribeTaskProps {
   onContinue: (data: { location: string; taskSize: string; taskDetails: string }) => void;
@@ -6,14 +7,12 @@ interface DescribeTaskProps {
 
 export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
   const [location, setLocation] = useState('');
-  const [isServiceAvailable, setIsServiceAvailable] = useState<boolean | null>(null);
+  const [searchLocation, setSearchLocation] = useState(''); // Triggers the query
   const [taskSize, setTaskSize] = useState('');
   const [taskDetails, setTaskDetails] = useState('');
 
-  const checkServiceAvailability = (loc: string) => {
-    const availableLocations = ['New York', 'Los Angeles', 'Chicago'];
-    return availableLocations.includes(loc);
-  };
+  // Use the custom hook
+  const { data: isServiceAvailable, isLoading, error } = useServiceAvailability(searchLocation);
 
   const handleCheckAvailability = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,14 +20,14 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
       alert('Please enter a location.');
       return;
     }
-    const available = checkServiceAvailability(location);
-    setIsServiceAvailable(available);
-    if (!available) alert('Sorry, service is not available in your location yet.');
+    setSearchLocation(location); // Trigger the query
   };
 
   const handleContinue = () => {
-    if (!isServiceAvailable) {
+    if (isServiceAvailable === null || isServiceAvailable === undefined) {
       alert('Please check service availability for your location.');
+    } else if (!isServiceAvailable) {
+      alert('Sorry, service is not available in your location yet.');
     } else if (!taskSize) {
       alert('Please select a task size.');
     } else if (!taskDetails) {
@@ -40,8 +39,7 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
-      <div className=" text-black p-6">
-        {/* <h2 className="text-2xl  font-bold mb-2">Describe Your Task</h2> */}
+      <div className="text-black p-6">
         <p className="opacity-90 bg-gray-100 p-4 rounded-l">
           Tell us about your task. We use these details to show Taskers in your area who fit your needs.
         </p>
@@ -62,10 +60,12 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
             <button
               onClick={handleCheckAvailability}
               className="px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
+              disabled={isLoading} // Disable while fetching
             >
-              Check Availability
+              {isLoading ? 'Checking...' : 'Check Availability'}
             </button>
           </div>
+          {error && <p className="mt-2 text-red-600">Error: {error.message}</p>}
           {isServiceAvailable === false && (
             <p className="mt-2 text-red-600">Service not available in this location.</p>
           )}
@@ -102,7 +102,10 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
         {/* Task Details */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">Tell us the details of your task</label>
-          <p className='text-gray-500 pb-4 text-md'>Start the conversation and tell your Tasker what you need done. This helps us show you only qualified and available Taskers for the job. Don't worry, you can edit this later."</p>
+          <p className="text-gray-500 pb-4 text-md">
+            Start the conversation and tell your Tasker what you need done. This helps us show you only
+            qualified and available Taskers for the job. Don’t worry, you can edit this later.
+          </p>
           <textarea
             value={taskDetails}
             onChange={(e) => setTaskDetails(e.target.value)}

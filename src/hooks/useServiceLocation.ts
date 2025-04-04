@@ -1,40 +1,23 @@
+// hooks/useServiceLocation.ts
 import { useState } from "react";
-import { RootState } from "../redux/store";
-import { useSelector } from "react-redux";
 import { Coordinates } from "../types/locationDTO";
 
 export const useServiceLocation = () => {
-  // Fallback locations (replace with backend API if available)
-  const locations = [
-    "Kochi",
-    "Aluva",
-    "Muvattupuzha",
-    "Eloor",
-    "Kakkanadu",
-    "Thripunnithura",
-    "Perumbavoor",
-    "Angamaly",
-    "Vyttila",
-    "Edappally",
-  ];
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  // Hardcoded city options (replace with API call if dynamic)
+  const cityOptions = ["Kochi", "Aluva", "Muvattupuzha", "Kothamangalam", "Vypin"];
+
+  const [city, setCity] = useState<string>("");
   const [radius, setRadius] = useState<number>(5);
-  const [coordinates, setCoordinates] = useState<Coordinates>({
-    lat: 9.9312, // Default Kochi coordinates
-    lng: 76.2673,
-  });
-  const { user } = useSelector((state: RootState) => state.auth);
+  const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
 
   const handleGetLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const newCoords: Coordinates = {
+          setCoordinates({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-          };
-          setCoordinates(newCoords);
-          setSelectedLocation("Current Location"); // Custom label for geolocation
+          });
         },
         (error) => {
           console.error("Geolocation error:", error);
@@ -46,14 +29,13 @@ export const useServiceLocation = () => {
   };
 
   return {
-    locations,
-    selectedLocation,
-    setSelectedLocation,
+    cityOptions,
+    city,
+    setCity,
     radius,
     setRadius,
     coordinates,
     setCoordinates,
     handleGetLocation,
-    user,
   };
 };

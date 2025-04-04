@@ -1,27 +1,30 @@
-import { useMutation } from "@tanstack/react-query";
-import { AddServiceLocation } from "../api/neighborApiRequests"; 
-import { Location, Coordinates } from "../types/locationDTO"; 
+// hooks/useSaveLocationMutation.ts
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AddServiceLocation } from "../api/neighborApiRequests";
+import { Location, Coordinates } from "../types/locationDTO";
 
 export const useSaveLocationMutation = (
   userId: string | undefined,
-  selectedLocation: string,
+  city: string,
   radius: number,
-  coordinates: Coordinates
+  coordinates: Coordinates | null
 ) => {
+  const queryClient = useQueryClient();
+
   return useMutation<Location, Error>({
     mutationFn: async () => {
-      if (!userId || !selectedLocation || !coordinates.lat || !coordinates.lng) {
-        throw new Error("Invalid data for saving location");
+      if (!userId || !city || !coordinates?.lat || !coordinates?.lng) {
+        throw new Error("All fields (city, radius, coordinates) are required");
       }
       const locationData: Location = {
-        city: selectedLocation,
+        city,
         radius,
-        coordinates: [coordinates.lat, coordinates.lng],
+        coordinates: [coordinates.lng, coordinates.lat], // Convert to [lng, lat] for API
       };
       return AddServiceLocation(userId, locationData);
     },
-    onSuccess: (data) => {
-      console.log("Location saved successfully:", data);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["serviceLocation", userId] });
     },
     onError: (error) => {
       console.error("Error saving location:", error.message);
