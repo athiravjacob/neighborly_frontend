@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Calendar, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 interface ScheduleTaskProps {
-  onContinue: (schedule: { date: string; time: string }) => void;
-  selectedHelper: string;
-  taskData: { location: string; taskSize: string; taskDetails: string };
+  onContinue: (data: { date: string; time: string }) => void; // Updated to accept date and time
+  selectedHelper: any;
+  taskData: { location: string; taskSize:string; taskDetails: string,category:string,subCategory:string };
 }
 
 export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
@@ -17,36 +17,21 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
   const [timePreference, setTimePreference] = useState<string>('');
   const [isFlexible, setIsFlexible] = useState(false);
 
-  // Generate dates for current month
-  const currentDate = new Date(2025, 2, 1); // March 1, 2025
-  const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
-  const currentYear = currentDate.getFullYear();
-  const daysInMonth = new Date(2025, 3, 0).getDate();
-  
-  // Calculate first day of month to determine offset
-  const firstDayOfMonth = new Date(2025, 2, 1).getDay();
-  
-  // Generate dates array with empty slots for offset
-  const calendarDays = Array(firstDayOfMonth).fill(null);
-  for (let i = 1; i <= daysInMonth; i++) {
-    const date = new Date(2025, 2, i);
-    calendarDays.push({
-      day: i,
-      date: date,
-      weekday: date.toLocaleString('en-US', { weekday: 'short' }),
-      isWeekend: [0, 6].includes(date.getDay()),
-    });
-  }
+  // Generate next 7 days from today (April 5, 2025 as per system date)
+  const today = new Date('2025-04-05');
+  const nextSevenDays = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    return date;
+  });
 
-  // Create weeks for calendar grid
-  const calendarWeeks = [];
-  for (let i = 0; i < calendarDays.length; i += 7) {
-    calendarWeeks.push(calendarDays.slice(i, i + 7));
-  }
+  // Get available dates from selectedHelper
+  const availableDates = selectedHelper.availability.map((slot: { date: string | number | Date }) =>
+    new Date(slot.date).toDateString()
+  );
 
-  const handleSelectDate = (day: number) => {
-    const selectedDateObj = new Date(2025, 2, day);
-    const formattedDate = selectedDateObj.toLocaleDateString('en-US', {
+  const handleSelectDate = (date: Date) => {
+    const formattedDate = date.toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
@@ -69,84 +54,68 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
       return;
     }
     
+    // Determine the time to pass (either timePreference or formatted selectedTime)
     const timeSelection = timePreference || formatTimeDisplay(selectedTime);
-    const flexibleNote = isFlexible ? ' (Flexible)' : '';
-    
-    onContinue({ 
-      date: selectedDate, 
-      time: timeSelection + flexibleNote 
+    const finalTime = isFlexible ? `${timeSelection} (Flexible)` : timeSelection;
+
+    // Pass the selected date and time to the onContinue function
+    onContinue({
+      date: selectedDate,
+      time: finalTime,
     });
   };
+  const estHours = (size: string):Number  => {
+    if (size === 'Small') return 2
+    if (size === 'Medium') return 4
+    if (size === 'Large') return 6
+    return 0
+  }
 
-  // Calculate estimated cost
-  const hourlyRate = 56.78;
-  const estimatedHours = 2; // Minimum hours
+  const hourlyRate = selectedHelper.skills[0].hourlyRate
+  const estimatedHours = Number(estHours(taskData.taskSize))*hourlyRate;
   const estimatedCost = hourlyRate * estimatedHours;
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
-      <div className=" text-black p-6">
-        {/* <h2 className="text-2xl font-bold mb-2">Schedule Your Task</h2> */}
+      <div className="text-black p-6">
         <p className="opacity-90 p-4 bg-gray-100 rounded-lg">
           Choose when you'd like your task completed
         </p>
       </div>
-      
+
       <div className="p-6">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Date Selection */}
+          {/* Date Selection - Simplified 7-day view */}
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="text-violet-700" size={20} />
-              <h3 className="font-semibold text-lg">Select Date</h3>
-            </div>
-            
-            <div className="bg-violet-50 rounded-lg p-4 mb-4">
-              <div className="flex justify-between items-center mb-4">
-                <h4 className="font-medium text-violet-900">{currentMonth} {currentYear}</h4>
-                <div className="flex gap-2">
-                  <button className="p-1 rounded hover:bg-violet-100 text-violet-700">
-                    ←
+            <h3 className="font-semibold text-lg mb-4">Select Date</h3>
+            <div className="flex flex-wrap gap-2 bg-violet-50 rounded-lg p-4">
+              {nextSevenDays.map((date, index) => {
+                const isAvailable = availableDates.includes(date.toDateString());
+                const isSelected = selectedDate?.includes(date.getDate().toString());
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectDate(date)}
+                    disabled={!isAvailable}
+                    className={`
+                      w-20 p-2 rounded-lg text-center
+                      ${isAvailable ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}
+                      ${isSelected ? 'ring-2 ring-violet-600' : ''}
+                    `}
+                  >
+                    <div className="text-sm font-medium">
+                      {date.toLocaleString('default', { weekday: 'short' })}
+                    </div>
+                    <div className="text-lg">{date.getDate()}</div>
+                    <div className="text-xs">
+                      {date.toLocaleString('default', { month: 'short' })}
+                    </div>
                   </button>
-                  <button className="p-1 rounded hover:bg-violet-100 text-violet-700">
-                    →
-                  </button>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-7 gap-1">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
-                  <div key={index} className="text-center text-xs font-medium text-violet-700 py-1">
-                    {day}
-                  </div>
-                ))}
-                
-                {calendarWeeks.map((week, weekIndex) => (
-  <React.Fragment key={weekIndex}>
-    {week.map((day, dayIndex) => (
-      <button
-        key={`${weekIndex}-${dayIndex}`}
-        onClick={() => day?.day && handleSelectDate(day.day)}
-        disabled={!day?.day}
-        className={`
-          aspect-square flex items-center justify-center text-sm rounded-full
-          ${!day?.day ? 'cursor-default' : 'hover:bg-violet-100'}
-          ${day?.isWeekend && day?.day ? 'text-violet-400' : ''}
-          ${selectedDate?.includes(`${currentMonth} ${day?.day}`) 
-            ? 'bg-violet-600 text-white hover:bg-violet-700' 
-            : ''}
-        `}
-      >
-        {day?.day || ''}
-      </button>
-    ))}
-  </React.Fragment>
-))}
-
-              </div>
+                );
+              })}
             </div>
           </div>
-          
+
           {/* Time Selection */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-4">
@@ -155,19 +124,6 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
             </div>
             
             <div className="bg-violet-50 rounded-lg p-4 mb-4">
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-violet-900 mb-2">Specific Time</label>
-                <input
-                  type="time"
-                  value={selectedTime}
-                  onChange={(e) => {
-                    setSelectedTime(e.target.value);
-                    setTimePreference('');
-                  }}
-                  className="w-full px-4 py-2 border border-violet-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-                />
-              </div>
-              
               <div className="mb-4">
                 <label className="block text-sm font-medium text-violet-900 mb-2">Time Preference</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -208,7 +164,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
             </div>
           </div>
         </div>
-        
+
         {/* Summary and Continue */}
         <div className="bg-gray-50 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-lg mb-3">Task Summary</h3>
@@ -217,7 +173,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
             <div>
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Helper:</span>
-                <span className="font-medium">#{selectedHelper}</span>
+                <span className="font-medium">{selectedHelper.name}</span>
               </div>
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Location:</span>

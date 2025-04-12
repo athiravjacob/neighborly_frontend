@@ -50,11 +50,11 @@ export const signup = async (
     throw new Error("An unexpected error occurred");
   }
 };
+// ********************Login*************************
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
   try {
       const response = await api.post("/auth/login", { email, password },{ withCredentials: true });
-      console.log(response.data.data)
       return response.data.data;
       
   } catch (error) {
@@ -64,7 +64,21 @@ export const login = async (email: string, password: string): Promise<AuthRespon
     throw new Error("An unexpected error occurred");
   }
 };
-
+//******************** Google Login ********************* */
+export const loginWithGoogle = async (idToken: string): Promise<AuthResponse> => {
+  try {
+    const response = await api.post("/auth/google-login", { idToken },{ withCredentials: true })
+    console.log(response.data.data,"login with google")
+    return response.data.data
+  } catch (error) {
+    console.log(error)
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Login failed");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
+//********************* Logout **************************** */
 export const logout = async (): Promise<void> => {
   try {
     console.log("hello")
@@ -80,6 +94,7 @@ export const logout = async (): Promise<void> => {
   }
 };
 
+//*********************** forgot Password ************************** */
 export const forgotPassword = async (email: string): Promise<void> => {
   try {
     const response = await api.post("/auth/forgot-password", { email })
@@ -91,7 +106,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
     throw new Error("An unexpected error occurred");
   }
 }
-
+//******************** Reset Password *****************************8 */
 export const resetPassword = async (email:string,token: string,newPassword:string): Promise<void> => {
   try {
     const response = await api.post("/auth/reset-password", {email,token,newPassword })
@@ -103,22 +118,10 @@ export const resetPassword = async (email:string,token: string,newPassword:strin
     throw new Error("An unexpected error occurred");
   }
 }
-export const loginWithGoogle = async (googleId: string): Promise<AuthResponse> => {
-  try {
-    const response = await api.post("/login/google", { googleId });
-    return response.data; // Adjust based on your API response
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message || "Login with Google failed");
-    }
-    throw new Error("An unexpected error occurred");
-  }
-};
-
-// Protected endpoints (token added by interceptor)
+//************************* Get User **************************** */
 export const getUser = async (userId: string): Promise<UserInfo> => {
   try {
-    const response = await api.get(`/user/getUser/${userId}`);
+    const response = await api.get(`/user/getUser/${userId}`,{ withCredentials: true });
     return response.data.data; 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -128,6 +131,7 @@ export const getUser = async (userId: string): Promise<UserInfo> => {
   }
 };
 
+//*********************************************** */
 export const saveBasicInfo = async (userBasicInfo: object): Promise<any> => {
   console.log("save basic api")
   try {
@@ -141,7 +145,7 @@ export const saveBasicInfo = async (userBasicInfo: object): Promise<any> => {
     throw new Error("An unexpected error occurred");
   }
 };
-
+//****************************Save Address ********************************** */
 export const saveAddress = async (id: string, address: object): Promise<any> => {
   try {
     const response = await api.patch("/user/update_address", { id, address });
@@ -153,7 +157,7 @@ export const saveAddress = async (id: string, address: object): Promise<any> => 
     throw new Error("An unexpected error occurred");
   }
 };
-
+//******************** Verify ID ************************ */
 export const verifyId = async (govtId:string,imageUrl: string): Promise<any> => {
   try {
     const response = await api.post("/user/verify_govt_id",{govtId,imageUrl});

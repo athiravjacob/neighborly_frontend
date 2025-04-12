@@ -4,7 +4,6 @@ import SignupForm from '../../components/user/auth/SignupForm';
 import LoginForm from '../../components/user/auth/LoginForm';
 import { useLocation, useNavigate } from 'react-router-dom';
 import NavbarLanding from '../../components/user/common/Navbar-Landing';
-// import Loader from '../../components/ui/loader';
 
 const SignUpPage: React.FC = () => {
   const location = useLocation();
@@ -13,14 +12,13 @@ const SignUpPage: React.FC = () => {
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [hasLoggedIn, setHasLoggedIn] = useState<boolean>(false); // New state to track login completion
 
-  // Callback to handle login success
   const handleLoginSuccess = () => {
     setShowLoader(true);
-    setHasLoggedIn(true); // Mark login as complete
+    setHasLoggedIn(true); 
     setTimeout(() => {
       setShowLoader(false);
       navigate('/home');
-    }, 2000); // Show loader for 1 minute
+    }, 500); 
   };
 
   return (

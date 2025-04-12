@@ -1,7 +1,7 @@
 import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
-import { login } from '../../../api/apiRequests';
+import { login, loginWithGoogle } from '../../../api/apiRequests';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../../../config/firebase';
 import { useDispatch } from 'react-redux';
@@ -14,7 +14,7 @@ const loginSchema = yup.object().shape({
 });
 
 interface LoginFormProps {
-  onLoginSuccess: () => void; // Add callback prop
+  onLoginSuccess: () => void; 
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
@@ -47,10 +47,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
       await loginSchema.validate(formData, { abortEarly: false });
       setLoading(true);
       const user = await login(formData.email, formData.password);
-      const userDTO: UserDTO = { id: user.id, name: user.name, email: user.email, type: user.type };
-      dispatch(setCredentials({ user: userDTO }));
+      const userDetails = { id: user.id, name: user.name, email: user.email, type: user.type };
+      dispatch(setCredentials({ user: userDetails }));
       setLoading(false);
-      onLoginSuccess(); // Trigger the parent's loader logic
+      onLoginSuccess(); 
     } catch (err) {
       setLoading(false);
       if (err instanceof yup.ValidationError) {
@@ -68,15 +68,18 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   };
 
   const handleGoogleLogin = async () => {
-    console.log('Continue with Google clicked');
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      onLoginSuccess(); // Trigger the parent's loader logic
+      const idToken = await result.user.getIdToken(); // Get the Google idToken
+      const user = await loginWithGoogle(idToken); // Pass idToken instead of uid
+      const userDetails = { id: user.id, name: user.name, email: user.email, type: user.type };
+      dispatch(setCredentials({ user: userDetails }));
+      setLoading(false);
+      onLoginSuccess();
     } catch (error) {
       console.error('Google Sign-In Error:', error);
     }
   };
-
   return (
     <div className="w-full max-w-md p-8">
       <h2 className="text-3xl font-bold text-violet-950 mb-2">Welcome Back!</h2>

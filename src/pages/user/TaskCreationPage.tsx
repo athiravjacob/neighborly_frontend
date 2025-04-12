@@ -1,33 +1,46 @@
 import React, { useState } from 'react';
 import NavbarLanding from '../../components/user/common/Navbar-Landing';
 import { DescribeTask } from '../../components/user/task/DescribeTask';
-import { BrowseHelpers } from '../../components/user/task/BrowseHelpers';
+import { BrowseNeighbors } from '../../components/user/task/BrowseHelpers';
 import { ScheduleTask } from '../../components/user/task/ScheduleTask';
 import { ConfirmTask } from '../../components/user/task/ConfirmTask';
+import { ListAvailableNeighbors } from '../../api/neighborApiRequests';
+import { NeighborInfo } from '../../types/neighbor';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
+import { createTask } from '../../api/taskApiRequests';
 
 
 const TaskCreationPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [neighborsList, setNeighborsList] = useState<NeighborInfo[]>([]);
   const [taskData, setTaskData] = useState<{
     location: string;
     taskSize: string;
     taskDetails: string;
+    category: string;
+    subCategory: string;
   } | null>(null);
-  const [selectedHelper, setSelectedHelper] = useState<string | null>(null);
+  const [selectedHelper, setSelectedHelper] = useState<NeighborInfo | null>(null);
   const [schedule, setSchedule] = useState<{ date: string; time: string } | null>(null);
   const steps = ['Describe Your Task', 'Browse Helpers & Prices', 'Schedule', 'Confirm'];
+  const { user } = useSelector((state: RootState) => state.auth);
 
-  const handleDescribeTaskContinue = (data: {
+  const handleDescribeTaskContinue = async (data: {
     location: string;
     taskSize: string;
     taskDetails: string;
+    category: string;
+    subCategory: string;
   }) => {
     setTaskData(data);
+    const neighbors = await ListAvailableNeighbors(data.location,data.subCategory)
+    setNeighborsList(neighbors)
     setCurrentStep(2);
   };
 
-  const handleBrowseHelpersContinue = (helperId: string) => {
-    setSelectedHelper(helperId);
+  const handleBrowseHelpersContinue = (neighbor: NeighborInfo) => {
+    setSelectedHelper(neighbor);
     setCurrentStep(3);
   };
 
@@ -36,7 +49,30 @@ const TaskCreationPage: React.FC = () => {
     setCurrentStep(4);
   };
 
+ function calculateEstHours(taskSize :string):number{
+   if (taskSize === "Small") return 2
+   if (taskSize === 'Medium') return 4
+   if (taskSize === "Large") return 6
+   return 1
+  }
+
   const handleConfirm = () => {
+    const taskDetails = {
+      createdBy: user?.id!,
+      assignedNeighbor: selectedHelper?._id!,
+      location: taskData?.location!,
+      category: taskData?.category!,
+      subCategory: taskData?.subCategory!,
+      description: taskData?.taskDetails!,
+      est_hours: calculateEstHours(taskData?.taskSize!)!,
+      prefferedDate: schedule?.date!,
+      timeSlot: {
+        startTime:1744266600
+      },
+      ratePerHour:selectedHelper?.skills[0].hourlyRate!
+    }
+    console.log(taskDetails)
+    const result = createTask(taskDetails)
     alert("Task requested successfully!");
     // Here you can add logic to send the task request to the backend
     // Reset state or redirect user to a confirmation page/dashboard
@@ -74,9 +110,9 @@ const TaskCreationPage: React.FC = () => {
           </div>
 
           {/* Steps */}
-          {currentStep === 1 && <DescribeTask onContinue={handleDescribeTaskContinue} />}
+          {currentStep === 1 && <DescribeTask onContinue={handleDescribeTaskContinue}  />}
           {currentStep === 2 && taskData && (
-            <BrowseHelpers onContinue={handleBrowseHelpersContinue} taskData={taskData} />
+            <BrowseNeighbors onContinue={handleBrowseHelpersContinue} neighbors={neighborsList} taskData={taskData} />
           )}
           {currentStep === 3 && taskData && selectedHelper && (
             <ScheduleTask

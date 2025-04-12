@@ -3,7 +3,6 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import SignUpPage from './pages/user/SignUp';
 import HomePage from './pages/user/Home';
-import TaskList from './pages/user/Main/Tasks';
 import Profile from './pages/user/Main/Profile';
 import Settings from './pages/user/Main/Settings';
 import ProtectedRoutes from './components/user/common/ProtectedRoutes';
@@ -20,6 +19,9 @@ import BecomeANeighbor from './pages/neighbor/BecomeNeighborPage';
 import Calendar from './pages/neighbor/Calendar';
 import NeighborHome from './pages/neighbor/Neighbor-home';
 import CompleteYourProfile from './pages/neighbor/CompleteProfile';
+import TaskListPage from './components/user/task/ListTask';
+import SettingsPage from './pages/user/SettingsPage';
+import KYCProcess from './pages/user/Kyc';
 // import NeighborProfile from './pages/neighbor/Profile';
 const AppRoutes: React.FC = () => {
   return (
@@ -40,13 +42,15 @@ const AppRoutes: React.FC = () => {
 
       {/* Protected User Routes */}
       <Route element={<ProtectedRoutes />}>
-        <Route path="/home" element={<HomePage />}>
-          <Route path="task-list" element={<TaskList />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="" element={<TaskList />} /> {/* Default child route */}
-        </Route>
+        <Route path="/home" element={<HomePage />}/>
+        <Route path="/home/taskList" element={<TaskListPage />} />
+        <Route path="/home/settings" element={<SettingsPage />} />
+        <Route path="/home/kyc" element={<KYCProcess />} />
+
+
+    
       </Route>
+
 
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLogin />} />

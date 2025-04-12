@@ -45,7 +45,6 @@ const CalendarSection = () => {
     mutationFn: (availability: { date: string; timeSlots: { startTime: number; endTime: number }[] }[]) =>
       ScheduleTimeslots(user!.id, availability),
     onSuccess: () => {
-      // Refetch availability after saving
       queryClient.invalidateQueries({ queryKey: ['availability', user?.id] });
       const notification = document.getElementById("success-notification");
       if (notification) {
@@ -61,7 +60,6 @@ const CalendarSection = () => {
     },
   });
 
-  // Handle window resize for responsive view
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);

@@ -1,10 +1,11 @@
 import React from "react";
 import { MapPin, Calendar, Clock, User, Hammer, IndianRupee } from "lucide-react";
+import { NeighborInfo } from "../../../types/neighbor";
 
 interface ConfirmTaskProps {
   onConfirm: () => void;
-  taskData: { location: string; taskSize: string; taskDetails: string };
-  selectedHelper: string;
+  taskData: { location: string; taskSize: string; taskDetails: string ,category:string,subCategory:string};
+  selectedHelper: NeighborInfo;
   schedule: { date: string; time: string };
 }
 
@@ -14,38 +15,20 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
   selectedHelper,
   schedule,
 }) => {
-  // Dummy helper data (same as BrowseHelpers for consistency)
-  const helpers = [
-    {
-      id: "1",
-      name: "John D.",
-      hourlyRate: 650,
-    },
-    {
-      id: "2",
-      name: "Latisha B.",
-      hourlyRate: 449,
-    },
-    {
-      id: "3",
-      name: "Mike J.",
-      hourlyRate: 700,
-    },
-  ];
+  console.log(taskData,"Task Details")
 
-  const selectedHelperData = helpers.find((h) => h.id === selectedHelper);
-  if (!selectedHelperData) {
+  if (!selectedHelper) {
     return <div>Error: Helper not found.</div>;
   }
 
   // Calculate estimated time and cost based on task size
   const estimatedTimeMap: { [key: string]: number } = {
-    Small: 1, // 1 hour
-    Medium: 3, // Average of 2-4 hours
-    Large: 4, // 4+ hours (using 4 as minimum)
+    Small: 2, 
+    Medium: 4, 
+    Large: 6,
   };
-  const estimatedTime = estimatedTimeMap[taskData.taskSize] || 2; // Default to 2 hours if size not found
-  const estimatedCost = selectedHelperData.hourlyRate * estimatedTime;
+  const estimatedTime = estimatedTimeMap[taskData.taskSize] || 2; 
+  const estimatedCost = selectedHelper.skills[0].hourlyRate * estimatedTime;
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
@@ -88,7 +71,7 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
             <div className="flex items-center gap-2">
               <User size={18} className="text-gray-600" />
               <span className="text-gray-700">
-                <span className="font-medium">Tasker:</span> {selectedHelperData.name}
+                <span className="font-medium">Tasker:</span> {selectedHelper.name}
               </span>
             </div>
           </div>
@@ -113,7 +96,7 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
             <div className="flex items-center gap-2">
               <IndianRupee size={18} className="text-gray-600" />
               <span className="text-gray-700">
-                <span className="font-medium">Hourly Rate:</span> ₹{selectedHelperData.hourlyRate}/hr
+                <span className="font-medium">Hourly Rate:</span> ₹{selectedHelper.skills[0].hourlyRate}/hr
               </span>
             </div>
             <div className="flex items-center gap-2">

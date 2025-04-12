@@ -11,6 +11,7 @@ import { RootState, persistor } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { clearCredentials } from "../../redux/slices/authSlice";
 import { logout } from "../../api/apiRequests";
+import NavbarLanding from "../../components/user/common/Navbar-Landing";
 
 
 // Sample service categories with images
@@ -18,37 +19,37 @@ const serviceCategories = [
   {
     name: "Home Repairs",
     icon: <Hammer size={32} className="text-violet-700" />,
-    image: handyman, // Corrected: Use the imported image directly
+    image: handyman, 
     path: "/create-task",
   },
   {
     name: "Moving Help",
     icon: <Truck size={32} className="text-violet-700" />,
-    image: moving, // Corrected: Use the imported image directly
+    image: moving, 
     path: "/create-task",
   },
   {
     name: "Cleaning",
-    icon: <Truck size={32} className="text-violet-700" />, // Corrected: Use Broom icon for Cleaning
-    image: Cleaning, // Corrected: Use the imported image directly
-    path: "/create-task", // Corrected: Use a string path instead of {cleaning}
+    icon: <Truck size={32} className="text-violet-700" />, 
+    image: Cleaning, 
+    path: "/create-task", 
   },
   {
     name: "Delivery",
     icon: <Package size={32} className="text-violet-700" />,
-    image: Delivery, // Using the imported Delivery image (you might want a different image)
+    image: Delivery,
     path: "/create-task",
   },
   {
     name: "Assembly",
     icon: <Wrench size={32} className="text-violet-700" />,
-    image: drive, // Placeholder path (replace with imported image)
+    image: drive,
     path: "/create-task",
   },
   {
     name: "Painting",
     icon: <Paintbrush size={32} className="text-violet-700" />,
-    image: Gardening ,// Placeholder path (replace with imported image)
+    image: Gardening ,
     path: "/create-task",
   },
 ];
@@ -77,50 +78,9 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between p-6 bg-white shadow-sm border-b border-violet-100">
-  <div className="text-2xl font-bold text-violet-900">Neighborly</div>
-  <div className="flex items-center gap-6">
-    <Link to="/services" className="text-violet-700 hover:text-violet-900">
-      Services
-    </Link>
-    <Link to="/tasks" className="text-violet-700 hover:text-violet-900">
-      Tasks
-    </Link>
-    <div className="relative group">
-      <p 
-        className="flex items-center gap-2 text-violet-700 hover:text-violet-900"
-      >
-        <User size={20} />
-         {/* Assuming username comes from Redux persist */}
-      </p>
-      {/* Dropdown menu */}
-      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block">
-              <div className="py-1">
-                <p             className="block px-4 py-2 text-sm text-black hover:bg-violet-100"
->
-                Hi,{user?.name.split(' ')[0]} 
-
-                </p>
-          <Link 
-            to="/profile/settings" 
-            className="block px-4 py-2 text-sm text-violet-700 hover:bg-violet-100"
-          >
-            Settings
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="block w-full text-left px-4 py-2 text-sm text-violet-700 hover:bg-violet-100"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
-
+    
+    <>
+      <NavbarLanding/>
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
@@ -149,7 +109,7 @@ const HomePage: React.FC = () => {
                 <Search size={24} />
               </button>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <MapPin size={20} className="text-violet-700" />
               <select
                 value={location}
@@ -162,7 +122,7 @@ const HomePage: React.FC = () => {
                 <option value="Chennai, IN">Chennai, IN</option>
                 <option value="Kolkata, IN">Kolkata, IN</option>
               </select>
-            </div>
+            </div> */}
           </form>
         </div>
       </section>
@@ -199,7 +159,8 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-    </div>
+    </ >
+      
   );
 };
 

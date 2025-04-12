@@ -2,16 +2,32 @@ import React, { useState } from 'react';
 import useServiceAvailability from '../../../hooks/useServiceAvailability';
 
 interface DescribeTaskProps {
-  onContinue: (data: { location: string; taskSize: string; taskDetails: string }) => void;
+  onContinue: (data: {
+    location: string;
+    taskSize: string;
+    taskDetails: string;
+    category: string;
+    subCategory: string
+  }) => void;
 }
+
+const skillCategories: { [key: string]: string[] } = { 
+  cleaning: ["Cleaning Apartments", "Outdoor Cleaning", "Kitchen Cleaning", "Deep Clean"],
+  delivery: ["Food Delivery", "Package Delivery", "Grocery Delivery"],
+  handyman: ["Plumbing", "Electrical", "Painting", "Furniture Assembly"],
+  moving: ["Packing", "Loading/Unloading", "Transportation"],
+  gardening: ["Lawn Mowing", "Planting", "Weeding"],
+  "personal assistant": ["Scheduling", "Errands", "Organization"]
+};
 
 export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
   const [location, setLocation] = useState('');
-  const [searchLocation, setSearchLocation] = useState(''); // Triggers the query
+  const [searchLocation, setSearchLocation] = useState('');
   const [taskSize, setTaskSize] = useState('');
   const [taskDetails, setTaskDetails] = useState('');
+  const [category, setCategory] = useState('');
+  const [subcategory, setSubcategory] = useState('');
 
-  // Use the custom hook
   const { data: isServiceAvailable, isLoading, error } = useServiceAvailability(searchLocation);
 
   const handleCheckAvailability = (e: React.FormEvent) => {
@@ -20,7 +36,7 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
       alert('Please enter a location.');
       return;
     }
-    setSearchLocation(location); // Trigger the query
+    setSearchLocation(location);
   };
 
   const handleContinue = () => {
@@ -32,8 +48,18 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
       alert('Please select a task size.');
     } else if (!taskDetails) {
       alert('Please provide task details.');
+    } else if (!category) {
+      alert('Please select a category.');
+    } else if (!subcategory) {
+      alert('Please select a subcategory.');
     } else {
-      onContinue({ location, taskSize, taskDetails });
+      onContinue({ 
+        location, 
+        taskSize, 
+        taskDetails, 
+        category, 
+        subCategory:subcategory 
+      });
     }
   };
 
@@ -60,7 +86,7 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
             <button
               onClick={handleCheckAvailability}
               className="px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
-              disabled={isLoading} // Disable while fetching
+              disabled={isLoading}
             >
               {isLoading ? 'Checking...' : 'Check Availability'}
             </button>
@@ -72,6 +98,45 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
           {isServiceAvailable === true && (
             <p className="mt-2 text-green-600">Service available in {location}!</p>
           )}
+        </div>
+
+        {/* Category Selection */}
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Select Task Category</label>
+          <select
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setSubcategory(''); // Reset subcategory when category changes
+            }}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
+          >
+            <option value="">Select a category</option>
+            {Object.keys(skillCategories).map((cat) => (
+              <option key={cat} value={cat}>
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Subcategory Selection */}
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Select Task Subcategory</label>
+          <select
+            value={subcategory}
+            onChange={(e) => (setSubcategory(e.target.value))}
+            disabled={!category} // Disable if no category is selected
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 disabled:bg-gray-100"
+          >
+            <option value="">Select a subcategory</option>
+            {category &&
+              skillCategories[category].map((sub) => (
+                <option key={sub} value={sub}>
+                  {sub}
+                </option>
+              ))}
+          </select>
         </div>
 
         {/* Task Size Options */}
