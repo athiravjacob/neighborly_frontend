@@ -33,7 +33,7 @@ export const NeighborSignup = async (
   /*********************Neighbor Login********************************* */
 export const NeighborLogin = async (email: string, password: string): Promise<UserDTO> => {
   try {
-      const response = await api.post("/auth/neighbor/login", { email, password },{ withCredentials: true });
+      const response = await api.post("/auth/neighbor/login", { email, password },{ withCredentials: true },);
       console.log(response.data.data)
       return response.data.data;
       
@@ -41,6 +41,7 @@ export const NeighborLogin = async (email: string, password: string): Promise<Us
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message || "Login failed");
     }
+    console.log(error)
     throw new Error("An unexpected error occurred");
   }
 };

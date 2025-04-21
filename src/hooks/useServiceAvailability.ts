@@ -6,7 +6,6 @@ const checkServiceAvailability = async (loc:string) => {
     return response
   };
   
-  // Custom hook
   const useServiceAvailability = (city:string) => {
     return useQuery({
       queryKey: ['serviceAvailability', city],

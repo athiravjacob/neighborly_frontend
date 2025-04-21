@@ -1,7 +1,7 @@
 
 export interface UserInfo {
     id: string ;
-    profile_pic?: string | null;
+    profilePicture?: string | null;
     name: string;
     email: string;
     phone: string;
@@ -22,4 +22,12 @@ export interface BasicInfoProps {
     User?:UserInfo
 }
   
-
+export interface UserProfile {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    dob: string;
+    profilePicture: string | null;
+  }
+  

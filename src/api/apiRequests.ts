@@ -1,4 +1,5 @@
-import { UserInfo } from "../types/settings";
+import { current } from "@reduxjs/toolkit";
+import { UserInfo, UserProfile } from "../types/settings";
 import api from "./apiConfig";
 import axios from "axios";
 
@@ -131,13 +132,13 @@ export const getUser = async (userId: string): Promise<UserInfo> => {
   }
 };
 
-//*********************************************** */
-export const saveBasicInfo = async (userBasicInfo: object): Promise<any> => {
-  console.log("save basic api")
+//*****************************Save Profile Details ****************** */
+export const saveProfile = async (profileDetails: UserProfile): Promise<any> => {
   try {
-    const response = await api.patch("/user/update_basic_info", { userBasicInfo });
-    console.log(response)
-    return response.data;
+    console.log(profileDetails,"profilr Details api call")
+    const response = await api.patch("/user/updateProfile", { profileDetails });
+    console.log(response.data.data,"save profile function")
+    return response.data.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message || "Unable to update basic info");
@@ -145,6 +146,21 @@ export const saveBasicInfo = async (userBasicInfo: object): Promise<any> => {
     throw new Error("An unexpected error occurred");
   }
 };
+
+//****************************Get Profile Details****************************/
+
+export const fetchProfile = async (userId:string): Promise<any> => {
+  try {
+    const response = await api.get("/user/fetchProfile");
+    console.log(response.data.data,"fetch profile")
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Unable to update basic info");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
 //****************************Save Address ********************************** */
 export const saveAddress = async (id: string, address: object): Promise<any> => {
   try {
@@ -160,7 +176,7 @@ export const saveAddress = async (id: string, address: object): Promise<any> => 
 //******************** Verify ID ************************ */
 export const verifyId = async (govtId:string,imageUrl: string): Promise<any> => {
   try {
-    const response = await api.post("/user/verify_govt_id",{govtId,imageUrl});
+    const response = await api.patch("/user/verify_govt_id",{govtId,imageUrl});
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -171,3 +187,16 @@ export const verifyId = async (govtId:string,imageUrl: string): Promise<any> => 
 };
   
 
+//**********************Change Password ************* */
+export const changePassword = async (currentPassword:string, newPassword:string): Promise<void> => {
+  try {
+   console.log("change pass",newPassword)
+   const response = await api.patch("/auth/change-password", { currentPassword, newPassword })
+   console.log(response.data.data)
+ } catch (error) {
+  if (axios.isAxiosError(error) && error.response) {
+    throw new Error(error.response.data.message || "Unable to verify govtid");
+  }
+  throw new Error("An unexpected error occurred");
+ } 
+}

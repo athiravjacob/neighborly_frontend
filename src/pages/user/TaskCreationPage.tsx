@@ -10,7 +10,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { createTask } from '../../api/taskApiRequests';
 
-
 const TaskCreationPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [neighborsList, setNeighborsList] = useState<NeighborInfo[]>([]);
@@ -34,8 +33,8 @@ const TaskCreationPage: React.FC = () => {
     subCategory: string;
   }) => {
     setTaskData(data);
-    const neighbors = await ListAvailableNeighbors(data.location,data.subCategory)
-    setNeighborsList(neighbors)
+    const neighbors = await ListAvailableNeighbors(data.location, data.subCategory);
+    setNeighborsList(neighbors);
     setCurrentStep(2);
   };
 
@@ -49,15 +48,16 @@ const TaskCreationPage: React.FC = () => {
     setCurrentStep(4);
   };
 
- function calculateEstHours(taskSize :string):number{
-   if (taskSize === "Small") return 2
-   if (taskSize === 'Medium') return 4
-   if (taskSize === "Large") return 6
-   return 1
+  function calculateEstHours(taskSize: string): number {
+    if (taskSize === "Small") return 2;
+    if (taskSize === 'Medium') return 4;
+    if (taskSize === "Large") return 6;
+    return 1;
   }
 
   const handleConfirm = () => {
     const taskDetails = {
+      id: "",
       createdBy: user?.id!,
       assignedNeighbor: selectedHelper?._id!,
       location: taskData?.location!,
@@ -67,17 +67,38 @@ const TaskCreationPage: React.FC = () => {
       est_hours: calculateEstHours(taskData?.taskSize!)!,
       prefferedDate: schedule?.date!,
       timeSlot: {
-        startTime:1744266600
+        startTime: 1744266600
       },
-      ratePerHour:selectedHelper?.skills[0].hourlyRate!
-    }
-    console.log(taskDetails)
-    const result = createTask(taskDetails)
+      ratePerHour: selectedHelper?.skills[0].hourlyRate!
+    };
+    console.log(taskDetails);
+    const result = createTask(taskDetails);
     alert("Task requested successfully!");
-    // Here you can add logic to send the task request to the backend
-    // Reset state or redirect user to a confirmation page/dashboard
   };
-  
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep === 1 && taskData) {
+      setCurrentStep(2);
+    } else if (currentStep === 2 && selectedHelper) {
+      setCurrentStep(3);
+    } else if (currentStep === 3 && schedule) {
+      setCurrentStep(4);
+    }
+  };
+
+  const isNextDisabled = () => {
+    if (currentStep === 1 && !taskData) return true;
+    if (currentStep === 2 && !selectedHelper) return true;
+    if (currentStep === 3 && !schedule) return true;
+    return false;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <NavbarLanding />
@@ -110,7 +131,7 @@ const TaskCreationPage: React.FC = () => {
           </div>
 
           {/* Steps */}
-          {currentStep === 1 && <DescribeTask onContinue={handleDescribeTaskContinue}  />}
+          {currentStep === 1 && <DescribeTask onContinue={handleDescribeTaskContinue} />}
           {currentStep === 2 && taskData && (
             <BrowseNeighbors onContinue={handleBrowseHelpersContinue} neighbors={neighborsList} taskData={taskData} />
           )}
@@ -129,6 +150,34 @@ const TaskCreationPage: React.FC = () => {
               schedule={schedule}
             />
           )}
+
+          {/* Navigation Buttons */}
+          <div className="mt-8 flex justify-between">
+            <button
+              onClick={handleBack}
+              disabled={currentStep === 1}
+              className={`px-4 py-2 rounded-md ${
+                currentStep === 1
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-violet-600 text-white hover:bg-violet-700'
+              }`}
+            >
+              Back
+            </button>
+            {currentStep < 4 && (
+              <button
+                onClick={handleNext}
+                disabled={isNextDisabled()}
+                className={`px-4 py-2 rounded-md ${
+                  isNextDisabled()
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-violet-600 text-white hover:bg-violet-700'
+                }`}
+              >
+                Next
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -12,7 +12,6 @@ import ChangePassword from "../../../components/user/settings/ChangePassword";
 
 const Settings: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const [userDetails, setUserDetails] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,10 +34,10 @@ const Settings: React.FC = () => {
   };
   
   useEffect(() => {
-    if (accessToken && user?.id) {
+    if ( user?.id) {
       getUserDetails(user.id); 
     }
-  }, [user?.id,accessToken]); 
+  }, [user?.id]); 
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;

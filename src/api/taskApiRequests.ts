@@ -16,10 +16,11 @@ export const createTask = async (newTask: newTaskDetails): Promise<void>=>{
     
 }
 
-export const showTasks_User = async (): Promise<void> => {
+export const showTasks = async (userId:string): Promise<newTaskDetails[]> => {
     try {
-        const response = await api.get("/task/show-task",{ withCredentials: true })
-        console.log("user task list",response.data.data)
+        const response = await api.get("/task/show-task", { withCredentials: true })
+        console.log(response.data.data)
+        return response.data.data
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
             throw new Error(error.response.data.message || "Failed to list task");

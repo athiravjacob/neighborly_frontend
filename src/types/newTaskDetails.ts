@@ -1,5 +1,18 @@
+export enum TaskStatus {
+  PENDING = 'pending',
+  ASSIGNED = 'assigned',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
+}
 
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  DISPUTED = 'disputed'
+}
 export interface newTaskDetails {
+  id: string|undefined;
   createdBy: string; 
   assignedNeighbor?: string | null; 
   location: string;
@@ -13,5 +26,7 @@ export interface newTaskDetails {
     endTime?: number;
   };
   ratePerHour: number;
+  task_status?: TaskStatus; 
+  payment_status?: PaymentStatus
  
 }
