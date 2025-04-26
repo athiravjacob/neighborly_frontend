@@ -5,10 +5,10 @@ import { Navigate, Outlet } from "react-router-dom";
 import { RootState } from "../../../redux/store";
 
 const ProtectedRoutes_admin: React.FC = () => {
-  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const {user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
-
-  if (!accessToken) {
+console.log(user)
+  if (!isAuthenticated || user?.type!== "admin") {
     return <Navigate to="/admin" replace />;
   }
 

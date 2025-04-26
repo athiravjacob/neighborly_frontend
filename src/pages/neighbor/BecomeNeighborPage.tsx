@@ -20,6 +20,7 @@ import { NeighborLogin, NeighborSignup } from "../../api/neighborApiRequests";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../redux/slices/authSlice";
+import { toast } from "react-toastify";
 
 const BecomeANeighbor: React.FC = () => {
   const [isLogin, setIsLogin] = useState(false);
@@ -52,7 +53,7 @@ const BecomeANeighbor: React.FC = () => {
     try {
       const response = await NeighborSignup(neighbor)
       console.log('Signup successful:', response);
-      alert('Signup successful! Please log in.');
+      toast.success("Signup success .Please Login")
       setIsLogin(true); 
       setFormData({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
       

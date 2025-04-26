@@ -3,8 +3,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import SignUpPage from './pages/user/SignUp';
 import HomePage from './pages/user/Home';
-import Profile from './pages/user/Main/Profile';
-import Settings from './pages/user/Main/Settings';
+
 import ProtectedRoutes from './components/user/common/ProtectedRoutes';
 import AdminLogin from './pages/admin/Login';
 import Home from './pages/admin/AdminHome';
@@ -16,12 +15,14 @@ import { ResetPassword } from './components/user/auth/ResetPassword';
 import LandingPage from './pages/user/LandingPage';
 import TaskCreationPage from './pages/user/TaskCreationPage';
 import BecomeANeighbor from './pages/neighbor/BecomeNeighborPage';
-import Calendar from './pages/neighbor/Calendar';
 import NeighborHome from './pages/neighbor/Neighbor-home';
 import CompleteYourProfile from './pages/neighbor/CompleteProfile';
 import TaskListPage from './components/user/task/ListTask';
 import SettingsPage from './pages/user/SettingsPage';
 import KYCProcess from './pages/user/Kyc';
+import Chat from './components/Chat'
+import NeighborList from './pages/admin/Main/NeighborList';
+import ChatWithHelper from './components/user/task/ChatWithHelper';
 // import NeighborProfile from './pages/neighbor/Profile';
 const AppRoutes: React.FC = () => {
   return (
@@ -39,6 +40,8 @@ const AppRoutes: React.FC = () => {
       {/* <Route path="/neighbor/profile" element={<NeighborProfile/>}></Route> */}
 
       <Route path="/" element={<LandingPage />} />
+      <Route path="/message" element={<Chat />} />
+
 
       {/* Protected User Routes */}
       <Route element={<ProtectedRoutes />}>
@@ -58,6 +61,8 @@ const AppRoutes: React.FC = () => {
         <Route path="/admin/dashboard" element={<Home />}>
           <Route path="users" element={<UserList />} />
           <Route path="users/details" element={<UserDetails />} />
+          <Route path="neighbors" element={<NeighborList />} />
+
 
           
         </Route>

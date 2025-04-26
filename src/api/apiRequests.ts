@@ -174,17 +174,31 @@ export const saveAddress = async (id: string, address: object): Promise<any> => 
   }
 };
 //******************** Verify ID ************************ */
-export const verifyId = async (govtId:string,imageUrl: string): Promise<any> => {
+export const verifyId = async (imageUrl: string): Promise<Boolean> => {
   try {
-    const response = await api.patch("/user/verify_govt_id",{govtId,imageUrl});
-    return response.data;
+    console.log("verify id")
+    const result =await api.patch("/neighbor/uploadId", { imageUrl });
+    return result.data.data
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message || "Unable to verify govtid");
+      throw new Error(error.response.data.message || "Unable to upload id");
     }
     throw new Error("An unexpected error occurred");
   }
 };
+
+export const fetchVerificationStatus = async (): Promise<Boolean> => {
+  try {
+    console.log("fetch verific")
+    const result = await api.get("/neighbor/fetchStatus")
+    return result.data.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Unable to fetch verificatio status");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
   
 
 //**********************Change Password ************* */

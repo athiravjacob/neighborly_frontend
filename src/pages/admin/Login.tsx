@@ -15,10 +15,9 @@ const AdminLogin = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { accessToken, user } = await adminLogin(email, password);
-      console.log(user)
-      dispatch(setCredentials({ user, accessToken }));
-      console.log('Login successful:', user);
+      const response = await adminLogin(email, password);
+      const adminDetails = {id:response.id,name:response.name,email:response.email,type:response.type}
+      dispatch(setCredentials({user:adminDetails}))      
       navigate('/admin/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');

@@ -5,6 +5,8 @@ import NavbarLanding from '../common/Navbar-Landing';
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../../hooks/useTasks';
 import { newTaskDetails, TaskStatus, PaymentStatus } from '../../../types/newTaskDetails'
+import ChatWithHelper from './ChatWithHelper';
+import Chat from '../../Chat';
 
 // Status badge component for better visual distinction
 const StatusBadge = ({ status }: { status: TaskStatus }) => {
@@ -67,6 +69,10 @@ const TaskListPage: React.FC = () => {
   const { tasks, isLoading, error } = useTasks(user?.id);
   const navigate = useNavigate();
 
+  const [chatOpen, setChatOpen] = useState<boolean>();
+  const [chatTaskId, setChatTaskId] = useState<string>('');
+  const [chatHelperId, setChatHelperId] = useState<string>('');
+  
   const formatDateTime = (timestamp: number, date: string | Date) => {
     const dateObj = new Date(date);
     const time = new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -77,14 +83,24 @@ const TaskListPage: React.FC = () => {
     return new Date(isoString).toLocaleString();
   };
 
+  const handleChat = (taskId: string | undefined, helperId: string | undefined) => {
+    console.log('handleChat called', { taskId, helperId });
+    if (taskId && helperId) {
+      setChatTaskId(taskId);
+      setChatHelperId(helperId);
+      setChatOpen(true);
+      setSelectedTask(null); // Close task details modal
+      console.log('Opening chat with', { taskId, helperId });
+    } else {
+      console.warn('Cannot open chat: Invalid taskId or helperId', { taskId, helperId });
+    }
+  };
   const handleChangeHelper = (taskId: string | undefined) => {
     console.log(`Changing helper for task ${taskId}`);
     setSelectedTask(null);
   };
 
-  const handleChat = (taskId: string | undefined) => {
-    console.log(`Opening chat for task ${taskId}`);
-  };
+  
 
   const filteredTasks = tasks.filter(task => {
     if (filter === 'all') return true;
@@ -233,15 +249,15 @@ const TaskListPage: React.FC = () => {
                       </div>
 
                       {task.assignedNeighbor && (
-                        <button
-                          className="text-violet-700 hover:text-violet-800 text-sm font-medium"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleChat(task.id);
-                          }}
-                        >
-                          Chat
-                        </button>
+                         <button
+                         className="text-violet-700 hover:text-violet-800 text-sm font-medium"
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           handleChat(task.id, task.assignedNeighbor!);
+                         }}
+                       >
+                         Chat
+                       </button>
                       )}
                     </div>
                   </div>
@@ -284,7 +300,7 @@ const TaskListPage: React.FC = () => {
                     <p className="flex items-start">
                       <span className="w-24 text-gray-600 font-medium">Rate:</span>
                       <span className="text-gray-900">${selectedTask.ratePerHour}/hour</span>
-                    </p>
+                    </p>   
                     <p className="flex items-start">
                       <span className="w-24 text-gray-600 font-medium">Total:</span>
                       <span className="text-gray-900 font-semibold">${selectedTask.ratePerHour * selectedTask.est_hours}</span>
@@ -381,7 +397,7 @@ const TaskListPage: React.FC = () => {
               {selectedTask.assignedNeighbor && (
                 <button
                   className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-                  onClick={() => handleChat(selectedTask.id)}
+                  onClick={() => handleChat(selectedTask.id, selectedTask.assignedNeighbor!)}
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
@@ -399,6 +415,9 @@ const TaskListPage: React.FC = () => {
           </div>
         </div>
       )}
+      {chatOpen && (
+    <Chat/>
+  )}
     </div>
   );
 };

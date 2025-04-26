@@ -18,7 +18,7 @@ export const createTask = async (newTask: newTaskDetails): Promise<void>=>{
 
 export const showTasks = async (userId:string): Promise<newTaskDetails[]> => {
     try {
-        const response = await api.get("/task/show-task", { withCredentials: true })
+        const response = await api.get(`/task/show-task/${userId}`, { withCredentials: true })
         console.log(response.data.data)
         return response.data.data
     } catch (error) {

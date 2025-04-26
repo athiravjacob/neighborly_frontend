@@ -6,6 +6,10 @@ import { FetchAvailability, ScheduleTimeslots } from "../../api/neighborApiReque
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from "react-toastify";
+import 'react-confirm-alert/src/react-confirm-alert.css'; 
+import { confirmAlert } from 'react-confirm-alert';
+
 
 const localizer = momentLocalizer(moment);
 
@@ -46,14 +50,12 @@ const CalendarSection = () => {
       ScheduleTimeslots(user!.id, availability),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['availability', user?.id] });
-      const notification = document.getElementById("success-notification");
-      if (notification) {
-        notification.classList.remove("hidden");
-        setTimeout(() => notification.classList.add("hidden"), 3000);
-      }
+      toast.success("Availability saved successfully!");
+
     },
     onError: (error) => {
-      console.error("Error saving availability:", error);
+            toast.error(`Oops couldnt save the availabilty!, ${error}`);
+     
     },
     onSettled: () => {
       setIsLoading(false);
@@ -152,11 +154,25 @@ const CalendarSection = () => {
   };
 
   const handleClearAll = () => {
-    if (events.length === 0) return;
-    if (confirm("Are you sure you want to clear all your availability slots?")) {
-      setEvents([]);
-    }
+    confirmAlert({
+      title: 'Confirm to Clear',
+      message: 'Are you sure you want to clear the data?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => {
+            setEvents([])
+            toast.success("Data cleared successfully!");
+          }
+        },
+        {
+          label: 'No',
+          onClick: () => toast.info("Action cancelled.")
+        }
+      ]
+    });
   };
+  
 
   const formatEventTitle = (event: AvailabilityEvent) => {
     return `${moment(event.start).format("h:mm A")} - ${moment(event.end).format("h:mm A")}`;

@@ -18,7 +18,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
   const [isFlexible, setIsFlexible] = useState(false);
 
   // Generate next 7 days from today (April 5, 2025 as per system date)
-  const today = new Date('2025-04-05');
+  const today = new Date();
   const nextSevenDays = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
@@ -65,8 +65,8 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
     });
   };
   const estHours = (size: string):Number  => {
-    if (size === 'Small') return 2
-    if (size === 'Medium') return 4
+    if (size === 'Small') return 1
+    if (size === 'Medium') return 3
     if (size === 'Large') return 6
     return 0
   }

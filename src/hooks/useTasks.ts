@@ -4,7 +4,7 @@ import { showTasks } from "../api/taskApiRequests";
 
 
 export const useTasks = (userId: string | undefined) => {
-  const queryClient = useQueryClient()
+  // const queryClient = useQueryClient()
   const { data: tasks = [], isLoading, error } = useQuery<newTaskDetails[], Error>({
     queryKey: ["tasks", userId],
     queryFn: () => showTasks(userId!),

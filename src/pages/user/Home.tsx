@@ -60,7 +60,7 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const user = useSelector((state: RootState) => state.auth.user);
+  const { user ,isAuthenticated} = useSelector((state: RootState) => state.auth);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +77,10 @@ const HomePage: React.FC = () => {
     navigate("/signup");
   };
 
+  if (!isAuthenticated || !user ||user.type !== 'user') {
+    navigate('/neighbor'); 
+    return null;
+  }
   return (
     
     <>

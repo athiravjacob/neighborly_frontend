@@ -9,6 +9,7 @@ import { NeighborInfo } from '../../types/neighbor';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { createTask } from '../../api/taskApiRequests';
+import { useNavigate } from 'react-router-dom';
 
 const TaskCreationPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -37,6 +38,8 @@ const TaskCreationPage: React.FC = () => {
     setNeighborsList(neighbors);
     setCurrentStep(2);
   };
+
+  const navigate = useNavigate()
 
   const handleBrowseHelpersContinue = (neighbor: NeighborInfo) => {
     setSelectedHelper(neighbor);
@@ -73,7 +76,8 @@ const TaskCreationPage: React.FC = () => {
     };
     console.log(taskDetails);
     const result = createTask(taskDetails);
-    alert("Task requested successfully!");
+    navigate("/home/taskList")
+    // alert("Task requested successfully!");
   };
 
   const handleBack = () => {

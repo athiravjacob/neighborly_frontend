@@ -50,9 +50,9 @@ const UserDetails: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Larger Image Section */}
                     <div className="lg:col-span-1">
-                        {user.profile_pic ? (
+                        {user.profilePicture ? (
                             <img 
-                                src={user.profile_pic} 
+                                src={user.profilePicture} 
                                 alt={`${user.name}'s profile`}
                                 className="w-64 h-64 rounded-full object-cover mx-auto mb-4 shadow-lg"
                             />
@@ -78,7 +78,7 @@ const UserDetails: React.FC = () => {
                                 <span className="font-semibold text-white block">Phone:</span>
                                 <span>{user.phone || 'Not provided'}</span>
                             </div>
-                            <div className="mb-4">
+                            {/* <div className="mb-4">
                                 <span className="font-semibold text-white block">Government ID:</span>
                                 <span>{user.govtId || 'Not provided'}</span>
                             </div>
@@ -91,7 +91,7 @@ const UserDetails: React.FC = () => {
                             <div className="mb-4">
                                 <span className="font-semibold text-white block">Address:</span>
                                 <span>{user.address?.city || 'Not provided'}</span>
-                            </div>
+                            </div> */}
                             <div className="mb-4">
                                 <span className="font-semibold text-white block">Date of Birth:</span>
                                 <span>{user.DOB ? new Date(user.DOB).toLocaleDateString() : 'Not provided'}</span>

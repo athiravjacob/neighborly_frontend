@@ -5,7 +5,7 @@ import { RootState } from '../../../redux/store';
 import { User } from 'lucide-react'; // assuming you're using lucide-react icons
 import { logout } from '../../../api/apiRequests';
 import { clearCredentials } from '../../../redux/slices/authSlice';
-import { showTasks_User } from '../../../api/taskApiRequests';
+import { showTasks } from '../../../api/taskApiRequests';
 
 const NavbarLanding: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,12 +20,12 @@ const NavbarLanding: React.FC = () => {
     navigate('/');
   };
   async function FetchTasks() {
-    await showTasks_User()
+    await showTasks(user?.id!)
     navigate("/home/taskList")
   }
 
   // 🔹 If user is NOT authenticated
-  if (!isAuthenticated) {
+  if (!isAuthenticated || user?.type === 'neighbor') {
     return (
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,23 +85,22 @@ const NavbarLanding: React.FC = () => {
     );
   }
 
-  
+  // If user logged in
 
-  // 🔹 If user IS authenticated
   return (
     <nav className="flex items-center justify-between p-6 bg-white shadow-sm border-b border-violet-100">
       <div className="text-2xl font-bold text-violet-900 cursor-pointer" onClick={() => navigate("/")}>
         Neighborly
       </div>
       <div className="flex items-center gap-6">
-        <Link to="/home/kyc" className="text-violet-700 hover:text-violet-900">Services</Link>
-        <p onClick={FetchTasks} className="text-violet-700 hover:text-violet-900">Tasks</p>
-        <div className="relative group">
+        {/* <Link to="/home/kyc" className="text-violet-700 hover:text-violet-900">Services</Link> */}
+        <div   onClick={FetchTasks} className="text-violet-700 hover:text-violet-900 hover:cursor-default cursor-pointer">Tasks</div>
+        <div className="relative group p-2">
   <p className="flex items-center gap-2 text-violet-700 hover:text-violet-900 cursor-pointer">
     <User size={20} />
   </p>
   <div
-    className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200 pointer-events-none group-hover:pointer-events-auto z-50"
+    className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 pointer-events-none group-hover:pointer-events-auto z-50"
   >
     <div className="py-1">
       <p className="block px-4 py-2 text-sm text-black">Hi, {user?.name?.split(' ')[0]}</p>

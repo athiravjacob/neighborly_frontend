@@ -64,8 +64,16 @@ const Sidebar: React.FC = () => {
           label="Users"
           isCollapsed={isCollapsed}
           onClick={() => navigate("users")} 
-        />
+          />
+          </div>
       
+      <div className="space-y-1">
+        <MenuItem
+          icon={<PersonIcon />}
+          label="Neighbor"
+          isCollapsed={isCollapsed}
+          onClick={() => navigate("neighbors")} 
+        />
        
           </div>
         <div className="mt-auto">

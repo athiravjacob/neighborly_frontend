@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { getAllUsers } from '../../../api/adminApiRequests';
+import { getAllNeighbors, getAllUsers } from '../../../api/adminApiRequests';
 import { RootState } from '../../../redux/store';
 import { UserInfo } from '../../../types/settings';
 import { format } from 'date-fns';
 
-const UserList: React.FC = () => {
+const NeighborList: React.FC = () => {
     const [users, setUsers] = useState<UserInfo[]>([]);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -19,7 +19,7 @@ const UserList: React.FC = () => {
                 return;
             }
             try {
-                const userList = await getAllUsers();
+                const userList = await getAllNeighbors();
                 setUsers(userList);
             } catch (err: any) {
                 setError(err.message || 'Failed to fetch users');
@@ -44,11 +44,11 @@ const UserList: React.FC = () => {
 
     return (
         <main className="flex-1 p-8">
-            <h1 className="text-3xl font-semibold text-white mb-6">User List</h1>
+            <h1 className="text-3xl font-semibold text-white mb-6">Neighbors List</h1>
             {error && <p className="text-red-500 mb-4">{error}</p>}
             <div className="bg-gray-950 rounded-lg shadow-xl p-6">
                 {users.length === 0 ? (
-                    <p className="text-gray-400">No users found.</p>
+                    <p className="text-gray-400">No neighbors found.</p>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-gray-300">
@@ -57,7 +57,7 @@ const UserList: React.FC = () => {
                                     <th className="py-3 px-4">Name</th>
                                     <th className="py-3 px-4">Email</th>
                                     <th className="py-3 px-4">Phone</th>
-                                    <th className="py-3 px-4">Dob</th>
+                                    <th className="py-3 px-4">Verification Image</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -83,4 +83,4 @@ const UserList: React.FC = () => {
     );
 };
 
-export default UserList;
+export default NeighborList;

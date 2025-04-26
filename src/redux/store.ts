@@ -11,17 +11,19 @@ import {
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from './slices/authSlice';
+import verificationReducer from './slices/verificationSlice';
 
 // Define the root reducer
 const rootReducer = combineReducers({
-  auth: authReducer, // Explicitly name the 'auth' slice
+  auth: authReducer,
+  verification: verificationReducer, // Add verification slice
 });
 
 // Persist config
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'], // Persist only the 'auth' slice
+  whitelist: ['auth', 'verification'], // Persist both auth and verification slices
 };
 
 // Create persisted reducer
@@ -39,7 +41,7 @@ export const store = configureStore({
 });
 
 // Export store types
-export type RootState = ReturnType<typeof rootReducer>; // Use rootReducer for type
+export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 
 // Persistor

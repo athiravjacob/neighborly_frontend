@@ -115,8 +115,8 @@ export const General = ({ setSuccessMessage, setErrorMessage }: GeneralProps) =>
 
       const file = fileInputRef.current?.files?.[0];
       console.log('Profile to update:', updatedProfile, 'File selected:', !!file);
-      updateProfile(updatedProfile, file); // Pass file to mutation
-      setSuccessMessage('Profile updated successfully!');
+      await updateProfile(updatedProfile, file); 
+      // setSuccessMessage('Profile updated successfully!');
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
