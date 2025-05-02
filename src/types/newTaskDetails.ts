@@ -1,3 +1,5 @@
+import { NeighborInfo } from "./neighbor";
+
 export enum TaskStatus {
   PENDING = 'pending',
   ASSIGNED = 'assigned',
@@ -12,9 +14,9 @@ export enum PaymentStatus {
   DISPUTED = 'disputed'
 }
 export interface newTaskDetails {
-  id: string|undefined;
+  _id: string|undefined;
   createdBy: string; 
-  assignedNeighbor?: string | null; 
+  assignedNeighbor?: NeighborInfo | null; 
   location: string;
   category: string;
   subCategory: string;

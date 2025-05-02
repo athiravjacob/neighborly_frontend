@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import NavbarLanding from '../common/Navbar-Landing';
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../../hooks/useTasks';
-import { newTaskDetails, TaskStatus, PaymentStatus } from '../../../types/newTaskDetails'
-import ChatWithHelper from './ChatWithHelper';
-import Chat from '../../Chat';
+import { newTaskDetails, TaskStatus, PaymentStatus } from '../../../types/newTaskDetails';
+import Chat from './ChatWithHelper';
 
 // Status badge component for better visual distinction
 const StatusBadge = ({ status }: { status: TaskStatus }) => {
@@ -69,10 +68,20 @@ const TaskListPage: React.FC = () => {
   const { tasks, isLoading, error } = useTasks(user?.id);
   const navigate = useNavigate();
 
-  const [chatOpen, setChatOpen] = useState<boolean>();
+  const [chatOpen, setChatOpen] = useState<boolean>(false);
   const [chatTaskId, setChatTaskId] = useState<string>('');
   const [chatHelperId, setChatHelperId] = useState<string>('');
-  
+  const [HelperName, setHelperName] = useState<string>('');
+
+  // Debug tasks with missing IDs
+  useEffect(() => {
+    tasks.forEach(task => {
+      if (!task._id) {
+        console.warn('Task with missing ID:', task);
+      }
+    });
+  }, [tasks]);
+
   const formatDateTime = (timestamp: number, date: string | Date) => {
     const dateObj = new Date(date);
     const time = new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -83,24 +92,26 @@ const TaskListPage: React.FC = () => {
     return new Date(isoString).toLocaleString();
   };
 
-  const handleChat = (taskId: string | undefined, helperId: string | undefined) => {
+  const handleChat = (taskId: string | undefined, helperId: string | undefined,assignedHelperName:string) => {
     console.log('handleChat called', { taskId, helperId });
-    if (taskId && helperId) {
-      setChatTaskId(taskId);
-      setChatHelperId(helperId);
-      setChatOpen(true);
-      setSelectedTask(null); // Close task details modal
-      console.log('Opening chat with', { taskId, helperId });
-    } else {
-      console.warn('Cannot open chat: Invalid taskId or helperId', { taskId, helperId });
+    if (!taskId || !helperId || !user?.id) {
+      console.warn('Cannot open chat: Invalid taskId, helperId, or userId', { taskId, helperId,assignedHelperName, userId: user?.id });
+      return;
     }
-  };
-  const handleChangeHelper = (taskId: string | undefined) => {
-    console.log(`Changing helper for task ${taskId}`);
-    setSelectedTask(null);
+    setChatTaskId(taskId);
+    setChatHelperId(helperId);
+    setHelperName(assignedHelperName);
+    setChatOpen(true);
+    setSelectedTask(null); // Close task details modal
+    console.log('Opening chat with', { taskId, helperId });
   };
 
-  
+  const handleChangeHelper = (taskId: string | undefined) => {
+    if (taskId) {
+      console.log(`Changing helper for task ${taskId}`);
+      setSelectedTask(null);
+    }
+  };
 
   const filteredTasks = tasks.filter(task => {
     if (filter === 'all') return true;
@@ -208,7 +219,7 @@ const TaskListPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredTasks.map((task) => (
                 <div
-                  key={task.id}
+                  key={task._id }
                   className="bg-white rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer"
                   onClick={() => setSelectedTask(task)}
                 >
@@ -242,22 +253,22 @@ const TaskListPage: React.FC = () => {
                     <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
                       <div className="flex items-center">
                         {task.assignedNeighbor ? (
-                          <span className="text-sm text-gray-600">Helper Assigned</span>
+                          <span className="text-sm text-gray-600">Helper Assigned :{ task.assignedNeighbor.name}</span>
                         ) : (
                           <span className="text-sm text-gray-500 italic">No helper assigned</span>
                         )}
                       </div>
 
                       {task.assignedNeighbor && (
-                         <button
-                         className="text-violet-700 hover:text-violet-800 text-sm font-medium"
-                         onClick={(e) => {
-                           e.stopPropagation();
-                           handleChat(task.id, task.assignedNeighbor!);
-                         }}
-                       >
-                         Chat
-                       </button>
+                        <button
+                          className="text-violet-700 hover:text-violet-800 text-sm font-medium"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleChat(task._id, task.assignedNeighbor?._id!,task.assignedNeighbor?.name!);
+                          }}
+                        >
+                          Chat
+                        </button>
                       )}
                     </div>
                   </div>
@@ -321,7 +332,7 @@ const TaskListPage: React.FC = () => {
                     </p>
                     <p className="flex items-start">
                       <span className="w-24 text-gray-600 font-medium">Helper:</span>
-                      <span className="text-gray-900">{selectedTask.assignedNeighbor ? 'Assigned' : 'Not assigned yet'}</span>
+                      <span className="text-gray-900">{selectedTask.assignedNeighbor ? selectedTask.assignedNeighbor.name : 'Not assigned yet'}</span>
                     </p>
                   </div>
                 </div>
@@ -346,7 +357,7 @@ const TaskListPage: React.FC = () => {
                         <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white"></div>
                         <div className="ml-12">
                           <p className="text-sm font-medium text-gray-900">Helper Assigned</p>
-                          <p className="text-xs text-gray-500">Helper ID: {selectedTask.assignedNeighbor}</p>
+                          <p className="text-xs text-gray-500">Helper Name: {selectedTask.assignedNeighbor.name}</p>
                         </div>
                       </div>
                     )}
@@ -389,7 +400,7 @@ const TaskListPage: React.FC = () => {
               {!selectedTask.assignedNeighbor && selectedTask.task_status === TaskStatus.PENDING && (
                 <button
                   className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-                  onClick={() => handleChangeHelper(selectedTask.id)}
+                  onClick={() => handleChangeHelper(selectedTask._id)}
                 >
                   Find Helper
                 </button>
@@ -397,7 +408,7 @@ const TaskListPage: React.FC = () => {
               {selectedTask.assignedNeighbor && (
                 <button
                   className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-                  onClick={() => handleChat(selectedTask.id, selectedTask.assignedNeighbor!)}
+                  onClick={() => handleChat(selectedTask._id, selectedTask.assignedNeighbor?._id!,selectedTask.assignedNeighbor?.name!)}
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
@@ -415,9 +426,16 @@ const TaskListPage: React.FC = () => {
           </div>
         </div>
       )}
-      {chatOpen && (
-    <Chat/>
-  )}
+
+      {/* Chat Component */}
+      {chatOpen && user?.id && (
+        <Chat
+          userId={user.id}
+          helperId={chatHelperId}
+          helperName={HelperName}
+          onClose={() => setChatOpen(false)}
+        />
+      )}
     </div>
   );
 };

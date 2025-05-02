@@ -11,7 +11,7 @@ import { logout } from "../../api/apiRequests";
 import { useDispatch } from "react-redux";
 import { useTasks } from "../../hooks/useTasks";
 import TaskListPage from "../../components/user/task/ListTask";
-import { TaskListed_Neigbor } from "../../components/neighbor/TasksListed_Neighbor";
+import  TaskListed_Neigbor  from "../../components/neighbor/TasksListed_Neighbor";
 import Verification from "../../components/neighbor/Verification";
 import { clearVerificationStatus } from "../../redux/slices/verificationSlice";
 

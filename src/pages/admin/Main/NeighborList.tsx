@@ -19,8 +19,8 @@ const NeighborList: React.FC = () => {
                 return;
             }
             try {
-                const userList = await getAllNeighbors();
-                setUsers(userList);
+                const neighborList = await getAllNeighbors();
+                setUsers(neighborList);
             } catch (err: any) {
                 setError(err.message || 'Failed to fetch users');
             }
@@ -31,7 +31,7 @@ const NeighborList: React.FC = () => {
     // Add click handler function
     const handleUserClick = (user: UserInfo) => {
         // console.log(user)
-        navigate('/admin/dashboard/users/details', { state: { user } });
+        navigate('/admin/dashboard/neighbors/details', { state: { user } });
     };
     const formatDOB = (dob: string | Date): string => {
         try {
@@ -57,7 +57,7 @@ const NeighborList: React.FC = () => {
                                     <th className="py-3 px-4">Name</th>
                                     <th className="py-3 px-4">Email</th>
                                     <th className="py-3 px-4">Phone</th>
-                                    <th className="py-3 px-4">Verification Image</th>
+                                    <th className="py-3 px-4">Verification Status </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -70,8 +70,7 @@ const NeighborList: React.FC = () => {
                                         <td className="py-3 px-4">{user.name}</td>
                                         <td className="py-3 px-4">{user.email}</td>
                                         <td className="py-3 px-4">{user.phone}</td>
-                                        <td className="py-3 px-4">{user.DOB ? formatDOB(user.DOB) : 'N/A'}</td>
-                                        
+                                        <th className="py-3 px-4">{user.isVerified ? "Verified" :"Not Verified"} </th>
                                     </tr>
                                 ))}
                             </tbody>

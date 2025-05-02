@@ -23,6 +23,7 @@ import KYCProcess from './pages/user/Kyc';
 import Chat from './components/Chat'
 import NeighborList from './pages/admin/Main/NeighborList';
 import ChatWithHelper from './components/user/task/ChatWithHelper';
+import NeighborDetails from './pages/admin/Main/NeighborDetailedView';
 // import NeighborProfile from './pages/neighbor/Profile';
 const AppRoutes: React.FC = () => {
   return (
@@ -62,6 +63,7 @@ const AppRoutes: React.FC = () => {
           <Route path="users" element={<UserList />} />
           <Route path="users/details" element={<UserDetails />} />
           <Route path="neighbors" element={<NeighborList />} />
+          <Route path="neighbors/details" element={<NeighborDetails />} />
 
 
           

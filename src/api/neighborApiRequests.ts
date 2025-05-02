@@ -154,9 +154,9 @@ export const FetchServiceLocation = async (neighborId: string): Promise<Location
 }
   
 // ********** Check Service Availability ***********************/
-export const CheckCityAvailability = async (city: string): Promise<Boolean> => {
+export const CheckCityAvailability = async (city: string,category:string,subCategory:string): Promise<Boolean> => {
   try {
-    const response = await api.get(`/neighbor/check-service-availability?city=${city}`,{ withCredentials: true })
+    const response = await api.get(`/neighbor/check-service-availability?city=${city}&category=${category}&subCategory=${subCategory}`,{ withCredentials: true })
     console.log(response.data.data, "check service availble")
     return response.data.data
     

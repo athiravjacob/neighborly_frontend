@@ -34,7 +34,7 @@ export const getAllUsers = async (): Promise<UserInfo[]> => {
   
 };
 
-export const getAllNeighbors = async (): Promise<UserInfo[]> => {
+export const getAllNeighbors = async (): Promise<N[]> => {
   try {
     const response = await api.get('/admin/neighborList');
     console.log(response.data.data)

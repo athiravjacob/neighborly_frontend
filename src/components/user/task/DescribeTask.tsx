@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import useServiceAvailability from '../../../hooks/useServiceAvailability';
+import { toast } from 'react-toastify';
 
 interface DescribeTaskProps {
   onContinue: (data: {
@@ -28,12 +29,12 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
 
-  const { data: isServiceAvailable, isLoading, error } = useServiceAvailability(searchLocation);
+  const { data: isServiceAvailable, isLoading, error } = useServiceAvailability(searchLocation,category,subcategory);
 
   const handleCheckAvailability = (e: React.FormEvent) => {
     e.preventDefault();
     if (location.trim() === '') {
-      alert('Please enter a location.');
+      toast.info('Please enter a location.');
       return;
     }
     setSearchLocation(location);
@@ -41,17 +42,17 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
 
   const handleContinue = () => {
     if (isServiceAvailable === null || isServiceAvailable === undefined) {
-      alert('Please check service availability for your location.');
+      toast.error('Please check service availability for your location.');
     } else if (!isServiceAvailable) {
-      alert('Sorry, service is not available in your location yet.');
+      toast.error('Sorry, service is not available in your location yet.');
     } else if (!taskSize) {
-      alert('Please select a task size.');
+      toast.error('Please select a task size.');
     } else if (!taskDetails) {
-      alert('Please provide task details.');
+      toast.error('Please provide task details.');
     } else if (!category) {
-      alert('Please select a category.');
+      toast.error('Please select a category.');
     } else if (!subcategory) {
-      alert('Please select a subcategory.');
+      toast.error('Please select a subcategory.');
     } else {
       onContinue({ 
         location, 
@@ -83,21 +84,8 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
               placeholder="Enter your city (e.g., New York)"
               className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
             />
-            <button
-              onClick={handleCheckAvailability}
-              className="px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Checking...' : 'Check Availability'}
-            </button>
-          </div>
-          {error && <p className="mt-2 text-red-600">Error: {error.message}</p>}
-          {isServiceAvailable === false && (
-            <p className="mt-2 text-red-600">Service not available in this location.</p>
-          )}
-          {isServiceAvailable === true && (
-            <p className="mt-2 text-green-600">Service available in {location}!</p>
-          )}
+             </div>
+            
         </div>
 
         {/* Category Selection */}
@@ -139,6 +127,22 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
           </select>
         </div>
 
+        <button
+              onClick={handleCheckAvailability}
+              className="px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Checking...' : 'Check Availability'}
+            </button>
+         
+          {error && <p className="mt-2 text-red-600">Error: {error.message}</p>}
+        {isServiceAvailable === false && (
+          <p className="mt-2 text-red-600">Service not available in this location.</p>
+        )}
+          {isServiceAvailable === true && (
+            <p className="mt-2 text-green-600">Service available in {location}!</p>
+          )}
+        
         {/* Task Size Options */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">How big is your task?</label>
