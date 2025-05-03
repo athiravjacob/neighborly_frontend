@@ -1,3 +1,4 @@
+import { userGeneralInfo } from "./UserDTO";
 import { NeighborInfo } from "./neighbor";
 
 export enum TaskStatus {
@@ -15,7 +16,7 @@ export enum PaymentStatus {
 }
 export interface newTaskDetails {
   _id: string|undefined;
-  createdBy: string; 
+  createdBy: userGeneralInfo |null; 
   assignedNeighbor?: NeighborInfo | null; 
   location: string;
   category: string;

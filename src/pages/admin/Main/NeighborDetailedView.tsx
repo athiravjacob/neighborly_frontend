@@ -1,6 +1,5 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { UserInfo } from '../../../types/settings';
 import { NeighborInfo } from '../../../types/neighbor';
 
 const NeighborDetails: React.FC = () => {
@@ -10,10 +9,12 @@ const NeighborDetails: React.FC = () => {
 
     if (!user) {
         return (
-            <main className="flex-1 p-8">
-                <p className="text-red-500">No user data available. Please select a user from the list.</p>
+            <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto">
+                <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6 text-center">
+                    No user data available. Please select a user from the list.
+                </div>
                 <button 
-                    className="mt-4 px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700"
+                    className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors duration-200"
                     onClick={() => navigate('/admin/dashboard/neighbors')}
                 >
                     Back to Neighbors List
@@ -23,121 +24,166 @@ const NeighborDetails: React.FC = () => {
     }
 
     const handleBanUser = async () => {
-        // Add your ban user API call here
         try {
-            // Example: await banUser(user._id);
             alert(`User ${user.name} has been banned`);
         } catch (error) {
             alert('Failed to ban user');
         }
     };
+  
+    const handleVerifyNeighbor = async () => {
+        try {
+            alert(`User ${user.name} has been verified`);
+        } catch (error) {
+            alert('Failed to verify user');
+        }
+    };
 
     return (
-      <main className="flex-1 p-8">
-        <button
-          className="px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 mb-6 flex items-center"
+      <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto bg-gray-900 text-gray-200">
+      <button
+          className="group flex items-center mb-6 text-violet-400 hover:text-violet-300 font-medium transition-colors duration-200"
           onClick={() => navigate("/admin/dashboard/neighbors")}
-        >
-          <span className="text-xl mr-2">←</span>
+      >
+          <span className="text-xl mr-2 group-hover:transform group-hover:-translate-x-1 transition-transform duration-200">←</span>
           <span>Back to Neighbors</span>
-        </button>
-
-        <div className="bg-gray-950 rounded-lg shadow-xl p-6 text-gray-300">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-semibold text-white">
-              Neighbor Details
-            </h1>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Larger Image Section */}
-            {/* <div className="lg:col-span-1">
-                        {user.profilePicture ? (
-                            <img 
-                                src={user.profilePicture} 
-                                alt={`${user.name}'s profile`}
-                                className="w-64 h-64 rounded-full object-cover mx-auto mb-4 shadow-lg"
-                            />
-                        ) : (
-                            <div className="w-64 h-64 rounded-full bg-gray-700 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                                <span className="text-gray-400 text-xl">No Image</span>
-                            </div>
-                        )}
-                    </div> */}
-
-            {/* Details Section */}
-            <div className="lg:col-span-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="mb-4">
-                  <span className="font-semibold text-white block">Name:</span>
-                  <span>{user.name}</span>
-                </div>
-                <div className="mb-4">
-                  <span className="font-semibold text-white block">Email:</span>
-                  <span>{user.email}</span>
-                </div>
-                <div className="mb-4">
-                  <span className="font-semibold text-white block">Phone:</span>
-                  <span>{user.phone || "Not provided"}</span>
-                </div>
-                <div className="mb-4">
-                  <span className="font-semibold text-white block">
-                    ID Card:
-                  </span>
-                  <div className="lg:col-span-1">
-                    {user.idCardImage ? (
-                      <img
-                        src={user.idCardImage}
-                        alt={`${user.name}'s ID`}
-                        className="w-64 h-64  object-cover mx-auto mb-4 shadow-lg"
-                      />
-                    ) : (
-                      <div className="w-64 h-64  bg-gray-700 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <span className="text-gray-400 text-xl">No ID provided</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <span className="font-semibold text-white block">
-                    Verified:
-                  </span>
-                  <span
-                    className={
-                      user.isVerified ? "text-green-500" : "text-red-500"
-                    }
-                  >
-                    {user.isVerified ? "Yes" : "No"}
-                  </span>
-                </div>
-                <div className="mb-4">
-                  <span className="font-semibold text-white block">
-                    Service Location:
-                  </span>
-                  <span>{user.availableLocations.city || "Not provided"}</span>
-                            </div>
-                            <div className="mb-4">
-                  <span className="font-semibold text-white block">
-                    Location Radius:
-                  </span>
-                  <span>{user.availableLocations.re || "Not provided"}</span>
-                </div>
-                {/* <div className="mb-4">
-                                <span className="font-semibold text-white block">Date of Birth:</span>
-                                <span>{user.DOB ? new Date(user.DOB).toLocaleDateString() : 'Not provided'}</span>
-                            </div> */}
+      </button>
+  
+      <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-violet-700 to-violet-900 p-6">
+              <h1 className="text-2xl md:text-3xl font-bold text-white">Neighbor Profile</h1>
+              <div className="mt-2">
+                  {user.isVerified ? (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-600 bg-opacity-30 text-green-200">
+                          Verified Account
+                      </span>
+                  ) : (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-600 bg-opacity-30 text-yellow-200">
+                          Pending Verification
+                      </span>
+                  )}
               </div>
-
-              <button
-                className="mt-6 px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                onClick={handleBanUser}
-              >
-                Ban User
-              </button>
-            </div>
           </div>
-        </div>
-      </main>
+  
+          <div className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Left Column */}
+                  <div className="lg:col-span-1">
+                      <div className="bg-gray-700 p-6 rounded-lg border border-gray-600">
+                          <div className="w-24 h-24 rounded-full bg-violet-900 mx-auto flex items-center justify-center text-3xl font-bold text-violet-300 mb-4">
+                              {user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <h2 className="text-xl font-bold text-white text-center mb-6">{user.name}</h2>
+  
+                          <div className="space-y-4">
+                              <div>
+                                  <span className="text-sm text-gray-400 block">Email</span>
+                                  <span className="font-medium text-white">{user.email}</span>
+                              </div>
+                              <div>
+                                  <span className="text-sm text-gray-400 block">Phone</span>
+                                  <span className="font-medium text-white">{user.phone || "Not provided"}</span>
+                              </div>
+                              <div>
+                                  <span className="text-sm text-gray-400 block">Service Location</span>
+                                  <span className="font-medium text-white">{user.availableLocation?.city || "Not provided"}</span>
+                              </div>
+                              <div>
+                                  <span className="text-sm text-gray-400 block">Service Radius</span>
+                                  <span className="font-medium text-white">{user.availableLocation?.radius || "5"} Kms</span>
+                              </div>
+                          </div>
+                      </div>
+  
+                      <div className="mt-6">
+                          <h3 className="text-lg font-semibold text-gray-300 mb-3">Identity Verification</h3>
+                          {user.idCardImage ? (
+                              <div className="rounded-lg overflow-hidden border border-gray-600">
+                                  <img
+                                      src={user.idCardImage}
+                                      alt={`${user.name}'s ID`}
+                                      className="w-full h-48 object-cover"
+                                  />
+                              </div>
+                          ) : (
+                              <div className="w-full h-32 bg-gray-600 rounded-lg flex items-center justify-center">
+                                  <span className="text-gray-400 text-sm">No ID Provided</span>
+                              </div>
+                          )}
+                      </div>
+                  </div>
+  
+                  {/* Right Column */}
+                  <div className="lg:col-span-2">
+                      <h3 className="text-lg font-semibold text-gray-300 mb-4">Professional Skills</h3>
+  
+                      {user.skills.length > 0 ? (
+                          <div className="space-y-4">
+                              {user.skills.map((skill, index) => (
+                                  <div
+                                      key={index}
+                                      className="bg-gray-700 p-5 rounded-lg border border-gray-600 hover:border-violet-400 transition-colors"
+                                  >
+                                      <div className="flex justify-between items-start">
+                                          <div>
+                                              <h4 className="font-semibold text-white">{skill.category}</h4>
+                                              <p className="text-gray-400 text-sm">{skill.subcategories}</p>
+                                          </div>
+                                          <div className="bg-violet-800 text-violet-200 px-3 py-1 rounded-full text-sm font-medium">
+                                              ${skill.hourlyRate}/hr
+                                          </div>
+                                      </div>
+                                      {skill.description && (
+                                          <p className="text-gray-400 text-sm mt-3">{skill.description}</p>
+                                      )}
+                                  </div>
+                              ))}
+                          </div>
+                      ) : (
+                          <div className="bg-gray-700 p-6 rounded-lg text-center">
+                              <span className="text-gray-400">No skills listed</span>
+                          </div>
+                      )}
+  
+                      {/* Admin Actions */}
+                      <div className="mt-8 pt-6 border-t border-gray-700">
+                          <h3 className="text-lg font-semibold text-gray-300 mb-4">Admin Actions</h3>
+                          <div className="flex flex-wrap gap-3">
+                              <button
+                                  className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center"
+                                  onClick={handleBanUser}
+                              >
+                                  <span className="mr-2">🚫</span>
+                                  Ban Neighbor
+                              </button>
+  
+                              {!user.isVerified && (
+                                  <>
+                                      <button
+                                          className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center"
+                                          onClick={handleVerifyNeighbor}
+                                      >
+                                          <span className="mr-2">✓</span>
+                                          Verify Neighbor
+                                      </button>
+  
+                                      <button
+                                          className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 flex items-center"
+                                          onClick={handleVerifyNeighbor}
+                                      >
+                                          <span className="mr-2">✕</span>
+                                          Reject Neighbor
+                                      </button>
+                                  </>
+                              )}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </main>
+  
     );
 };
 

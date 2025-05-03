@@ -7,7 +7,6 @@ import { RootState } from "../../../redux/store";
 const ProtectedRoutes_admin: React.FC = () => {
   const {user, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
-console.log(user)
   if (!isAuthenticated || user?.type!== "admin") {
     return <Navigate to="/admin" replace />;
   }

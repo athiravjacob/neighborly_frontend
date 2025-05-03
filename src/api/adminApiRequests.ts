@@ -1,5 +1,7 @@
 // src/api/adminApi.ts
 import { UserDTO } from '../types/UserDTO';
+import { NeighborInfo } from '../types/neighbor';
+import { newTaskDetails } from '../types/newTaskDetails';
 import { UserInfo } from '../types/settings';
 import api from './apiConfig';
 import axios from 'axios';
@@ -23,7 +25,6 @@ export const adminLogin = async (email: string, password: string): Promise<UserD
 export const getAllUsers = async (): Promise<UserInfo[]> => {
   try {
     const response = await api.get('/admin/userList');
-    console.log(response.data.data)
     return response.data.data; 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -34,9 +35,21 @@ export const getAllUsers = async (): Promise<UserInfo[]> => {
   
 };
 
-export const getAllNeighbors = async (): Promise<N[]> => {
+export const getAllNeighbors = async (): Promise<NeighborInfo[]> => {
   try {
     const response = await api.get('/admin/neighborList');
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || 'Failed to fetch users');
+    }
+    throw new Error('An unexpected error occurred');
+  }
+}
+
+export const getAllTasks = async (): Promise<newTaskDetails[]> => {
+  try {
+    const response = await api.get('/admin/TaskList');
     console.log(response.data.data)
     return response.data.data;
   } catch (error) {
