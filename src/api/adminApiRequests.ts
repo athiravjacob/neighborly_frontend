@@ -59,3 +59,16 @@ export const getAllTasks = async (): Promise<newTaskDetails[]> => {
     throw new Error('An unexpected error occurred');
   }
 }
+
+export const verifyNeighbor = async (neighborId:string): Promise<Boolean> => {
+  try {
+    const response = await api.patch('/admin/verifyNeighbor', { neighborId });
+    if (response) return true
+    return false
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || 'Failed to verify neighbor');
+    }
+    throw new Error('An unexpected error occurred');
+  }
+}

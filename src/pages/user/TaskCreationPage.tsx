@@ -60,7 +60,7 @@ const TaskCreationPage: React.FC = () => {
 
   const handleConfirm = () => {
     const taskDetails = {
-      id: "",
+      _id: "",
       createdBy: user?.id!,
       assignedNeighbor: selectedHelper?._id!,
       location: taskData?.location!,

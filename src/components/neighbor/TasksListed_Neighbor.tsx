@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../hooks/useTasks';
 import NavbarLanding from '../user/common/Navbar-Landing';
 import Chat from '../user/task/ChatWithHelper';
+import { acceptTask } from '../../api/taskApiRequests';
+import { toast } from 'react-toastify';
 
 
 // Status badge component for better visual distinction
@@ -14,20 +16,23 @@ const StatusBadge = ({ status }: { status: TaskStatus }) => {
   let textColor = '';
   
   switch (status) {
-    case TaskStatus.COMPLETED:
+    case "completed":
       bgColor = 'bg-green-100';
       textColor = 'text-green-800';
       break;
-    case TaskStatus.ASSIGNED:
-    case TaskStatus.IN_PROGRESS:
+    case "assigned":
+      bgColor = 'bg-blue-100';
+      textColor = 'text-blue-800';
+      break;
+    case "in_progress":
       bgColor = 'bg-violet-100';
       textColor = 'text-violet-800';
       break;
-    case TaskStatus.CANCELLED:
+    case "cancelled":
       bgColor = 'bg-red-100';
       textColor = 'text-red-800';
       break;
-    case TaskStatus.PENDING:
+    case "pending":
     default:
       bgColor = 'bg-yellow-100';
       textColor = 'text-yellow-800';
@@ -36,7 +41,7 @@ const StatusBadge = ({ status }: { status: TaskStatus }) => {
   
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColor} ${textColor}`}>
-      {status || TaskStatus.PENDING}
+      {status ||"pending"}
     </span>
   );
 };
@@ -74,7 +79,19 @@ const TaskListed_Neigbor: React.FC = () => {
   const [chatHelperId, setChatHelperId] = useState<string>('');
   const [HelperName, setHelperName] = useState<string>('');
 
-  // Debug tasks with missing IDs
+  // Placeholder function for handling payment request
+  const handlePaymentRequest = (taskId:string, amount:number) => {
+    // This is a placeholder - replace with actual payment request logic
+    console.log(`Requesting payment for task ${taskId} with amount $${amount}`);
+    // Example: Send request to backend
+    // fetch('/api/request-payment', {
+    //   method: 'POST',
+    //   body: JSON.stringify({ taskId, amount }),
+    //   headers: { 'Content-Type': 'application/json' },
+    // });
+  };
+
+  
   useEffect(() => {
     tasks.forEach(task => {
       if (!task._id) {
@@ -94,7 +111,7 @@ const TaskListed_Neigbor: React.FC = () => {
   };
 
   const handleChat = (taskId: string | undefined, helperId: string | undefined,assignedHelperName:string) => {
-    console.log('handleChat called', { taskId, helperId });
+    console.log('handleChat called', { taskId, helperId,assignedHelperName });
     if (!taskId || !helperId || !user?.id) {
       console.warn('Cannot open chat: Invalid taskId, helperId, or userId', { taskId, helperId,assignedHelperName, userId: user?.id });
       return;
@@ -103,7 +120,7 @@ const TaskListed_Neigbor: React.FC = () => {
     setChatHelperId(helperId);
     setHelperName(assignedHelperName);
     setChatOpen(true);
-    setSelectedTask(null); // Close task details modal
+    setSelectedTask(null);
     console.log('Opening chat with', { taskId, helperId });
   };
 
@@ -120,13 +137,22 @@ const TaskListed_Neigbor: React.FC = () => {
   });
 
   // Calculate statistics for the dashboard
-  const completedTasks = tasks.filter(task => task.task_status === TaskStatus.COMPLETED).length;
-  const pendingTasks = tasks.filter(task => task.task_status === TaskStatus.PENDING).length;
-  const scheduledTasks = tasks.filter(task => task.task_status === TaskStatus.ASSIGNED || task.task_status === TaskStatus.IN_PROGRESS).length;
+  const completedTasks = tasks.filter(task => task.task_status === "completed").length;
+  const pendingTasks = tasks.filter(task => task.task_status === "pending").length;
+  const scheduledTasks = tasks.filter(task => task.task_status === "assigned"|| task.task_status === "in_progress").length;
+
+  async function handleAcceptTask(taskId: string | undefined): Promise<void> {
+    try {
+      if(!taskId) throw new Error("task Id is required to accept task")
+      const accept = await acceptTask(taskId)
+      if(accept) toast.info("you accepted this task.Let the user make payment")
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavbarLanding />
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
@@ -185,15 +211,7 @@ const TaskListed_Neigbor: React.FC = () => {
               </button>
             </div>
 
-            <button
-              onClick={() => navigate('/create-task')}
-              className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              Create New Task
-            </button>
+            
           </div>
 
           {/* Tasks list */}
@@ -232,7 +250,7 @@ const TaskListed_Neigbor: React.FC = () => {
                           {task.category} - {task.subCategory}
                         </h2>
                       </div>
-                      <StatusBadge status={task.task_status || TaskStatus.PENDING} />
+                      <StatusBadge status={task.task_status ||"pending"} />
                     </div>
 
                     <p className="mt-3 text-gray-600 line-clamp-2">{task.description}</p>
@@ -248,24 +266,24 @@ const TaskListed_Neigbor: React.FC = () => {
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                       </svg>
-                      ${task.ratePerHour} / hour
+                      ₹{task.ratePerHour} / hour
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
                       <div className="flex items-center">
-                        {task.assignedNeighbor ? (
-                          <span className="text-sm text-gray-600">Helper Assigned :{ task.assignedNeighbor.name}</span>
+                        {task.createdBy ? (
+                          <span className="text-sm text-gray-600">Task created by :{ task.createdBy.name}</span>
                         ) : (
-                          <span className="text-sm text-gray-500 italic">No helper assigned</span>
+                          <span className="text-sm text-gray-500 italic">Unknown</span>
                         )}
                       </div>
 
-                      {task.assignedNeighbor && (
+                      {task.createdBy && (
                         <button
                           className="text-violet-700 hover:text-violet-800 text-sm font-medium"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleChat(task._id, task.assignedNeighbor?._id!,task.assignedNeighbor?.name!);
+                            handleChat(task._id, task.createdBy?._id!,task.createdBy?.name!);
                           }}
                         >
                           Chat
@@ -282,151 +300,162 @@ const TaskListed_Neigbor: React.FC = () => {
 
       {/* Task Details Modal */}
       {selectedTask && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-gray-50 rounded-t-lg py-4 px-6 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800 flex items-center">
-                <CategoryIcon category={selectedTask.category} />
-                {selectedTask.category} - {selectedTask.subCategory}
-              </h2>
-              <StatusBadge status={selectedTask.task_status || TaskStatus.PENDING} />
-            </div>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-gray-50 rounded-t-lg py-4 px-6 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center">
+              <CategoryIcon category={selectedTask.category} />
+              {selectedTask.category} - {selectedTask.subCategory}
+            </h2>
+            <StatusBadge status={selectedTask.task_status || "pending"} />
+          </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Task Details</h3>
-                  <div className="space-y-3">
-                    <p className="flex items-start">
-                      <span className="w-24 text-gray-600 font-medium">Description:</span>
-                      <span className="text-gray-900">{selectedTask.description}</span>
-                    </p>
-                    <p className="flex items-start">
-                      <span className="w-24 text-gray-600 font-medium">Location:</span>
-                      <span className="text-gray-900">{selectedTask.location}</span>
-                    </p>
-                    <p className="flex items-start">
-                      <span className="w-24 text-gray-600 font-medium">Est. Hours:</span>
-                      <span className="text-gray-900">{selectedTask.est_hours}</span>
-                    </p>
-                    <p className="flex items-start">
-                      <span className="w-24 text-gray-600 font-medium">Rate:</span>
-                      <span className="text-gray-900">${selectedTask.ratePerHour}/hour</span>
-                    </p>   
-                    <p className="flex items-start">
-                      <span className="w-24 text-gray-600 font-medium">Total:</span>
-                      <span className="text-gray-900 font-semibold">${selectedTask.ratePerHour * selectedTask.est_hours}</span>
-                    </p>
-                    <p className="flex items-start">
-                      <span className="w-24 text-gray-600 font-medium">Payment:</span>
-                      <span className="text-gray-900 capitalize">{selectedTask.payment_status || PaymentStatus.PENDING}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Schedule & Helper</h3>
-                  <div className="space-y-3">
-                    <p className="flex items-start">
-                      <span className="w-24 text-gray-600 font-medium">Scheduled:</span>
-                      <span className="text-gray-900">{formatDateTime(selectedTask.timeSlot.startTime, selectedTask.prefferedDate)}</span>
-                    </p>
-                    <p className="flex items-start">
-                      <span className="w-24 text-gray-600 font-medium">Helper:</span>
-                      <span className="text-gray-900">{selectedTask.assignedNeighbor ? selectedTask.assignedNeighbor.name : 'Not assigned yet'}</span>
-                    </p>
-                  </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Task Details</h3>
+                <div className="space-y-3">
+                  <p className="flex items-start">
+                    <span className="w-24 text-gray-600 font-medium">Description:</span>
+                    <span className="text-gray-900">{selectedTask.description}</span>
+                  </p>
+                  <p className="flex items-start">
+                    <span className="w-24 text-gray-600 font-medium">Location:</span>
+                    <span className="text-gray-900">{selectedTask.location}</span>
+                  </p>
+                  <p className="flex items-start">
+                    <span className="w-24 text-gray-600 font-medium">Est. Hours:</span>
+                    <span className="text-gray-900">{selectedTask.est_hours}</span>
+                  </p>
+                  <p className="flex items-start">
+                    <span className="w-24 text-gray-600 font-medium">Rate:</span>
+                    <span className="text-gray-900">₹{selectedTask.ratePerHour}/hour</span>
+                  </p>   
+                  <p className="flex items-start">
+                    <span className="w-24 text-gray-600 font-medium">Total:</span>
+                    <span className="text-gray-900 font-semibold">₹{selectedTask.ratePerHour * selectedTask.est_hours}</span>
+                  </p>
+                  <p className="flex items-start">
+                    <span className="w-24 text-gray-600 font-medium">Payment:</span>
+                    <span className="text-gray-900 capitalize">{selectedTask.payment_status || PaymentStatus.PENDING}</span>
+                  </p>
                 </div>
               </div>
 
-              {/* Timeline */}
-              <div className="mt-6 border-t border-gray-200 pt-6">
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Task Timeline</h3>
-                <div className="relative">
-                  <div className="absolute top-0 left-4 h-full w-0.5 bg-gray-200"></div>
-                  <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Schedule & Helper</h3>
+                <div className="space-y-3">
+                  <p className="flex items-start">
+                    <span className="w-24 text-gray-600 font-medium">Scheduled:</span>
+                    <span className="text-gray-900">{formatDateTime(selectedTask.timeSlot.startTime, selectedTask.prefferedDate)}</span>
+                  </p>
+                  <p className="flex items-start">
+                    <span className="w-24 text-gray-600 font-medium">Created By:</span>
+                    <span className="text-gray-900">{selectedTask.createdBy ? selectedTask.createdBy?.name : 'Unknown'}</span>
+                  </p>
+                </div>
+              </div>
+              </div>
+              <div>
+
+              {selectedTask.task_status === "pending" && (
+    <button
+      onClick={() => handleAcceptTask(selectedTask._id)}
+      className="inline-flex items-center px-4 py-2 bg-violet-700 text-white font-semibold text-sm rounded-lg shadow-md hover:bg-violet-800 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition duration-200"
+    >
+      Accept Task
+    </button>
+  )}         </div>
+
+            {/* Timeline */}
+            <div className="mt-6 border-t border-gray-200 pt-6">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Task Timeline</h3>
+              <div className="relative">
+                <div className="absolute top-0 left-4 h-full w-0.5 bg-gray-200"></div>
+                <div className="space-y-6">
+                  <div className="relative flex items-start">
+                    <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white"></div>
+                    <div className="ml-12">
+                      <p className="text-sm font-medium text-gray-900">Task Created</p>
+                      <p className="text-xs text-gray-500">{formatCreatedAt(selectedTask.prefferedDate.toString())}</p>
+                    </div>
+                  </div>
+
+                  {selectedTask.createdBy && (
                     <div className="relative flex items-start">
                       <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white"></div>
                       <div className="ml-12">
-                        <p className="text-sm font-medium text-gray-900">Task Created</p>
-                        <p className="text-xs text-gray-500">{formatCreatedAt(selectedTask.prefferedDate.toString())}</p>
+                        <p className="text-sm font-medium text-gray-900">Task Created By</p>
+                        <p className="text-xs text-gray-500">Task Created By: {selectedTask.createdBy.name}</p>
                       </div>
                     </div>
+                  )}
 
-                    {selectedTask.assignedNeighbor && (
-                      <div className="relative flex items-start">
-                        <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white"></div>
-                        <div className="ml-12">
-                          <p className="text-sm font-medium text-gray-900">Helper Assigned</p>
-                          <p className="text-xs text-gray-500">Helper Name: {selectedTask.assignedNeighbor.name}</p>
-                        </div>
+                  {(selectedTask.task_status === "assigned" || selectedTask.task_status === "in_progress") && (
+                    <div className="relative flex items-start">
+                      <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white"></div>
+                      <div className="ml-12">
+                        <p className="text-sm font-medium text-gray-900">Task Scheduled</p>
+                        <p className="text-xs text-gray-500">{formatDateTime(selectedTask.timeSlot.startTime, selectedTask.prefferedDate)}</p>
                       </div>
-                    )}
+                    </div>
+                  )}
 
-                    {(selectedTask.task_status === TaskStatus.ASSIGNED || selectedTask.task_status === TaskStatus.IN_PROGRESS) && (
-                      <div className="relative flex items-start">
-                        <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white"></div>
-                        <div className="ml-12">
-                          <p className="text-sm font-medium text-gray-900">Task Scheduled</p>
-                          <p className="text-xs text-gray-500">{formatDateTime(selectedTask.timeSlot.startTime, selectedTask.prefferedDate)}</p>
-                        </div>
+                  {selectedTask.task_status === "completed" && (
+                    <div className="relative flex items-start">
+                      <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-green-500 bg-white"></div>
+                      <div className="ml-12">
+                        <p className="text-sm font-medium text-gray-900">Task Completed</p>
+                        <p className="text-xs text-gray-500">Great job!</p>
                       </div>
-                    )}
+                    </div>
+                  )}
 
-                    {selectedTask.task_status === TaskStatus.COMPLETED && (
-                      <div className="relative flex items-start">
-                        <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-green-500 bg-white"></div>
-                        <div className="ml-12">
-                          <p className="text-sm font-medium text-gray-900">Task Completed</p>
-                          <p className="text-xs text-gray-500">Great job!</p>
-                        </div>
+                  {selectedTask.task_status === "cancelled" && (
+                    <div className="relative flex items-start">
+                      <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-red-500 bg-white"></div>
+                      <div className="ml-12">
+                        <p className="text-sm font-medium text-gray-900">Task Cancelled</p>
+                        <p className="text-xs text-gray-500">Task was cancelled</p>
                       </div>
-                    )}
-
-                    {selectedTask.task_status === TaskStatus.CANCELLED && (
-                      <div className="relative flex items-start">
-                        <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-red-500 bg-white"></div>
-                        <div className="ml-12">
-                          <p className="text-sm font-medium text-gray-900">Task Cancelled</p>
-                          <p className="text-xs text-gray-500">Task was cancelled</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end space-x-3 border-t border-gray-200">
-              {!selectedTask.assignedNeighbor && selectedTask.task_status === TaskStatus.PENDING && (
-                <button
-                  className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-                  onClick={() => handleChangeHelper(selectedTask._id)}
-                >
-                  Find Helper
-                </button>
-              )}
-              {selectedTask.assignedNeighbor && (
-                <button
-                  className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-                  onClick={() => handleChat(selectedTask._id, selectedTask.assignedNeighbor?._id!,selectedTask.assignedNeighbor?.name!)}
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                  </svg>
-                  Chat with Helper
-                </button>
-              )}
+          <div className="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end space-x-3 border-t border-gray-200">
+            {!selectedTask.assignedNeighbor && selectedTask.task_status === "pending" && (
               <button
-                className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium"
-                onClick={() => setSelectedTask(null)}
+                className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
+                onClick={() => handleChangeHelper(selectedTask._id)}
               >
-                Close
+                Find Helper
               </button>
-            </div>
+            )}
+            {selectedTask.assignedNeighbor && (
+              <button
+                className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
+                onClick={() => handleChat(selectedTask._id, selectedTask.createdBy?._id, selectedTask.createdBy?.name!)}
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                Chat with Helper
+              </button>
+            )}
+          
+            <button
+              className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium"
+              onClick={() => setSelectedTask(null)}
+            >
+              Close
+            </button>
           </div>
         </div>
-      )}
+      </div>
+    )}
 
       {/* Chat Component */}
       {chatOpen && user?.id && (

@@ -23,8 +23,8 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
 
   // Calculate estimated time and cost based on task size
   const estimatedTimeMap: { [key: string]: number } = {
-    Small: 2, 
-    Medium: 4, 
+    Small: 1, 
+    Medium: 3, 
     Large: 6,
   };
   const estimatedTime = estimatedTimeMap[taskData.taskSize] || 2; 

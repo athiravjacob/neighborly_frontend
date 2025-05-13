@@ -25,6 +25,7 @@ import NeighborList from './pages/admin/Main/NeighborList';
 import ChatWithHelper from './components/user/task/ChatWithHelper';
 import NeighborDetails from './pages/admin/Main/NeighborDetailedView';
 import TaskList from './pages/admin/Main/TaskList';
+import { PaymentPage } from './pages/user/PaymentPage';
 // import NeighborProfile from './pages/neighbor/Profile';
 const AppRoutes: React.FC = () => {
   return (
@@ -51,7 +52,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/home/taskList" element={<TaskListPage />} />
         <Route path="/home/settings" element={<SettingsPage />} />
         <Route path="/home/kyc" element={<KYCProcess />} />
-
+        <Route path="/payment/:taskId" element={<PaymentPage />} />
 
     
       </Route>

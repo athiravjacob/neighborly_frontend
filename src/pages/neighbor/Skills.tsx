@@ -176,7 +176,7 @@ const SkillsSection = () => {
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <div className="flex justify-between text-sm text-gray-700 mb-2">
                     <span>Hourly Rate:</span>
-                    <span className="font-semibold text-violet-900">${skill.hourlyRate}</span>
+                    <span className="font-semibold text-violet-900">₹ {skill.hourlyRate}</span>
                   </div>
                   <p className="text-sm text-gray-600 mt-2 line-clamp-2">{skill.description}</p>
                 </div>
@@ -184,7 +184,7 @@ const SkillsSection = () => {
             ))}
           </div>
         )}
-      </div>
+      </div>  
     </div>
   );
 };

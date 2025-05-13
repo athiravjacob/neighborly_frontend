@@ -1,13 +1,7 @@
 import { userGeneralInfo } from "./UserDTO";
 import { NeighborInfo } from "./neighbor";
 
-export enum TaskStatus {
-  PENDING = 'pending',
-  ASSIGNED = 'assigned',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
-}
+export type TaskStatus = "pending" | "assigned" | "in_progress" | "completed" | "cancelled";
 
 export enum PaymentStatus {
   PENDING = 'pending',
@@ -15,7 +9,7 @@ export enum PaymentStatus {
   DISPUTED = 'disputed'
 }
 export interface newTaskDetails {
-  _id: string|undefined;
+  _id?: string;
   createdBy: userGeneralInfo |null; 
   assignedNeighbor?: NeighborInfo | null; 
   location: string;
@@ -29,6 +23,9 @@ export interface newTaskDetails {
     endTime?: number;
   };
   ratePerHour: number;
+  baseAmount?: number;
+  platform_fee?: number;
+  final_amount?: number;
   task_status?: TaskStatus; 
   payment_status?: PaymentStatus
  

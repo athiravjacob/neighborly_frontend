@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../../hooks/useTasks';
 import { newTaskDetails, TaskStatus, PaymentStatus } from '../../../types/newTaskDetails';
 import Chat from './ChatWithHelper';
+import PaymentButton from '../payment/PaymentButton';
 
 // Status badge component for better visual distinction
 const StatusBadge = ({ status }: { status: TaskStatus }) => {
@@ -13,20 +14,23 @@ const StatusBadge = ({ status }: { status: TaskStatus }) => {
   let textColor = '';
   
   switch (status) {
-    case TaskStatus.COMPLETED:
+    case "completed":
       bgColor = 'bg-green-100';
       textColor = 'text-green-800';
       break;
-    case TaskStatus.ASSIGNED:
-    case TaskStatus.IN_PROGRESS:
+    case "assigned":
+      bgColor = 'bg-blue-100';
+      textColor = 'text-blue-800';
+      break;
+    case "in_progress":
       bgColor = 'bg-violet-100';
       textColor = 'text-violet-800';
       break;
-    case TaskStatus.CANCELLED:
+    case "cancelled":
       bgColor = 'bg-red-100';
       textColor = 'text-red-800';
       break;
-    case TaskStatus.PENDING:
+    case "pending":
     default:
       bgColor = 'bg-yellow-100';
       textColor = 'text-yellow-800';
@@ -35,7 +39,7 @@ const StatusBadge = ({ status }: { status: TaskStatus }) => {
   
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColor} ${textColor}`}>
-      {status || TaskStatus.PENDING}
+      {status || "pending"}
     </span>
   );
 };
@@ -119,9 +123,9 @@ const TaskListPage: React.FC = () => {
   });
 
   // Calculate statistics for the dashboard
-  const completedTasks = tasks.filter(task => task.task_status === TaskStatus.COMPLETED).length;
-  const pendingTasks = tasks.filter(task => task.task_status === TaskStatus.PENDING).length;
-  const scheduledTasks = tasks.filter(task => task.task_status === TaskStatus.ASSIGNED || task.task_status === TaskStatus.IN_PROGRESS).length;
+  const completedTasks = tasks.filter(task => task.task_status === "completed").length;
+  const pendingTasks = tasks.filter(task => task.task_status === "completed").length;
+  const scheduledTasks = tasks.filter(task => task.task_status === "assigned" || task.task_status === "in_progress").length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -231,7 +235,7 @@ const TaskListPage: React.FC = () => {
                           {task.category} - {task.subCategory}
                         </h2>
                       </div>
-                      <StatusBadge status={task.task_status || TaskStatus.PENDING} />
+                      <StatusBadge status={task.task_status || "pending"} />
                     </div>
 
                     <p className="mt-3 text-gray-600 line-clamp-2">{task.description}</p>
@@ -247,30 +251,34 @@ const TaskListPage: React.FC = () => {
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                       </svg>
-                      ${task.ratePerHour} / hour
+                      ₹{task.ratePerHour} / hour
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
-                      <div className="flex items-center">
-                        {task.assignedNeighbor ? (
-                          <span className="text-sm text-gray-600">Helper Assigned :{ task.assignedNeighbor.name}</span>
-                        ) : (
-                          <span className="text-sm text-gray-500 italic">No helper assigned</span>
-                        )}
-                      </div>
+  <div className="flex items-center">
+    {task.assignedNeighbor ? (
+      <span className="text-sm text-gray-600">Helper Assigned: {task.assignedNeighbor.name}</span>
+    ) : (
+      <span className="text-sm text-gray-500 italic">No helper assigned</span>
+    )}
+  </div>
 
-                      {task.assignedNeighbor && (
-                        <button
-                          className="text-violet-700 hover:text-violet-800 text-sm font-medium"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleChat(task._id, task.assignedNeighbor?._id!,task.assignedNeighbor?.name!);
-                          }}
-                        >
-                          Chat
-                        </button>
-                      )}
-                    </div>
+  <div className="flex items-center space-x-2">
+    {task.assignedNeighbor && (
+      <button
+        className="text-violet-700 hover:text-violet-800 text-sm font-medium"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleChat(task._id, task.assignedNeighbor?._id!, task.assignedNeighbor?.name!);
+        }}
+      >
+        Chat
+      </button>
+    )}
+
+<PaymentButton task={task} navigate={navigate} />
+  </div>
+</div>
                   </div>
                 </div>
               ))}
@@ -288,7 +296,7 @@ const TaskListPage: React.FC = () => {
                 <CategoryIcon category={selectedTask.category} />
                 {selectedTask.category} - {selectedTask.subCategory}
               </h2>
-              <StatusBadge status={selectedTask.task_status || TaskStatus.PENDING} />
+              <StatusBadge status={selectedTask.task_status || "pending"} />
             </div>
 
             <div className="p-6">
@@ -310,11 +318,11 @@ const TaskListPage: React.FC = () => {
                     </p>
                     <p className="flex items-start">
                       <span className="w-24 text-gray-600 font-medium">Rate:</span>
-                      <span className="text-gray-900">${selectedTask.ratePerHour}/hour</span>
+                      <span className="text-gray-900">₹{selectedTask.ratePerHour}/hour</span>
                     </p>   
                     <p className="flex items-start">
                       <span className="w-24 text-gray-600 font-medium">Total:</span>
-                      <span className="text-gray-900 font-semibold">${selectedTask.ratePerHour * selectedTask.est_hours}</span>
+                      <span className="text-gray-900 font-semibold">₹{selectedTask.ratePerHour * selectedTask.est_hours}</span>
                     </p>
                     <p className="flex items-start">
                       <span className="w-24 text-gray-600 font-medium">Payment:</span>
@@ -362,7 +370,7 @@ const TaskListPage: React.FC = () => {
                       </div>
                     )}
 
-                    {(selectedTask.task_status === TaskStatus.ASSIGNED || selectedTask.task_status === TaskStatus.IN_PROGRESS) && (
+                    {(selectedTask.task_status === "assigned" || selectedTask.task_status === "in_progress") && (
                       <div className="relative flex items-start">
                         <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white"></div>
                         <div className="ml-12">
@@ -372,7 +380,7 @@ const TaskListPage: React.FC = () => {
                       </div>
                     )}
 
-                    {selectedTask.task_status === TaskStatus.COMPLETED && (
+                    {selectedTask.task_status === "completed" && (
                       <div className="relative flex items-start">
                         <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-green-500 bg-white"></div>
                         <div className="ml-12">
@@ -382,7 +390,7 @@ const TaskListPage: React.FC = () => {
                       </div>
                     )}
 
-                    {selectedTask.task_status === TaskStatus.CANCELLED && (
+                    {selectedTask.task_status === "cancelled" && (
                       <div className="relative flex items-start">
                         <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-red-500 bg-white"></div>
                         <div className="ml-12">
@@ -397,7 +405,7 @@ const TaskListPage: React.FC = () => {
             </div>
 
             <div className="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end space-x-3 border-t border-gray-200">
-              {!selectedTask.assignedNeighbor && selectedTask.task_status === TaskStatus.PENDING && (
+              {!selectedTask.assignedNeighbor && selectedTask.task_status === "pending" && (
                 <button
                   className="bg-violet-700 hover:bg-violet-800 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
                   onClick={() => handleChangeHelper(selectedTask._id)}

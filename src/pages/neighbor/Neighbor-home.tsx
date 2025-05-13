@@ -14,6 +14,7 @@ import TaskListPage from "../../components/user/task/ListTask";
 import  TaskListed_Neigbor  from "../../components/neighbor/TasksListed_Neighbor";
 import Verification from "../../components/neighbor/Verification";
 import { clearVerificationStatus } from "../../redux/slices/verificationSlice";
+import EarningsDashboard from "./EarningsDashboard";
 
 const NeighborHome = () => {
   const [activeSection, setActiveSection] = useState("tasks");
@@ -32,7 +33,9 @@ const NeighborHome = () => {
       case "location":
         return <ServiceLocation />;
       case "Verification":
-        return <Verification/>
+        return <Verification />;
+      case "Earnings":
+        return <EarningsDashboard/>
         
       
       default:
@@ -107,6 +110,15 @@ const NeighborHome = () => {
           >
             <BadgeCheck size={20} className="mr-3" />
             Verification
+          </button>
+          <button
+            onClick={() => setActiveSection("Earnings")}
+            className={`w-full flex items-center px-6 py-3 text-left ${
+              activeSection === "earnings" ? "bg-violet-50 text-violet-950" : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <BadgeCheck size={20} className="mr-3" />
+            Earnings
           </button>
 
           <button

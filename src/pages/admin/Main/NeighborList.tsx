@@ -140,7 +140,7 @@ const NeighborList: React.FC = () => {
                                 <tbody>
                                     {filteredUsers.map((user) => (
                                         <tr
-                                            key={user.id}
+                                            key={user._id}
                                             className="border-b border-gray-700 hover:bg-violet-900 hover:bg-opacity-25 transition-colors duration-150 cursor-pointer"
                                             onClick={() => handleUserClick(user)}
                                         >

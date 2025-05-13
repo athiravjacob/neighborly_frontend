@@ -1,11 +1,14 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NeighborInfo } from '../../../types/neighbor';
+import { verifyNeighbor } from '../../../api/adminApiRequests';
+import { toast } from 'react-toastify';
 
 const NeighborDetails: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const user = location.state?.user as NeighborInfo;
+    console.log(user)
 
     if (!user) {
         return (
@@ -31,10 +34,13 @@ const NeighborDetails: React.FC = () => {
         }
     };
   
-    const handleVerifyNeighbor = async () => {
+    const handleVerifyNeighbor = async (neighborId:string) => {
         try {
-            alert(`User ${user.name} has been verified`);
+            console.log(neighborId)
+            const isVerified = await verifyNeighbor(neighborId)
+            if(isVerified) toast.success("your are now a verified user")
         } catch (error) {
+            console.log(error)
             alert('Failed to verify user');
         }
     };
@@ -69,7 +75,7 @@ const NeighborDetails: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Left Column */}
                   <div className="lg:col-span-1">
-                      <div className="bg-gray-700 p-6 rounded-lg border border-gray-600">
+                      <div className="bg-gray-700 p-6 rounded-lg border border-gray-600" key={user._id}>
                           <div className="w-24 h-24 rounded-full bg-violet-900 mx-auto flex items-center justify-center text-3xl font-bold text-violet-300 mb-4">
                               {user.name.charAt(0).toUpperCase()}
                           </div>
@@ -157,23 +163,24 @@ const NeighborDetails: React.FC = () => {
                                   Ban Neighbor
                               </button>
   
-                              {!user.isVerified && (
+                              {(!user.isVerified && user.idCardImage)&& (
                                   <>
-                                      <button
-                                          className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center"
-                                          onClick={handleVerifyNeighbor}
+                                            <button
+                                                key={user._id}
+                                                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center"
+                                                onClick={() => { handleVerifyNeighbor(user._id) }}
                                       >
                                           <span className="mr-2">✓</span>
                                           Verify Neighbor
                                       </button>
   
-                                      <button
+                                      {/* <button
                                           className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 flex items-center"
-                                          onClick={handleVerifyNeighbor}
-                                      >
+                                          onClick={() => { handleVerifyNeighbor(user._id) }}
+                                          >
                                           <span className="mr-2">✕</span>
                                           Reject Neighbor
-                                      </button>
+                                      </button> */}
                                   </>
                               )}
                           </div>

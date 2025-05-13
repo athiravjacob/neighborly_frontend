@@ -37,9 +37,9 @@ const NavbarLanding: React.FC = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-gray-600 hover:text-[#2E1065] font-medium text-lg">
+              {/* <a href="#" className="text-gray-600 hover:text-[#2E1065] font-medium text-lg">
                 Services
-              </a>
+              </a> */}
 
               <p onClick={() => navigate("/login")} className="font-medium text-[#2E1065] hover:text-violet-800 cursor-pointer">
                 Log in
