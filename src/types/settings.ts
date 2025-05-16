@@ -1,6 +1,6 @@
 
 export interface UserInfo {
-    id: string ;
+    _id: string ;
     profilePicture?: string | null;
     name: string;
     email: string;
@@ -16,6 +16,7 @@ export interface UserInfo {
     role: 'user' | 'admin';
     govtId: string | null;
     isVerified?: boolean; 
+    isBanned:boolean
 }
   
 export interface BasicInfoProps {

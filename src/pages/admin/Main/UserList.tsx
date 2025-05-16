@@ -63,7 +63,7 @@ const UserList: React.FC = () => {
                             <tbody>
                                 {users.map((user) => (
                                     <tr 
-                                        key={user.id}
+                                        key={user._id}
                                         className="border-b border-gray-700 hover:bg-violet-900 cursor-pointer"
                                         onClick={() => handleUserClick(user)}
                                     >

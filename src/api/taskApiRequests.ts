@@ -61,4 +61,47 @@ export const fetchTaskStatus = async (taskId:string): Promise<TaskStatus> => {
       }
       throw new Error("An unexpected error occurred");
     }
+}
+  
+// *************** Verify taskcode **************
+
+export const VerifyCode = async (taskId:string,neighborId:string,code:string): Promise<Boolean> => {
+  try {
+    
+    const response = await api.patch(`/task/verify_task_code`, { taskId, neighborId, code })
+    if (response.status === 200 && response.data?.success) {
+      return true;
+    }
+
+    throw new Error(response.data?.message || "Failed to verify code");
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to verify code");
+    }
+    throw new Error("An unexpected error occurred while verifying task code");
   }
+
+  
+}
+//************* Mark Task as complete ************ */
+
+export const TaskComplete = async (taskId:string): Promise<Boolean> => {
+  try {
+    
+    const response = await api.patch(`/task/mark_task_complete`, { taskId})
+    if (response.status === 200 && response.data?.success) {
+      return true;
+    }
+
+    throw new Error(response.data?.message || "Failed to verify code");
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to verify code");
+    }
+    throw new Error("An unexpected error occurred while verifying task code");
+  }
+
+  
+}

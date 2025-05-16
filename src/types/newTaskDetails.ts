@@ -27,6 +27,7 @@ export interface newTaskDetails {
   platform_fee?: number;
   final_amount?: number;
   task_status?: TaskStatus; 
-  payment_status?: PaymentStatus
+  payment_status?: PaymentStatus;
+  task_code?:string
  
 }

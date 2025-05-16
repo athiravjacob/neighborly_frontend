@@ -3,6 +3,8 @@ import { AvailabilityEvent } from "../types/availabilityEvent";
 import { Location } from "../types/locationDTO";
 import { NeighborInfo } from "../types/neighbor";
 import { skillsDTO } from "../types/skillsDTO";
+import { Transaction } from "../types/transactions";
+import { WalletDetails } from "../types/wallet";
 import api from "./apiConfig";
 import axios from "axios";
 
@@ -72,8 +74,8 @@ export const FetchAvailability = async (neighborId: string): Promise<Availabilit
     const availabilityData = response.data.data; 
     const events = availabilityData.flatMap((item: any) =>
       item.timeSlots.map((slot: any) => ({
-        id: `${item.date}-${slot.startTime}`, // Unique ID using date and startTime
-        start: new Date(slot.startTime * 1000), // C1onvert Unix timestamp to Date
+        id: `${item.date}-${slot.startTime}`, 
+        start: new Date(slot.startTime * 1000), 
         end: new Date(slot.endTime * 1000),
         title: "Available",
       }))
@@ -179,6 +181,36 @@ export const ListAvailableNeighbors = async (city: string,subCategory:string): P
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message || "Failed to list availble neighbors in your area");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
+
+//********************Fetch Wallet ***************** */
+export const FetchWalletDetails = async (neighborId:string): Promise<WalletDetails> => {
+  try {
+    const response = await api.get(`/neighbor/wallet/${neighborId}`,{ withCredentials: true })
+    console.log(response.data.data, "wallet Details")
+    return response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to list availble neighbors in your area");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+}
+
+//****************************************** */
+export const FetchTransactionDetails = async (neighborId:string): Promise<Transaction[]|[]> => {
+  try {
+    const response = await api.get(`/payment/transaction_history/${neighborId}`,{ withCredentials: true })
+    console.log(response.data.data, "transaction Details Details")
+    return response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to list transactions of neighbors ");
     }
     throw new Error("An unexpected error occurred");
   }

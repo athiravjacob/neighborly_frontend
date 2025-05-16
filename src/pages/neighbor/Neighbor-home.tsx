@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Home, Calendar, Award, User, LogOut ,BadgeCheck ,MapPin} from "lucide-react";
+import { Bell, Home, Calendar, Award, User, LogOut, BadgeCheck, MapPin } from "lucide-react";
 import CalendarSection from "./Calendar";
 import SkillsSection from "./Skills";
 import ServiceLocation from "./ServiceLocation";
@@ -9,23 +9,35 @@ import { useNavigate } from "react-router-dom";
 import { clearCredentials } from "../../redux/slices/authSlice";
 import { logout } from "../../api/apiRequests";
 import { useDispatch } from "react-redux";
-import { useTasks } from "../../hooks/useTasks";
-import TaskListPage from "../../components/user/task/ListTask";
-import  TaskListed_Neigbor  from "../../components/neighbor/TasksListed_Neighbor";
+import TaskListed_Neighbor from "../../components/neighbor/TasksListed_Neighbor";
 import Verification from "../../components/neighbor/Verification";
 import { clearVerificationStatus } from "../../redux/slices/verificationSlice";
 import EarningsDashboard from "./EarningsDashboard";
+import TaskDetails from "../../components/neighbor/TaskDetails";
 
 const NeighborHome = () => {
   const [activeSection, setActiveSection] = useState("tasks");
-  const { user ,isAuthenticated} = useSelector((state: RootState) => state.auth);
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  // const {tasks,isLoading,error} =useTasks(user?.id!)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleTaskSelect = (taskId: string) => {
+    setSelectedTaskId(taskId);
+  };
+
+  const handleBackToTasks = () => {
+    setSelectedTaskId(null);
+  };
+
   const renderContent = () => {
+    if (activeSection === "tasks" && selectedTaskId) {
+      return <TaskDetails taskId={selectedTaskId} onBack={handleBackToTasks} />;
+    }
+
     switch (activeSection) {
       case "tasks":
-        return <TaskListed_Neigbor  />;
+        return <TaskListed_Neighbor onTaskSelect={handleTaskSelect} />;
       case "calendar":
         return <CalendarSection />;
       case "skills":
@@ -35,28 +47,25 @@ const NeighborHome = () => {
       case "Verification":
         return <Verification />;
       case "Earnings":
-        return <EarningsDashboard/>
-        
-      
+        return <EarningsDashboard />;
       default:
-        return <TaskListed_Neigbor />;
+        return <TaskListed_Neighbor onTaskSelect={handleTaskSelect} />;
     }
   };
-  if (!isAuthenticated || !user ||user.type !== 'neighbor') {
-    navigate('/neighbor'); 
+
+  if (!isAuthenticated || !user || user.type !== 'neighbor') {
+    navigate('/neighbor');
     return null;
   }
 
   const handleLogout = async () => {
-    
     dispatch(clearCredentials());
-    dispatch(clearVerificationStatus())
-    await persistor.purge(); 
-    await logout()
+    dispatch(clearVerificationStatus());
+    await persistor.purge();
+    await logout();
     navigate('/neighbor');
   };
 
-  
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar Navigation */}
@@ -66,7 +75,10 @@ const NeighborHome = () => {
         </div>
         <nav className="mt-6">
           <button
-            onClick={() => setActiveSection("tasks")}
+            onClick={() => {
+              setActiveSection("tasks");
+              setSelectedTaskId(null);
+            }}
             className={`w-full flex items-center px-6 py-3 text-left ${
               activeSection === "tasks" ? "bg-violet-50 text-violet-950" : "text-gray-600 hover:bg-gray-100"
             }`}
@@ -101,11 +113,10 @@ const NeighborHome = () => {
             <MapPin size={20} className="mr-3" />
             Location
           </button>
-
           <button
             onClick={() => setActiveSection("Verification")}
             className={`w-full flex items-center px-6 py-3 text-left ${
-              activeSection === "verification" ? "bg-violet-50 text-violet-950" : "text-gray-600 hover:bg-gray-100"
+              activeSection === "Verification" ? "bg-violet-50 text-violet-950" : "text-gray-600 hover:bg-gray-100"
             }`}
           >
             <BadgeCheck size={20} className="mr-3" />
@@ -114,13 +125,12 @@ const NeighborHome = () => {
           <button
             onClick={() => setActiveSection("Earnings")}
             className={`w-full flex items-center px-6 py-3 text-left ${
-              activeSection === "earnings" ? "bg-violet-50 text-violet-950" : "text-gray-600 hover:bg-gray-100"
+              activeSection === "Earnings" ? "bg-violet-50 text-violet-950" : "text-gray-600 hover:bg-gray-100"
             }`}
           >
             <BadgeCheck size={20} className="mr-3" />
             Earnings
           </button>
-
           <button
             onClick={handleLogout}
             className="w-full flex items-center px-6 py-3 text-left text-gray-600 hover:bg-gray-100 mt-auto absolute bottom-6"
@@ -136,17 +146,13 @@ const NeighborHome = () => {
         {/* Top Navigation */}
         <header className="bg-white shadow-sm sticky top-0 z-10">
           <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="text-lg font-semibold text-gray-700">Welcome back, {user?.name} </div>
+            <div className="text-lg font-semibold text-gray-700">Welcome back, {user?.name}</div>
             <div className="flex items-center space-x-4">
-              {/* <button className="p-2 rounded-full bg-gray-100 text-gray-600 relative hover:bg-gray-200">
-                <Bell size={20} />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-violet-500 rounded-full"></span>
-              </button> */}
               <div className="flex items-center space-x-2">
                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                   <User size={20} className="text-gray-600" />
                 </div>
-                <span className="text-gray-700 font-medium">{user.name }</span>
+                <span className="text-gray-700 font-medium">{user.name}</span>
               </div>
             </div>
           </div>
@@ -159,9 +165,4 @@ const NeighborHome = () => {
   );
 };
 
-
-
-<TaskListed_Neigbor/>
-
-
-export default NeighborHome
+export default NeighborHome;

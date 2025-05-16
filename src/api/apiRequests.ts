@@ -176,7 +176,7 @@ export const saveAddress = async (id: string, address: object): Promise<any> => 
 //******************** Verify ID ************************ */
 export const verifyId = async (imageUrl: string): Promise<Boolean> => {
   try {
-    console.log("verify id")
+    console.log("verify id ")
     const result =await api.patch("/neighbor/uploadId", { imageUrl });
     return result.data.data
   } catch (error) {

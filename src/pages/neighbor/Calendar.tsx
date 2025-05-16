@@ -33,7 +33,7 @@ const CalendarSection = () => {
     queryKey: ['availability', user?.id],
     queryFn: () => FetchAvailability(user!.id),
     enabled: !!user?.id,
-    placeholderData: [], // Start with empty array if no data yet
+    placeholderData: [], 
   });
 
   // Sync fetched events with local events state

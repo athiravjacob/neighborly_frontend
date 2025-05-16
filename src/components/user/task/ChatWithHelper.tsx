@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-
-const socket: Socket = io('http://localhost:4000');
 
 interface Message {
   sender: string;
@@ -17,12 +15,14 @@ interface ChatProps {
 }
 
 const Chat: React.FC<ChatProps> = ({ userId, helperId, helperName, onClose }) => {
-  const [chatStarted, setChatStarted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const socketRef = useRef<Socket | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [chatStarted, setChatStarted] = useState(false);
 
   const startChat = async () => {
     if (!userId || !helperId) return;
@@ -35,62 +35,78 @@ const Chat: React.FC<ChatProps> = ({ userId, helperId, helperName, onClose }) =>
       console.error('Error fetching messages:', err);
     }
   };
-
+  // Initialize Socket.IO connection
   useEffect(() => {
-    if (!chatStarted) return;
+    socketRef.current = io('http://localhost:4000', {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
+    startChat();
+    socketRef.current.on('connect', () => {
+      console.log('Socket connected:', socketRef.current?.id);
+      // Start chat when connected
+      socketRef.current?.emit('start-chat', userId, helperId);
+    });
 
-    socket.emit('start-chat', userId, helperId);
+    socketRef.current.on('connect_error', (err) => {
+      console.error('Socket connection error:', err);
+    });
 
-    socket.on('message', (message: Message) => {
-      setMessages(prev => [...prev, message]);
+    socketRef.current.on('message', (message: Message) => {
+      setMessages((prev) => [...prev, message]);
       setIsTyping(false);
     });
 
-    socket.on('typing', () => {
+    socketRef.current.on('typing', () => {
       setIsTyping(true);
     });
 
-    socket.on('stop-typing', () => {
+    socketRef.current.on('stop-typing', () => {
       setIsTyping(false);
     });
 
     return () => {
-      socket.off('message');
-      socket.off('typing');
-      socket.off('stop-typing');
+      socketRef.current?.disconnect();
     };
-  }, [chatStarted, userId, helperId]);
-
-  useEffect(() => {
-    startChat();
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
   }, [userId, helperId]);
 
+  // Auto-scroll to latest message
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Focus input on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  // Handle typing events
+  const handleTyping = () => {
+    if (!socketRef.current) return;
+    socketRef.current.emit('typing', userId, helperId);
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      socketRef.current?.emit('stop-typing', userId, helperId);
+    }, 1000);
+  };
+
+  // Send message
   const handleSendMessage = () => {
-    if (newMessage.trim() === '') return;
+    if (newMessage.trim() === '' || !socketRef.current) return;
 
-    const messageData = {
-      sender: userId,
-      receiver: helperId,
-      text: newMessage,
-    };
-
-    socket.emit('send-message', messageData);
+    socketRef.current.emit('send-message', userId, helperId, newMessage);
+    setNewMessage('');
 
     axios.post("http://localhost:4000/messages", {
       senderId: userId,
       receiverId: helperId,
       content: newMessage,
     });
-    
-    setMessages(prev => [...prev, { sender: userId, text: newMessage }]);
-    setNewMessage('');
   };
 
   const formatTime = () => {
@@ -114,8 +130,8 @@ const Chat: React.FC<ChatProps> = ({ userId, helperId, helperName, onClose }) =>
             </div>
           </div>
         </div>
-        <button 
-          onClick={onClose} 
+        <button
+          onClick={onClose}
           className="text-white hover:text-gray-200 p-2 rounded-full hover:bg-indigo-700 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +145,12 @@ const Chat: React.FC<ChatProps> = ({ userId, helperId, helperName, onClose }) =>
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <svg className="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
             </svg>
             <p className="font-medium">No messages yet</p>
             <p className="text-sm">Send a message to start the conversation</p>
@@ -137,14 +158,14 @@ const Chat: React.FC<ChatProps> = ({ userId, helperId, helperName, onClose }) =>
         ) : (
           <div className="space-y-4">
             {messages.map((msg, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`flex ${msg.sender === userId ? 'justify-end' : 'justify-start'}`}
               >
-                <div 
+                <div
                   className={`max-w-xs md:max-w-md py-2 px-4 rounded-2xl ${
-                    msg.sender === userId 
-                      ? 'bg-indigo-600 text-white rounded-tr-none' 
+                    msg.sender === userId
+                      ? 'bg-indigo-600 text-white rounded-tr-none'
                       : 'bg-white text-gray-800 shadow-md rounded-tl-none'
                   }`}
                 >
@@ -178,8 +199,11 @@ const Chat: React.FC<ChatProps> = ({ userId, helperId, helperName, onClose }) =>
             ref={inputRef}
             type="text"
             value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              handleTyping();
+            }}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Type a message..."
             className="flex-grow bg-transparent py-2 px-1 focus:outline-none text-gray-700"
           />
@@ -187,8 +211,8 @@ const Chat: React.FC<ChatProps> = ({ userId, helperId, helperName, onClose }) =>
             onClick={handleSendMessage}
             disabled={newMessage.trim() === ''}
             className={`p-2 rounded-full ${
-              newMessage.trim() === '' 
-                ? 'text-gray-400 cursor-not-allowed' 
+              newMessage.trim() === ''
+                ? 'text-gray-400 cursor-not-allowed'
                 : 'text-white bg-indigo-600 hover:bg-indigo-700'
             }`}
           >

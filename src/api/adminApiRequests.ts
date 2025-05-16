@@ -72,3 +72,16 @@ export const verifyNeighbor = async (neighborId:string): Promise<Boolean> => {
     throw new Error('An unexpected error occurred');
   }
 }
+
+export const banUnban = async (id: string, type: 'neighbor' | 'user'): Promise<Boolean> => {
+  try {
+    console.log(id,type)
+    const response = await api.patch('/admin/ban_unban', { id,type });
+    return response.data.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || 'Error Banned/Unbanned');
+    }
+    throw new Error('An unexpected error occurred');
+  }
+}
