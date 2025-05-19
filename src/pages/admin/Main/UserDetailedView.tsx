@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserInfo } from '../../../types/settings';
-import { banUnban } from '../../../api/adminApiRequests'; // Add fetchUser
+import { updateBanStatus } from '../../../api/adminApiRequests'; // Add fetchUser
 import { getUser } from '../../../api/apiRequests';
 
 const UserDetails: React.FC = () => {
@@ -43,7 +43,7 @@ const UserDetails: React.FC = () => {
 
   // React Query mutation for ban/unban
   const { mutate, isPending, isError, error } = useMutation({
-    mutationFn: () => banUnban(user._id, 'user'),
+    mutationFn: () => updateBanStatus(user._id, 'user'),
     onMutate: async () => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['user', user._id] });

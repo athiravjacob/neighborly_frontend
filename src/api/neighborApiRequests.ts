@@ -23,7 +23,7 @@ export const NeighborSignup = async (
     password: string}
   ): Promise<AuthResponse> => {
   try {
-      const response = await api.post("/auth/neighbor/signup", { neighbor });
+      const response = await api.post("/auth/neighbors", { neighbor });
       return response.data; 
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -35,7 +35,7 @@ export const NeighborSignup = async (
   /*********************Neighbor Login********************************* */
 export const NeighborLogin = async (email: string, password: string): Promise<UserDTO> => {
   try {
-      const response = await api.post("/auth/neighbor/login", { email, password },{ withCredentials: true },);
+      const response = await api.post("/auth/neighbors/login", { email, password },{ withCredentials: true },);
       console.log(response.data.data)
       return response.data.data;
       
@@ -52,8 +52,7 @@ export const NeighborLogin = async (email: string, password: string): Promise<Us
 
 export const ScheduleTimeslots = async (neighborId:string,availability:any): Promise<void> => {
   try {
-    console.log("hello api call",availability,neighborId)
-      const response = await api.post("/neighbor/availability", {neighborId,availability},{withCredentials: true,});
+      const response = await api.post(`/neighbors/${neighborId}/timeslots`, {availability});
       console.log(response.data.data)
       // return response.data.data;
       
@@ -70,7 +69,7 @@ export const ScheduleTimeslots = async (neighborId:string,availability:any): Pro
 
 export const FetchAvailability = async (neighborId: string): Promise<AvailabilityEvent[]> => {
   try {
-    const response = await api.get(`/neighbor/availability/${neighborId}`,{withCredentials:true});
+    const response = await api.get(`/neighbors/${neighborId}/timeslots`,{withCredentials:true});
     const availabilityData = response.data.data; 
     const events = availabilityData.flatMap((item: any) =>
       item.timeSlots.map((slot: any) => ({
@@ -93,7 +92,7 @@ export const FetchAvailability = async (neighborId: string): Promise<Availabilit
 
 export const AddSkills = async (neighborId:string,skill:any): Promise<skillsDTO[]> => {
   try {
-    const response = await api.post("/neighbor/skills", { neighborId, skill }, { withCredentials: true, });
+    const response = await api.post(`/neighbors/${neighborId}/skills`, { skill }, { withCredentials: true, });
     console.log(response.data.data)
     return response.data.data
       
@@ -110,7 +109,7 @@ export const AddSkills = async (neighborId:string,skill:any): Promise<skillsDTO[
 export const FetchSkills = async (neighborId: string): Promise<skillsDTO[]> => {
   try {
     console.log(neighborId)
-    const response = await api.get(`/neighbor/skills/${neighborId}`,{ withCredentials: true })
+    const response = await api.get(`/neighbors/${neighborId}/skills`,{ withCredentials: true })
     console.log(response.data.data,"fetch skills")
     return response.data.data
     
@@ -127,7 +126,7 @@ export const FetchSkills = async (neighborId: string): Promise<skillsDTO[]> => {
 export const AddServiceLocation = async (neighborId:string,location:Location): Promise<Location> => {
   try {
     console.log(location)
-    const response = await api.post("/neighbor/location", { neighborId, location }, { withCredentials: true, });
+    const response = await api.post(`/neighbors/${neighborId}/location`, { location }, { withCredentials: true, });
     console.log(response.data.data,"response from add loc")
     return response.data.data
       
@@ -143,7 +142,7 @@ export const AddServiceLocation = async (neighborId:string,location:Location): P
 export const FetchServiceLocation = async (neighborId: string): Promise<Location> => {
   try {
     console.log(neighborId,"location")
-    const response = await api.get(`/neighbor/location/${neighborId}`,{ withCredentials: true })
+    const response = await api.get(`/neighbors/${neighborId}/location`,{ withCredentials: true })
     console.log(response.data.data, "fetch location")
     return response.data.data
     
@@ -158,7 +157,7 @@ export const FetchServiceLocation = async (neighborId: string): Promise<Location
 // ********** Check Service Availability ***********************/
 export const CheckCityAvailability = async (city: string,category:string,subCategory:string): Promise<Boolean> => {
   try {
-    const response = await api.get(`/neighbor/check-service-availability?city=${city}&category=${category}&subCategory=${subCategory}`,{ withCredentials: true })
+    const response = await api.get(`/neighbors/service-availability?city=${city}&category=${category}&subCategory=${subCategory}`,{ withCredentials: true })
     console.log(response.data.data, "check service availble")
     return response.data.data
     
@@ -174,7 +173,7 @@ export const CheckCityAvailability = async (city: string,category:string,subCate
 
 export const ListAvailableNeighbors = async (city: string,subCategory:string): Promise<NeighborInfo[]> => {
   try {
-    const response = await api.get(`/neighbor/available-neighbors?city=${city}&subCategory=${subCategory}`,{ withCredentials: true })
+    const response = await api.get(`/neighbors/available?city=${city}&subCategory=${subCategory}`,{ withCredentials: true })
     console.log(response.data.data, "list availble neighbors")
     return response.data.data
     
@@ -189,7 +188,7 @@ export const ListAvailableNeighbors = async (city: string,subCategory:string): P
 //********************Fetch Wallet ***************** */
 export const FetchWalletDetails = async (neighborId:string): Promise<WalletDetails> => {
   try {
-    const response = await api.get(`/neighbor/wallet/${neighborId}`,{ withCredentials: true })
+    const response = await api.get(`/neighbors/${neighborId}/wallet `,{ withCredentials: true })
     console.log(response.data.data, "wallet Details")
     return response.data.data
     
@@ -204,7 +203,7 @@ export const FetchWalletDetails = async (neighborId:string): Promise<WalletDetai
 //****************************************** */
 export const FetchTransactionDetails = async (neighborId:string): Promise<Transaction[]|[]> => {
   try {
-    const response = await api.get(`/payment/transaction_history/${neighborId}`,{ withCredentials: true })
+    const response = await api.get(`/payments/transaction_history/${neighborId}`,{ withCredentials: true })
     console.log(response.data.data, "transaction Details Details")
     return response.data.data
     

@@ -54,7 +54,7 @@ api.interceptors.response.use(
 
       try {
         console.log("before refresh req")
-        await api.post('/auth/refresh');
+        await api.post('/auth/tokens/refresh');
         console.log("after refresh req")
         // Refresh token
         processQueue(null); // Retry all failed requests

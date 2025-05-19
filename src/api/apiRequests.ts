@@ -12,7 +12,7 @@ interface AuthResponse {
 
 export const sendMail = async (email: string): Promise<void> => {
   try {
-    const response = await api.post("/auth/send-otp", { email });
+    const response = await api.post("/auth/users/otp/send", { email });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -24,7 +24,7 @@ export const sendMail = async (email: string): Promise<void> => {
 
 export const verifyOTP = async (email: string, otp: string): Promise<void> => {
   try {
-    const response = await api.post("/auth/verify-otp", { email, otp });
+    const response = await api.post("/auth/users/otp/verify", { email, otp });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -42,7 +42,7 @@ export const signup = async (
 ): Promise<AuthResponse> => {
   try {
     const user={name,email,phone,password}
-    const response = await api.post("/auth/signup", { user });
+    const response = await api.post("/auth/users", { user });
     return response.data; 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -55,7 +55,7 @@ export const signup = async (
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
   try {
-      const response = await api.post("/auth/login", { email, password },{ withCredentials: true });
+      const response = await api.post("/auth/users/login", { email, password },{ withCredentials: true });
       return response.data.data;
       
   } catch (error) {
@@ -68,7 +68,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
 //******************** Google Login ********************* */
 export const loginWithGoogle = async (idToken: string): Promise<AuthResponse> => {
   try {
-    const response = await api.post("/auth/google-login", { idToken },{ withCredentials: true })
+    const response = await api.post("/auth/users/google-login", { idToken },{ withCredentials: true })
     console.log(response.data.data,"login with google")
     return response.data.data
   } catch (error) {
@@ -83,7 +83,7 @@ export const loginWithGoogle = async (idToken: string): Promise<AuthResponse> =>
 export const logout = async (): Promise<void> => {
   try {
     console.log("hello")
-    const response = await api.post("/auth/logout", { withCredentials: true });
+    const response = await api.post("/auth/users/logout", { withCredentials: true });
     console.log(response)
       return response.data.data;
       
@@ -98,7 +98,7 @@ export const logout = async (): Promise<void> => {
 //*********************** forgot Password ************************** */
 export const forgotPassword = async (email: string): Promise<void> => {
   try {
-    const response = await api.post("/auth/forgot-password", { email })
+    const response = await api.post("/auth/users/password/forgot", { email })
     console.log(response.data.data)
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -110,7 +110,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
 //******************** Reset Password *****************************8 */
 export const resetPassword = async (email:string,token: string,newPassword:string): Promise<void> => {
   try {
-    const response = await api.post("/auth/reset-password", {email,token,newPassword })
+    const response = await api.post("/auth/users/password/reset", {email,token,newPassword })
     console.log(response.data.data)
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -122,7 +122,7 @@ export const resetPassword = async (email:string,token: string,newPassword:strin
 //************************* Get User **************************** */
 export const getUser = async (userId: string): Promise<UserInfo> => {
   try {
-    const response = await api.get(`/user/getUser/${userId}`,{ withCredentials: true });
+    const response = await api.get(`/users/getUser/${userId}`,{ withCredentials: true });
     return response.data.data; 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -136,7 +136,7 @@ export const getUser = async (userId: string): Promise<UserInfo> => {
 export const saveProfile = async (profileDetails: UserProfile): Promise<any> => {
   try {
     console.log(profileDetails,"profilr Details api call")
-    const response = await api.patch("/user/updateProfile", { profileDetails });
+    const response = await api.patch("/users/updateProfile", { profileDetails });
     console.log(response.data.data,"save profile function")
     return response.data.data;
   } catch (error) {
@@ -151,7 +151,7 @@ export const saveProfile = async (profileDetails: UserProfile): Promise<any> => 
 
 export const fetchProfile = async (userId:string): Promise<any> => {
   try {
-    const response = await api.get("/user/fetchProfile");
+    const response = await api.get("/users/fetchProfile");
     console.log(response.data.data,"fetch profile")
     return response.data.data;
   } catch (error) {
@@ -164,7 +164,7 @@ export const fetchProfile = async (userId:string): Promise<any> => {
 //****************************Save Address ********************************** */
 export const saveAddress = async (id: string, address: object): Promise<any> => {
   try {
-    const response = await api.patch("/user/update_address", { id, address });
+    const response = await api.patch("/users/update_address", { id, address });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -177,7 +177,7 @@ export const saveAddress = async (id: string, address: object): Promise<any> => 
 export const verifyId = async (imageUrl: string): Promise<Boolean> => {
   try {
     console.log("verify id ")
-    const result =await api.patch("/neighbor/uploadId", { imageUrl });
+    const result =await api.patch("/neighbors/uploadId", { imageUrl });
     return result.data.data
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -205,7 +205,7 @@ export const fetchVerificationStatus = async (): Promise<Boolean> => {
 export const changePassword = async (currentPassword:string, newPassword:string): Promise<void> => {
   try {
    console.log("change pass",newPassword)
-   const response = await api.patch("/auth/change-password", { currentPassword, newPassword })
+   const response = await api.patch("/auth/users/password/change", { currentPassword, newPassword })
    console.log(response.data.data)
  } catch (error) {
   if (axios.isAxiosError(error) && error.response) {

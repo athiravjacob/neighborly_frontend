@@ -24,7 +24,7 @@ export const adminLogin = async (email: string, password: string): Promise<UserD
 
 export const getAllUsers = async (): Promise<UserInfo[]> => {
   try {
-    const response = await api.get('/admin/userList');
+    const response = await api.get('/admin/users');
     return response.data.data; 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -37,7 +37,7 @@ export const getAllUsers = async (): Promise<UserInfo[]> => {
 
 export const getAllNeighbors = async (): Promise<NeighborInfo[]> => {
   try {
-    const response = await api.get('/admin/neighborList');
+    const response = await api.get('/admin/neighbors');
     return response.data.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -49,7 +49,7 @@ export const getAllNeighbors = async (): Promise<NeighborInfo[]> => {
 
 export const getAllTasks = async (): Promise<newTaskDetails[]> => {
   try {
-    const response = await api.get('/admin/TaskList');
+    const response = await api.get('/admin/tasks');
     console.log(response.data.data)
     return response.data.data;
   } catch (error) {
@@ -62,8 +62,8 @@ export const getAllTasks = async (): Promise<newTaskDetails[]> => {
 
 export const verifyNeighbor = async (neighborId:string): Promise<Boolean> => {
   try {
-    const response = await api.patch('/admin/verifyNeighbor', { neighborId });
-    if (response) return true
+    const verificationResult = await api.patch(`/admin/neighbors/${neighborId}/verification`, {});
+    if (verificationResult) return true
     return false
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -73,11 +73,11 @@ export const verifyNeighbor = async (neighborId:string): Promise<Boolean> => {
   }
 }
 
-export const banUnban = async (id: string, type: 'neighbor' | 'user'): Promise<Boolean> => {
+export const updateBanStatus = async (id: string, type: 'neighbor' | 'user'): Promise<Boolean> => {
   try {
-    console.log(id,type)
-    const response = await api.patch('/admin/ban_unban', { id,type });
-    return response.data.data
+    const endpoint = type === 'neighbor' ? `/admin/neighbors/${id}/ban` : `/admin/users/${id}/ban`;
+    const banResult = await api.patch(endpoint);
+    return banResult.data.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message || 'Error Banned/Unbanned');
