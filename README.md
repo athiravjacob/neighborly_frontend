@@ -1,50 +1,75 @@
-# React + TypeScript + Vite
+# Project Neighborly Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The Project Neighborly frontend is a dynamic, user-friendly interface built with React and TypeScript, powering a platform that connects users needing household chores, neighbors (helpers) offering assistance, and admins managing operations. Styled with Tailwind CSS, it leverages React Query for efficient data fetching, Redux and Redux Persist for state management, and Axios for API calls. Features include interactive visualizations with Chart.js and React Chart.js, location mapping with React Leaflet and MapPin, event scheduling with Big Calendar, form validation with Yup, and icons from Lucide React.
 
-Currently, two official plugins are available:
+# Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-- Configure the top-level `parserOptions` property like this:
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+* Role-Based UI: Tailored interfaces for users, helpers, and admins.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+* Chore Management: Allows users to post chores and helpers to accept bookings.
+
+
+
+* Interactive Maps: Displays nearby helpers using React Leaflet and MapPin.
+
+
+
+* Real-Time Analytics: Visualizes platform activity with Chart.js and React Chart.js.
+
+
+
+* Scheduling: Manages bookings and availability with Big Calendar.
+
+
+
+* Form Validation: Ensures data integrity with Yup.
+
+
+
+* Responsive Design: Styled with Tailwind CSS for a seamless experience across devices.
+
+# Tech Stack
+
+
+
+
+
+* Framework: React, TypeScript
+
+
+
+* Styling: Tailwind CSS
+
+
+
+* Data Fetching: React Query, Axios
+
+
+
+* State Management: Redux, Redux Persist
+
+
+
+* Visualization: Chart.js, React Chart.js
+
+
+
+* Mapping: React Leaflet, MapPin
+
+
+
+* Scheduling: Big Calendar
+
+
+
+* Icons: Lucide React
+
+
+
+* Validation: Yup
