@@ -47,7 +47,7 @@ export const useProfileSettings = (userId: string) => {
       };
 
       console.log('Saving profile:', updatedProfile);
-      return saveProfile(updatedProfile);
+      return saveProfile(userId,updatedProfile);
     },
     onSuccess: (updatedProfile) => {
       console.log('Profile update successful:', updatedProfile);

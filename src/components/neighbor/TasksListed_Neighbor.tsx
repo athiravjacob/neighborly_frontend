@@ -88,7 +88,7 @@ interface TaskListedNeighborProps {
 const TaskListed_Neighbor: React.FC<TaskListedNeighborProps> = ({ onTaskSelect }) => {
   const [filter, setFilter] = useState<string>('all');
   const { user } = useSelector((state: RootState) => state.auth);
-  const { tasks, isLoading, error } = useTasks(user?.id);
+  const { tasks, isLoading, error } = useTasks(user?.id,user?.type!);
   
   const [chatOpen, setChatOpen] = useState<boolean>(false);
   const [chatTaskId, setChatTaskId] = useState<string>('');

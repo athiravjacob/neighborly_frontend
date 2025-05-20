@@ -71,7 +71,7 @@ const TaskListPage: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<newTaskDetails | null>(null);
   const [filter, setFilter] = useState<string>('all');
   const { user } = useSelector((state: RootState) => state.auth);
-  const { tasks, isLoading, error } = useTasks(user?.id);
+  const { tasks, isLoading, error } = useTasks(user?.id,user?.type!);
   const [isCompleting, setIsCompleting] = useState<string | null>(null); // Track task being completed
   const navigate = useNavigate();
 

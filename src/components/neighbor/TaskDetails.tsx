@@ -71,7 +71,7 @@ interface TaskDetailsProps {
 
 const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const { tasks } = useTasks(user?.id);
+  const { tasks } = useTasks(user?.id,user?.type!);
   const selectedTask = tasks.find(task => task._id === taskId);
   const [chatOpen, setChatOpen] = useState<boolean>(false);
   const [chatTaskId, setChatTaskId] = useState<string>('');

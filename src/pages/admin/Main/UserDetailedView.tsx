@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserInfo } from '../../../types/settings';
 import { updateBanStatus } from '../../../api/adminApiRequests'; // Add fetchUser
-import { getUser } from '../../../api/apiRequests';
+import { fetchProfile } from '../../../api/apiRequests';
 
 const UserDetails: React.FC = () => {
   const location = useLocation();
@@ -14,7 +14,7 @@ const UserDetails: React.FC = () => {
   // Fetch user data with useQuery
   const { data: user, isLoading, error: queryError } = useQuery({
     queryKey: ['user', initialUser?._id],
-    queryFn: () => getUser(initialUser!._id), // API call to fetch user
+    queryFn: () => fetchProfile(initialUser!._id), // API call to fetch user
     enabled: !!initialUser?._id, // Only fetch if _id exists
     initialData: initialUser, // Use location.state.user as initial data
   });

@@ -20,7 +20,7 @@ const NavbarLanding: React.FC = () => {
     navigate('/');
   };
   async function FetchTasks() {
-    await showTasks(user?.id!)
+    await showTasks(user?.id!,user?.type!)
     navigate("/home/taskList")
   }
 

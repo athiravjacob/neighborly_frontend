@@ -32,7 +32,7 @@ export const NeighborSignup = async (
       throw new Error("An unexpected error occurred");
     }
 };
-  /*********************Neighbor Login********************************* */
+  //********************* Neighbor Login********************************* */
 export const NeighborLogin = async (email: string, password: string): Promise<UserDTO> => {
   try {
       const response = await api.post("/auth/neighbors/login", { email, password },{ withCredentials: true },);
@@ -48,7 +48,7 @@ export const NeighborLogin = async (email: string, password: string): Promise<Us
   }
 };
 
-/************************ Schedule date and time ************************** */
+//************************ Schedule date and time ************************** */
 
 export const ScheduleTimeslots = async (neighborId:string,availability:any): Promise<void> => {
   try {
@@ -200,7 +200,7 @@ export const FetchWalletDetails = async (neighborId:string): Promise<WalletDetai
   }
 }
 
-//****************************************** */
+//********************Fetch Transaction details ********************** */
 export const FetchTransactionDetails = async (neighborId:string): Promise<Transaction[]|[]> => {
   try {
     const response = await api.get(`/payments/transaction_history/${neighborId}`,{ withCredentials: true })

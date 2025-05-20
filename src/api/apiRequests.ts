@@ -9,7 +9,7 @@ interface AuthResponse {
   email: string,
   type:string
 }
-
+//************Sending email to new user during signup*********** */
 export const sendMail = async (email: string): Promise<void> => {
   try {
     const response = await api.post("/auth/users/otp/send", { email });
@@ -22,6 +22,7 @@ export const sendMail = async (email: string): Promise<void> => {
   }
 };
 
+//********Verify email with the OTP during signup****************** */
 export const verifyOTP = async (email: string, otp: string): Promise<void> => {
   try {
     const response = await api.post("/auth/users/otp/verify", { email, otp });
@@ -34,6 +35,7 @@ export const verifyOTP = async (email: string, otp: string): Promise<void> => {
   }
 };
 
+//*************** Signup for users ************ */
 export const signup = async (
   name: string,
   email: string,
@@ -42,7 +44,7 @@ export const signup = async (
 ): Promise<AuthResponse> => {
   try {
     const user={name,email,phone,password}
-    const response = await api.post("/auth/users", { user });
+    const response = await api.post("/auth/users", { user});
     return response.data; 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -51,7 +53,7 @@ export const signup = async (
     throw new Error("An unexpected error occurred");
   }
 };
-// ********************Login*************************
+// ********************User Login*************************
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
   try {
@@ -59,6 +61,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
       return response.data.data;
       
   } catch (error) {
+    console.log(error)
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message || "Login failed");
     }
@@ -120,23 +123,22 @@ export const resetPassword = async (email:string,token: string,newPassword:strin
   }
 }
 //************************* Get User **************************** */
-export const getUser = async (userId: string): Promise<UserInfo> => {
-  try {
-    const response = await api.get(`/users/getUser/${userId}`,{ withCredentials: true });
-    return response.data.data; 
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message || "Unable to fetch user details");
-    }
-    throw new Error("An unexpected error occurred");
-  }
-};
+// export const getUser = async (userId: string): Promise<UserInfo> => {
+//   try {
+//     const response = await api.get(`/users/${userId}`,{ withCredentials: true });
+//     return response.data.data; 
+//   } catch (error) {
+//     if (axios.isAxiosError(error) && error.response) {
+//       throw new Error(error.response.data.message || "Unable to fetch user details");
+//     }
+//     throw new Error("An unexpected error occurred");
+//   }
+// };
 
 //*****************************Save Profile Details ****************** */
-export const saveProfile = async (profileDetails: UserProfile): Promise<any> => {
+export const saveProfile = async (userId:string,profileDetails: UserProfile): Promise<any> => {
   try {
-    console.log(profileDetails,"profilr Details api call")
-    const response = await api.patch("/users/updateProfile", { profileDetails });
+    const response = await api.patch(`/users/${userId}`, { profileDetails });
     console.log(response.data.data,"save profile function")
     return response.data.data;
   } catch (error) {
@@ -151,7 +153,7 @@ export const saveProfile = async (profileDetails: UserProfile): Promise<any> => 
 
 export const fetchProfile = async (userId:string): Promise<any> => {
   try {
-    const response = await api.get("/users/fetchProfile");
+    const response = await api.get(`/users/${userId}`);
     console.log(response.data.data,"fetch profile")
     return response.data.data;
   } catch (error) {
