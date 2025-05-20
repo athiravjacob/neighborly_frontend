@@ -89,7 +89,7 @@ export const fetchTaskStatus = async (taskId:string): Promise<TaskStatus> => {
 export const VerifyCode = async (taskId:string,neighborId:string,code:string): Promise<Boolean> => {
   try {
     
-    const response = await api.patch(`/tasks/${taskId}/verify_task_code`, { neighborId, code })
+    const response = await api.patch(`/tasks/${taskId}/verify-code`, { neighborId, code })
     if (response.status === 200 && response.data?.success) {
       return true;
     }

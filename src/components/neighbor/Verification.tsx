@@ -5,9 +5,9 @@ import { Button, IconButton } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { RootState } from '../../redux/store';
-import { fetchVerificationStatus, verifyId } from '../../api/apiRequests';
 import { setVerificationStatus, setPendingStatus } from '../../redux/slices/verificationSlice';
 import { uploadImageToCloudinary } from '../../utilis/UploadImageTocloudinary';
+import { fetchVerificationStatus, verifyId } from '../../api/neighborApiRequests';
 
 const Verification = () => {
   const [imageFile, setImageFile] = React.useState<File | null>(null);
@@ -22,7 +22,7 @@ const Verification = () => {
   // Fetch verification status with periodic refetch
   const { data: fetchedStatus, isLoading: statusLoading } = useQuery({
     queryKey: ['verificationStatus', user?.id],
-    queryFn: () => fetchVerificationStatus(),
+    queryFn: () => fetchVerificationStatus(user?.id!),
     enabled: !!user?.id && !verificationStatus, // Skip if already verified
     refetchInterval: verificationStatus ? false : 30000, // Refetch every 30 seconds if not verified
   });
@@ -79,7 +79,7 @@ const Verification = () => {
         return;
       }
 
-      const response = await verifyId(image);
+      const response = await verifyId(user?.id!,image);
       dispatch(setVerificationStatus(response));
       dispatch(setPendingStatus(true)); // Set pending after successful upload
     } catch (err) {

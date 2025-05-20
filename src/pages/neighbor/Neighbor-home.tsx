@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Home, Calendar, Award, User, LogOut, BadgeCheck, MapPin } from "lucide-react";
+import { Bell, Home, Calendar, Award, User, LogOut, BadgeCheck, MapPin, Settings } from "lucide-react";
 import CalendarSection from "./Calendar";
 import SkillsSection from "./Skills";
 import ServiceLocation from "./ServiceLocation";
@@ -14,6 +14,7 @@ import Verification from "../../components/neighbor/Verification";
 import { clearVerificationStatus } from "../../redux/slices/verificationSlice";
 import EarningsDashboard from "./EarningsDashboard";
 import TaskDetails from "../../components/neighbor/TaskDetails";
+import PasswordSettings from "../../components/neighbor/PasswordSettings";
 
 const NeighborHome = () => {
   const [activeSection, setActiveSection] = useState("tasks");
@@ -48,6 +49,8 @@ const NeighborHome = () => {
         return <Verification />;
       case "Earnings":
         return <EarningsDashboard />;
+        case "Settings":
+          return <PasswordSettings />;
       default:
         return <TaskListed_Neighbor onTaskSelect={handleTaskSelect} />;
     }
@@ -130,6 +133,16 @@ const NeighborHome = () => {
           >
             <BadgeCheck size={20} className="mr-3" />
             Earnings
+          </button>
+
+          <button
+            onClick={() => setActiveSection("Settings")}
+            className={`w-full flex items-center px-6 py-3 text-left ${
+              activeSection === "Earnings" ? "bg-violet-50 text-violet-950" : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <BadgeCheck size={20} className="mr-3" />
+            Settings
           </button>
           <button
             onClick={handleLogout}

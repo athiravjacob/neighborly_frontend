@@ -115,7 +115,7 @@ export const General = ({ setSuccessMessage, setErrorMessage }: GeneralProps) =>
 
       const file = fileInputRef.current?.files?.[0];
       console.log('Profile to update:', updatedProfile, 'File selected:', !!file);
-      await updateProfile(updatedProfile, file); 
+       updateProfile(updatedProfile, file); 
       // setSuccessMessage('Profile updated successfully!');
       if (fileInputRef.current) {
         fileInputRef.current.value = '';

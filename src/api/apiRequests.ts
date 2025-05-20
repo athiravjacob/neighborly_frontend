@@ -175,43 +175,19 @@ export const saveAddress = async (id: string, address: object): Promise<any> => 
     throw new Error("An unexpected error occurred");
   }
 };
-//******************** Verify ID ************************ */
-export const verifyId = async (imageUrl: string): Promise<Boolean> => {
-  try {
-    console.log("verify id ")
-    const result =await api.patch("/neighbors/uploadId", { imageUrl });
-    return result.data.data
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message || "Unable to upload id");
-    }
-    throw new Error("An unexpected error occurred");
-  }
-};
 
-export const fetchVerificationStatus = async (): Promise<Boolean> => {
-  try {
-    console.log("fetch verific")
-    const result = await api.get("/neighbor/fetchStatus")
-    return result.data.data
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message || "Unable to fetch verificatio status");
-    }
-    throw new Error("An unexpected error occurred");
-  }
-}
   
 
 //**********************Change Password ************* */
-export const changePassword = async (currentPassword:string, newPassword:string): Promise<void> => {
+export const changePassword_user = async (userId:string,currentPassword:string, newPassword:string): Promise<void> => {
   try {
    console.log("change pass",newPassword)
-   const response = await api.patch("/auth/users/password/change", { currentPassword, newPassword })
+   const response = await api.post(`/auth/users/${userId}/password/change`, { currentPassword, newPassword })
    console.log(response.data.data)
  } catch (error) {
-  if (axios.isAxiosError(error) && error.response) {
-    throw new Error(error.response.data.message || "Unable to verify govtid");
+    if (axios.isAxiosError(error) && error.response) {
+    console.log(error)
+    throw new Error(error.response.data.message || "Unable to change password");
   }
   throw new Error("An unexpected error occurred");
  } 

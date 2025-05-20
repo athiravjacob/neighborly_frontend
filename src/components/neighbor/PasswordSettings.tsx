@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { changePassword_user } from '../../../api/apiRequests';
-import { RootState } from '../../../redux/store';
 import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
+import { changePassword_neighbor } from '../../api/neighborApiRequests';
+import { toast } from 'react-toastify';
 
 
 interface GeneralProps {
@@ -11,7 +12,7 @@ interface GeneralProps {
 
   }
   
-export const Security = ({ setSuccessMessage, setErrorMessage ,setActiveSection}: GeneralProps) => {
+export const PasswordSettings = () => {
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
         newPassword: '',
@@ -28,25 +29,26 @@ export const Security = ({ setSuccessMessage, setErrorMessage ,setActiveSection}
     
       const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSuccessMessage('');
-        setErrorMessage('');
+       
     
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-          setErrorMessage('New passwords do not match.');
+          toast.error('New passwords do not match.');
           return;
         }
     
           try {
-              await changePassword_user(user?.id!,passwordData.currentPassword,passwordData.newPassword)
-            setPasswordData({
+            const passwordchanged = await changePassword_neighbor(user?.id!, passwordData.currentPassword, passwordData.newPassword)
+            if ( passwordchanged) {
+              setPasswordData({
                 currentPassword: '',
                 newPassword: '',
                 confirmPassword: '',
-            })
-              setSuccessMessage("Password updated successfully")
+              })
+              toast.success("Password updated successfully")
+            }else toast.error("Password couldn't update .Current password should be valid ")
           
         } catch (error) {
-          setErrorMessage('Failed to change password. Please try again.');
+          toast.error('Failed to change password. Please try again.');
           console.error('Error changing password:', error);
         }
       };
@@ -119,7 +121,6 @@ export const Security = ({ setSuccessMessage, setErrorMessage ,setActiveSection}
                       <button
                         type="button"
                         className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
-                        onClick={() => setActiveSection('general')}
                       >
                         Cancel
                       </button>
@@ -136,4 +137,4 @@ export const Security = ({ setSuccessMessage, setErrorMessage ,setActiveSection}
   )
 }
 
-export default Security
+export default PasswordSettings

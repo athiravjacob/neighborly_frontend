@@ -193,8 +193,9 @@ export const FetchWalletDetails = async (neighborId:string): Promise<WalletDetai
     return response.data.data
     
   } catch (error) {
+    console.log(error)
     if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message || "Failed to list availble neighbors in your area");
+      throw new Error(error.response.data.message || "Failed to fetch wallet details");
     }
     throw new Error("An unexpected error occurred");
   }
@@ -203,14 +204,60 @@ export const FetchWalletDetails = async (neighborId:string): Promise<WalletDetai
 //********************Fetch Transaction details ********************** */
 export const FetchTransactionDetails = async (neighborId:string): Promise<Transaction[]|[]> => {
   try {
-    const response = await api.get(`/payments/transaction_history/${neighborId}`,{ withCredentials: true })
+    const response = await api.get(`/neighbors/${neighborId}/payments/history`,{ withCredentials: true })
     console.log(response.data.data, "transaction Details Details")
     return response.data.data
     
   } catch (error) {
+    console.log(error)
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message || "Failed to list transactions of neighbors ");
     }
     throw new Error("An unexpected error occurred");
   }
 }
+//********************Neighbor Upload image to Verify ID ************************ */
+export const verifyId = async (id:string,imageUrl: string): Promise<Boolean> => {
+  try {
+    console.log("verify id ")
+    const result =await api.patch(`/neighbors/${id}/verification`, { imageUrl });
+    return result.data.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Unable to upload id");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+//****************Fetch verification status of neighbor ******************* */
+
+export const fetchVerificationStatus = async (id:string): Promise<Boolean> => {
+  try {
+    console.log("fetch verific")
+    const result = await api.get(`/neighbors/${id}/verification/status`)
+    return result.data.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Unable to fetch verificatio status");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+
+
+}
+
+  //**********************  Change Password for neighbor ***********************
+
+  export const changePassword_neighbor = async (neighborId: string, currentPassword: string, newPassword: string): Promise<Boolean> => {
+    try {
+      console.log("change pass",newPassword,currentPassword,neighborId)
+      const response = await api.post(`/auth/neighbors/${neighborId}/password/change`, { currentPassword, newPassword })
+      return response.status === 200;
+    } catch (error) {
+     if (axios.isAxiosError(error) && error.response) {
+       throw new Error(error.response.data.message || "Unable to verify govtid");
+     }
+     throw new Error("An unexpected error occurred");
+    } 
+  }

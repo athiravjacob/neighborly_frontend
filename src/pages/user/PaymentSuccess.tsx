@@ -33,7 +33,7 @@ export const PaymentSuccess = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:4000/payment/session-details/${sessionId}`, {
+        const response = await fetch(`http://localhost:4000/payments/session-details/${sessionId}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
