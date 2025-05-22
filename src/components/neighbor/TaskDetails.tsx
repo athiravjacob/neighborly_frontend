@@ -6,63 +6,9 @@ import { useTasks } from '../../hooks/useTasks';
 import { toast } from 'react-toastify';
 import { VerifyCode, acceptTask } from '../../api/taskApiRequests';
 import Chat from '../user/task/ChatWithHelper';
+import { CategoryIcon } from './CategoryIcon';
+import { StatusBadge } from './StatusBadge';
 
-// Status badge component for better visual distinction
-const StatusBadge = ({ status }: { status: TaskStatus }) => {
-  let bgColor = '';
-  let textColor = '';
-  
-  switch (status) {
-    case "completed":
-      bgColor = 'bg-green-100';
-      textColor = 'text-green-800';
-      break;
-    case "assigned":
-      bgColor = 'bg-blue-100';
-      textColor = 'text-blue-800';
-      break;
-    case "in_progress":
-      bgColor = 'bg-violet-100';
-      textColor = 'text-violet-800';
-      break;
-    case "cancelled":
-      bgColor = 'bg-red-100';
-      textColor = 'text-red-800';
-      break;
-    case "pending":
-    default:
-      bgColor = 'bg-yellow-100';
-      textColor = 'text-yellow-800';
-      break;
-  }
-  
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColor} ${textColor}`}>
-      {status || "pending"}
-    </span>
-  );
-};
-
-// Category icon component to add visual cues
-const CategoryIcon = ({ category }: { category: string }) => {
-  let icon = '📋'; // Default icon
-  
-  switch (category.toLowerCase()) {
-    case 'handyman':
-      icon = '🔧';
-      break;
-    case 'cleaning':
-      icon = '🧹';
-      break;
-    case 'garden':
-      icon = '🌱';
-      break;
-    default:
-      icon = '📋';
-  }
-  
-  return <span className="text-xl mr-2">{icon}</span>;
-};
 
 interface TaskDetailsProps {
   taskId: string;
@@ -81,10 +27,19 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
   const [codeInput, setCodeInput] = useState<string>('');
   const [verifying, setVerifying] = useState<boolean>(false);
 
-  const formatDateTime = (timestamp: number, date: string | Date) => {
+  // New state for task acceptance form
+  const [taskAcceptanceForm, setTaskAcceptanceForm] = useState({
+    estimatedHours: '',
+    paymentAmount: '',
+    extraCharges: '',
+    arrivalTime: '',
+    materialsCoverage: 'none', // 'none', 'user' or 'helper'
+    notes: ''
+  });
+
+  const formatDateTime = (time: string, date: string | Date) => {
     const dateObj = new Date(date);
-    const time = new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    return `${dateObj.toLocaleDateString()} at ${time}`;
+    return `${dateObj.toLocaleDateString()} , ${time}`;
   };
 
   const formatCreatedAt = (isoString: string) => {
@@ -109,13 +64,41 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
     }
   };
 
+  const handleFormChange = (field: string, value: string) => {
+    setTaskAcceptanceForm(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      
+      // Clear extra charges if not providing materials
+      if (field === 'materialsCoverage' && value !== 'helper') {
+        updated.extraCharges = '';
+      }
+      
+      return updated;
+    });
+  };
+
   async function handleAcceptTask(taskId: string | undefined): Promise<void> {
     try {
       if (!taskId) throw new Error("task Id is required to accept task");
+      
+      // Validate form data
+      if (!taskAcceptanceForm.estimatedHours || !taskAcceptanceForm.paymentAmount || !taskAcceptanceForm.arrivalTime) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
+
       const accept = await acceptTask(taskId);
-      if (accept) toast.info("You accepted this task. Let the user make payment");
+      if (accept) {
+        toast.success("Task accepted successfully! The user has been notified.");
+        // You might want to send the form data to the backend here as well
+        console.log('Task acceptance details:', taskAcceptanceForm);
+      }
     } catch (error) {
       console.log(error);
+      toast.error("Failed to accept task. Please try again.");
     }
   }
 
@@ -141,10 +124,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
 
       if (isVerified) {
         toast.success("Code verified successfully. Task started!");
-        // Reset code input state
         setIsCodeInputOpen(false);
         setCodeInput('');
-        // Refresh tasks or update state (simulating a page refresh for demo)
         setTimeout(() => {
           window.location.reload();
         }, 1000);
@@ -159,7 +140,6 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
     }
   };
 
-  // Reset code input
   const cancelCodeVerification = () => {
     setIsCodeInputOpen(false);
     setCodeInput('');
@@ -229,7 +209,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
                 <div className="space-y-3">
                   <p className="flex items-start">
                     <span className="w-24 text-gray-600 font-medium">Scheduled:</span>
-                    <span className="text-gray-900">{formatDateTime(selectedTask.timeSlot.startTime, selectedTask.prefferedDate)}</span>
+                    <span className="text-gray-900">{formatDateTime(selectedTask.prefferedTime, selectedTask.prefferedDate)}</span>
                   </p>
                   <p className="flex items-start">
                     <span className="w-24 text-gray-600 font-medium">Created By:</span>
@@ -239,81 +219,288 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
               </div>
             </div>
 
-            {/* Task Actions */}
-            <div className="space-y-4">
-              {/* Accept Task Button */}
-              {selectedTask.task_status === "pending" && (
-                <button
-                  onClick={() => handleAcceptTask(selectedTask._id)}
-                  className="inline-flex items-center px-4 py-2 bg-violet-700 text-white font-semibold text-sm rounded-lg shadow-md hover:bg-violet-800 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition duration-200"
-                >
-                  Accept Task
-                </button>
-              )}
+           {/* Enhanced Task Actions Section */}
+{selectedTask.task_status === "pending" && (
+  <div className="bg-gradient-to-br from-violet-50 to-indigo-50 rounded-xl p-6 border border-violet-200 shadow-sm">
+    <div className="flex items-center mb-4">
+      <div className="flex-shrink-0">
+        <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center">
+          <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      </div>
+      <div className="ml-4">
+        <h3 className="text-lg font-semibold text-gray-900">Accept This Task</h3>
+        <p className="text-sm text-gray-600">Provide your service details to accept this task</p>
+      </div>
+    </div>
 
-              {/* Start Task Button (appears for assigned tasks) */}
-              {selectedTask.task_status === "assigned" && !isCodeInputOpen && (
-                <button
-                  onClick={handleStartTask}
-                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white font-semibold text-sm rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                  </svg>
-                  Start Task
-                </button>
-              )}
-
-              {/* Code Input Area */}
-              {isCodeInputOpen && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Enter Verification Code</h4>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Please enter the 6-digit alphanumeric code provided by {selectedTask.createdBy?.name || "the user"}.
-                  </p>
-                  
-                  <div className="flex space-x-2 mb-4">
-                    <input
-                      type="text"
-                      maxLength={6}
-                      placeholder="Enter 6-digit code"
-                      value={codeInput}
-                      onChange={(e) => setCodeInput(e.target.value.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6).toUpperCase())}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 text-center text-lg font-mono"
-                    />
-                  </div>
-                  
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={verifyCodeAndStartTask}
-                      disabled={codeInput.length !== 6 || verifying}
-                      className="flex-1 inline-flex justify-center items-center px-4 py-2 bg-green-600 text-white font-medium text-sm rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {verifying ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Verifying...
-                        </>
-                      ) : (
-                        "Verify & Start Task"
-                      )}
-                    </button>
-                    <button
-                      onClick={cancelCodeVerification}
-                      className="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Left Column - Service Details */}
+      <div className="space-y-4">
+        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+            <svg className="w-4 h-4 mr-2 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Service Estimation
+          </h4>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Estimated Hours <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                min="0.5"
+                step="0.5"
+                value={taskAcceptanceForm.estimatedHours}
+                onChange={(e) => handleFormChange('estimatedHours', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                placeholder="e.g., 4.0"
+              />
             </div>
 
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Total Payment Amount <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-2 text-gray-500 text-sm">₹</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={taskAcceptanceForm.paymentAmount}
+                  onChange={(e) => handleFormChange('paymentAmount', e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Additional Charges</label>
+              <div className="relative">
+                <span className="absolute left-3 top-2 text-gray-500 text-sm">₹</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={taskAcceptanceForm.extraCharges}
+                  onChange={(e) => handleFormChange('extraCharges', e.target.value)}
+                  disabled={taskAcceptanceForm.materialsCoverage !== 'helper'}
+                  className={`w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent ${
+                    taskAcceptanceForm.materialsCoverage !== 'helper' 
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                      : ''
+                  }`}
+                  placeholder="0.00"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {taskAcceptanceForm.materialsCoverage === 'helper' 
+                  ? 'Cost of materials, transport, etc.'
+                  : 'Additional charges only apply when you provide materials'
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column - Schedule & Materials */}
+      <div className="space-y-4">
+        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+            <svg className="w-4 h-4 mr-2 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 5v4a2 2 0 002 2h4a2 2 0 002-2v-4M4 7h16v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7z"/>
+            </svg>
+            Schedule & Materials
+          </h4>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Arrival Date & Time <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={taskAcceptanceForm.arrivalTime}
+                onChange={(e) => handleFormChange('arrivalTime', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-2">Materials Coverage</label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="materialsCoverage"
+                    value="none"
+                    checked={taskAcceptanceForm.materialsCoverage === 'none'}
+                    onChange={(e) => handleFormChange('materialsCoverage', e.target.value)}
+                    className="text-violet-600 focus:ring-violet-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">No materials needed</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="materialsCoverage"
+                    value="user"
+                    checked={taskAcceptanceForm.materialsCoverage === 'user'}
+                    onChange={(e) => handleFormChange('materialsCoverage', e.target.value)}
+                    className="text-violet-600 focus:ring-violet-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Customer provides materials</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="materialsCoverage"
+                    value="helper"
+                    checked={taskAcceptanceForm.materialsCoverage === 'helper'}
+                    onChange={(e) => handleFormChange('materialsCoverage', e.target.value)}
+                    className="text-violet-600 focus:ring-violet-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">I will provide materials</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Additional Notes</label>
+              <textarea
+                rows={3}
+                value={taskAcceptanceForm.notes}
+                onChange={(e) => handleFormChange('notes', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+                placeholder="Any special requirements or notes..."
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Action Buttons */}
+    <div className="mt-6 flex flex-col sm:flex-row gap-3">
+      <button
+        onClick={() => handleAcceptTask(selectedTask._id)}
+        disabled={!taskAcceptanceForm.estimatedHours || !taskAcceptanceForm.paymentAmount || !taskAcceptanceForm.arrivalTime}
+        className="flex-1 inline-flex justify-center items-center px-6 py-3 bg-violet-600 text-white font-semibold text-sm rounded-lg shadow-md hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+      >
+        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        Accept Task & Send Quote
+      </button>
+      
+      <button
+        onClick={() => handleChat(selectedTask._id, selectedTask.createdBy?._id, selectedTask.createdBy?.name!)}
+        className="inline-flex justify-center items-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium text-sm rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition duration-200"
+      >
+        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+        Chat First
+      </button>
+    </div>
+
+    {/* Info Banner */}
+    <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+      <div className="flex items-start">
+        <svg className="w-5 h-5 text-blue-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p className="text-sm text-blue-700">
+          Once you accept this task, the customer will be notified with your quote and schedule. Make sure all details are accurate before accepting.
+        </p>
+      </div>
+    </div>
+  </div>
+)}
+
+            {/* Start Task Section */}
+            {selectedTask.task_status === "assigned" && (
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200 shadow-sm">
+                <div className="flex items-center mb-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Ready to Start?</h3>
+                    <p className="text-sm text-gray-600">Enter the verification code provided by the customer</p>
+                  </div>
+                </div>
+
+                {!isCodeInputOpen ? (
+                  <button
+                    onClick={handleStartTask}
+                    className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold text-sm rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    Start Task
+                  </button>
+                ) : (
+                  <div className="bg-white rounded-lg p-4 border border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Enter Verification Code</h4>
+                    <p className="text-xs text-gray-500 mb-3">
+                      Please enter the 6-digit alphanumeric code provided by {selectedTask.createdBy?.name || "the customer"}.
+                    </p>
+
+                    <div className="flex space-x-2 mb-4">
+                      <input
+                        type="text"
+                        maxLength={6}
+                        placeholder="Enter 6-digit code"
+                        value={codeInput}
+                        onChange={(e) => setCodeInput(e.target.value.replace(/[^a-zA-Z0-9]/g, "").substring(0, 6).toUpperCase())}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-center text-lg font-mono"
+                      />
+                    </div>
+
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={verifyCodeAndStartTask}
+                        disabled={codeInput.length !== 6 || verifying}
+                        className="flex-1 inline-flex justify-center items-center px-4 py-2 bg-green-600 text-white font-medium text-sm rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {verifying ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                            </svg>
+                            Verifying...
+                          </>
+                        ) : (
+                          "Verify & Start Task"
+                        )}
+                      </button>
+                      <button
+                        onClick={cancelCodeVerification}
+                        className="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Timeline */}
-            <div className="mt-6 border-t border-gray-200 pt-6">
+            <div className="mt-8 border-t border-gray-200 pt-6">
               <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Task Timeline</h3>
               <div className="relative">
                 <div className="absolute top-0 left-4 h-full w-0.5 bg-gray-200"></div>
@@ -330,7 +517,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
                     <div className="relative flex items-start">
                       <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white"></div>
                       <div className="ml-12">
-                        <p> {selectedTask.createdBy.name}</p>
+                        <p className="text-sm font-medium text-gray-900">Created by {selectedTask.createdBy.name}</p>
                       </div>
                     </div>
                   )}
@@ -340,10 +527,11 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
                       <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white"></div>
                       <div className="ml-12">
                         <p className="text-sm font-medium text-gray-900">Task Scheduled</p>
-                        <p className="text-xs text-gray-500">{formatDateTime(selectedTask.timeSlot.startTime, selectedTask.prefferedDate)}</p>
+                        <p className="text-xs text-gray-500">{formatDateTime(selectedTask.prefferedTime, selectedTask.prefferedDate)}</p>
                       </div>
                     </div>
                   )}
+
 
                   {selectedTask.task_status === "in_progress" && (
                     <div className="relative flex items-start">

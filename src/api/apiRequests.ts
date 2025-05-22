@@ -163,18 +163,18 @@ export const fetchProfile = async (userId:string): Promise<any> => {
     throw new Error("An unexpected error occurred");
   }
 }
-//****************************Save Address ********************************** */
-export const saveAddress = async (id: string, address: object): Promise<any> => {
-  try {
-    const response = await api.patch("/users/update_address", { id, address });
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message || "Unable to update address");
-    }
-    throw new Error("An unexpected error occurred");
-  }
-};
+// //****************************Save Address ********************************** */
+// export const saveAddress = async (id: string, address: object): Promise<any> => {
+//   try {
+//     const response = await api.patch("/users/update_address", { id, address });
+//     return response.data;
+//   } catch (error) {
+//     if (axios.isAxiosError(error) && error.response) {
+//       throw new Error(error.response.data.message || "Unable to update address");
+//     }
+//     throw new Error("An unexpected error occurred");
+//   }
+// };
 
   
 

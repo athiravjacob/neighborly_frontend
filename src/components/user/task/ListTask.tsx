@@ -89,9 +89,8 @@ const TaskListPage: React.FC = () => {
     });
   }, [tasks]);
 
-  const formatDateTime = (timestamp: number, date: string | Date) => {
+  const formatDateTime = (time:string, date: string | Date) => {
     const dateObj = new Date(date);
-    const time = new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return `${dateObj.toLocaleDateString()} at ${time}`;
   };
 
@@ -274,7 +273,7 @@ const TaskListPage: React.FC = () => {
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
-                      {formatDateTime(task.timeSlot.startTime, task.prefferedDate)}
+                      {formatDateTime(task.prefferedTime, task.prefferedDate)}
                     </div>
 
                     <div className="mt-2 flex items-center text-sm text-gray-500">
@@ -391,7 +390,7 @@ const TaskListPage: React.FC = () => {
                       <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
-                      <p className="text-gray-800 font-medium">{formatDateTime(selectedTask.timeSlot.startTime, selectedTask.prefferedDate)}</p>
+                      <p className="text-gray-800 font-medium">{formatDateTime(selectedTask.prefferedTime, selectedTask.prefferedDate)}</p>
                     </div>
                   </div>
                   <div>
@@ -544,7 +543,7 @@ const TaskListPage: React.FC = () => {
                     </div>
                     <div className="ml-12">
                       <p className="text-sm font-medium text-gray-800">Task Scheduled</p>
-                      <p className="text-xs text-gray-500 mt-1">{formatDateTime(selectedTask.timeSlot.startTime, selectedTask.prefferedDate)}</p>
+                      <p className="text-xs text-gray-500 mt-1">{formatDateTime(selectedTask.prefferedTime, selectedTask.prefferedDate)}</p>
                     </div>
                   </div>
                 )}

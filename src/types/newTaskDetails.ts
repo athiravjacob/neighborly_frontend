@@ -10,7 +10,7 @@ export enum PaymentStatus {
 }
 export interface newTaskDetails {
   _id?: string;
-  createdBy: userGeneralInfo |null; 
+  createdBy: userGeneralInfo | null; 
   assignedNeighbor?: NeighborInfo | null; 
   location: string;
   category: string;
@@ -18,8 +18,9 @@ export interface newTaskDetails {
   description: string;
   est_hours: number;
   prefferedDate: Date | string;
-  timeSlot: {
-    startTime: number; 
+  prefferedTime: "morning" | "afternoon" | "evening";
+  timeSlot?: {
+    startTime?: number; 
     endTime?: number;
   };
   ratePerHour: number;

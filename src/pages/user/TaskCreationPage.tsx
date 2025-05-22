@@ -69,9 +69,7 @@ const TaskCreationPage: React.FC = () => {
       description: taskData?.taskDetails!,
       est_hours: calculateEstHours(taskData?.taskSize!)!,
       prefferedDate: schedule?.date!,
-      timeSlot: {
-        startTime: 1744266600
-      },
+      prefferedTime:schedule?.time!,
       ratePerHour: selectedHelper?.skills[0].hourlyRate!
     };
     console.log(taskDetails);

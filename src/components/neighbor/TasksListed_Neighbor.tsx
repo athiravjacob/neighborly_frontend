@@ -7,79 +7,12 @@ import NavbarLanding from '../user/common/Navbar-Landing';
 import Chat from '../user/task/ChatWithHelper';
 import { acceptTask } from '../../api/taskApiRequests';
 import { toast } from 'react-toastify';
+import { StatusBadge } from './StatusBadge';
+import { CategoryIcon } from './CategoryIcon';
 
-// Status badge component with a more modern look
-const StatusBadge = ({ status }: { status: TaskStatus }) => {
-  let bgColor = '';
-  let textColor = '';
-  let icon = '';
-  
-  switch (status) {
-    case "completed":
-      bgColor = 'bg-emerald-100';
-      textColor = 'text-emerald-700';
-      icon = '✓';
-      break;
-    case "assigned":
-      bgColor = 'bg-sky-100';
-      textColor = 'text-sky-700';
-      icon = '👤';
-      break;
-    case "in_progress":
-      bgColor = 'bg-violet-100';
-      textColor = 'text-violet-700';
-      icon = '⚙️';
-      break;
-    case "cancelled":
-      bgColor = 'bg-rose-100';
-      textColor = 'text-rose-700';
-      icon = '✕';
-      break;
-    case "pending":
-    default:
-      bgColor = 'bg-amber-100';
-      textColor = 'text-amber-700';
-      icon = '⏳';
-      break;
-  }
-  
-  return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${bgColor} ${textColor}`}>
-      <span className="mr-1">{icon}</span>
-      {status?.charAt(0).toUpperCase() + status?.slice(1) || "Pending"}
-    </span>
-  );
-};
 
-// Category icon component with a more colorful approach
-const CategoryIcon = ({ category }: { category: string }) => {
-  let icon = '📋';
-  let bgColor = 'bg-gray-100';
-  
-  switch (category.toLowerCase()) {
-    case 'handyman':
-      icon = '🔧';
-      bgColor = 'bg-blue-100';
-      break;
-    case 'cleaning':
-      icon = '🧹';
-      bgColor = 'bg-green-100';
-      break;
-    case 'garden':
-      icon = '🌱';
-      bgColor = 'bg-lime-100';
-      break;
-    default:
-      icon = '📋';
-      bgColor = 'bg-violet-100';
-  }
-  
-  return (
-    <span className={`${bgColor} flex items-center justify-center rounded-full w-10 h-10 text-xl mr-3`}>
-      {icon}
-    </span>
-  );
-};
+
+
 
 interface TaskListedNeighborProps {
   onTaskSelect: (taskId: string) => void;
@@ -107,9 +40,9 @@ const TaskListed_Neighbor: React.FC<TaskListedNeighborProps> = ({ onTaskSelect }
     });
   }, [tasks]);
 
-  const formatDateTime = (timestamp: number, date: string | Date) => {
+  const formatDateTime = (time: string, date: string | Date) => {
     const dateObj = new Date(date);
-    const time = new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // const time = new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return `${dateObj.toLocaleDateString()} at ${time}`;
   };
 
@@ -300,7 +233,7 @@ const TaskListed_Neighbor: React.FC<TaskListedNeighborProps> = ({ onTaskSelect }
                         <svg className="w-4 h-4 mr-2 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        {formatDateTime(task.timeSlot.startTime, task.prefferedDate)}
+                        {formatDateTime(task.prefferedTime, task.prefferedDate)}
                       </div>
 
                       <div className="flex items-center text-sm text-gray-500">

@@ -1,10 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Clock } from 'lucide-react';
+import { NeighborInfo } from '../../../types/neighbor';
+
+interface TimeSlot {
+  startTime: number;
+  endTime: number;
+  _id: string;
+}
+
+interface Availability {
+  date: string;
+  timeSlots: TimeSlot[];
+  _id: string;
+}
+
+interface Helper {
+  name: string;
+  availability: Availability[];
+  skills: { hourlyRate: number }[];
+}
+
+interface TaskData {
+  location: string;
+  taskSize: string;
+  taskDetails: string;
+  category: string;
+  subCategory: string;
+}
 
 interface ScheduleTaskProps {
-  onContinue: (data: { date: string; time: string }) => void; // Updated to accept date and time
-  selectedHelper: any;
-  taskData: { location: string; taskSize:string; taskDetails: string,category:string,subCategory:string };
+  onContinue: (data: { date: string; time: string }) => void;
+  selectedHelper: NeighborInfo;
+  taskData: TaskData;
 }
 
 export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
@@ -16,8 +43,13 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
   const [selectedTime, setSelectedTime] = useState<string>('14:00');
   const [timePreference, setTimePreference] = useState<string>('');
   const [isFlexible, setIsFlexible] = useState(false);
+  const [availablePreferences, setAvailablePreferences] = useState({
+    morning: false,
+    afternoon: false,
+    evening: false,
+  });
 
-  // Generate next 7 days from today (April 5, 2025 as per system date)
+  // Generate next 7 days from today (May 21, 2025)
   const today = new Date();
   const nextSevenDays = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(today);
@@ -26,9 +58,61 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
   });
 
   // Get available dates from selectedHelper
-  const availableDates = selectedHelper.availability.map((slot: { date: string | number | Date }) =>
-    new Date(slot.date).toDateString()
+  const availableDates = useMemo(
+    () =>
+      selectedHelper.availability.map((slot) =>
+        new Date(slot.date).toDateString()
+      ),
+    [selectedHelper.availability]
   );
+
+  // Check time slot availability for Morning, Afternoon, Evening
+  useEffect(() => {
+    if (!selectedDate) {
+      setAvailablePreferences({ morning: false, afternoon: false, evening: false });
+      return;
+    }
+
+    // Find availability for the selected date
+    const selectedDateObj = nextSevenDays.find((date) =>
+      selectedDate.includes(date.getDate().toString())
+    );
+    if (!selectedDateObj) return;
+
+    const availability = selectedHelper.availability.find(
+      (slot) => new Date(slot.date).toDateString() === selectedDateObj.toDateString()
+    );
+
+    if (!availability) {
+      setAvailablePreferences({ morning: false, afternoon: false, evening: false });
+      return;
+    }
+
+    // Convert time slots to IST hours and check preferences
+    const { timeSlots } = availability;
+    let morning = false;
+    let afternoon = false;
+    let evening = false;
+
+    timeSlots.forEach((slot) => {
+      // Convert Unix timestamp (seconds) to IST hours
+      const startHour = (new Date(slot.startTime * 1000).getUTCHours() + 5.5) % 24;
+      // Check if slot falls within time preference ranges
+      if (startHour >= 8 && startHour < 12) morning = true;
+      if (startHour >= 12 && startHour < 17) afternoon = true;
+      if (startHour >= 17 && startHour < 21) evening = true;
+    });
+
+    setAvailablePreferences({ morning, afternoon, evening });
+    // Clear time preference if it becomes unavailable
+    if (
+      (timePreference.includes('Morning') && !morning) ||
+      (timePreference.includes('Afternoon') && !afternoon) ||
+      (timePreference.includes('Evening') && !evening)
+    ) {
+      setTimePreference('');
+    }
+  }, [selectedDate, selectedHelper.availability]);
 
   const handleSelectDate = (date: Date) => {
     const formattedDate = date.toLocaleDateString('en-US', {
@@ -38,6 +122,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
       year: 'numeric',
     });
     setSelectedDate(formattedDate);
+    setTimePreference(''); // Reset time preference on date change
   };
 
   const formatTimeDisplay = (time24: string): string => {
@@ -53,26 +138,25 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
       alert('Please select a date');
       return;
     }
-    
-    // Determine the time to pass (either timePreference or formatted selectedTime)
+
     const timeSelection = timePreference || formatTimeDisplay(selectedTime);
     const finalTime = isFlexible ? `${timeSelection} (Flexible)` : timeSelection;
 
-    // Pass the selected date and time to the onContinue function
     onContinue({
       date: selectedDate,
       time: finalTime,
     });
   };
-  const estHours = (size: string):Number  => {
-    if (size === 'Small') return 1
-    if (size === 'Medium') return 3
-    if (size === 'Large') return 6
-    return 0
-  }
 
-  const hourlyRate = selectedHelper.skills[0].hourlyRate
-  const estimatedHours = Number(estHours(taskData.taskSize))*hourlyRate;
+  const estHours = (size: string): number => {
+    if (size === 'Small') return 1;
+    if (size === 'Medium') return 3;
+    if (size === 'Large') return 6;
+    return 0;
+  };
+
+  const hourlyRate = selectedHelper.skills[0].hourlyRate;
+  const estimatedHours = estHours(taskData.taskSize);
   const estimatedCost = hourlyRate * estimatedHours;
 
   return (
@@ -85,7 +169,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
 
       <div className="p-6">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Date Selection - Simplified 7-day view */}
+          {/* Date Selection */}
           <div className="flex-1">
             <h3 className="font-semibold text-lg mb-4">Select Date</h3>
             <div className="flex flex-wrap gap-2 bg-violet-50 rounded-lg p-4">
@@ -122,27 +206,32 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
               <Clock className="text-violet-700" size={20} />
               <h3 className="font-semibold text-lg">Select Time</h3>
             </div>
-            
+
             <div className="bg-violet-50 rounded-lg p-4 mb-4">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-violet-900 mb-2">Time Preference</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: 'morning', label: 'Morning', time: '8am - 12pm' },
-                    { id: 'afternoon', label: 'Afternoon', time: '12pm - 5pm' },
-                    { id: 'evening', label: 'Evening', time: '5pm - 9pm' }
+                    { id: 'morning', label: 'morning', time: '8am - 12pm' },
+                    { id: 'afternoon', label: 'afternoon', time: '12pm - 5pm' },
+                    { id: 'evening', label: 'evening', time: '5pm - 9pm' },
                   ].map((option) => (
                     <button
                       key={option.id}
                       onClick={() => {
-                        setTimePreference(option.label + ' (' + option.time + ')');
+                        setTimePreference(option.label );
                         setSelectedTime('');
                       }}
+                      disabled={!availablePreferences[option.id as keyof typeof availablePreferences]}
                       className={`
                         p-3 border rounded-lg text-center
-                        ${timePreference.includes(option.label)
-                          ? 'bg-violet-100 border-violet-400 text-violet-800'
-                          : 'border-violet-200 hover:bg-violet-50'}
+                        ${
+                          availablePreferences[option.id as keyof typeof availablePreferences]
+                            ? timePreference.includes(option.label)
+                              ? 'bg-violet-100 border-violet-400 text-violet-800'
+                              : 'border-violet-200 hover:bg-violet-50'
+                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        }
                       `}
                     >
                       <div className="font-medium">{option.label}</div>
@@ -151,7 +240,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
                   ))}
                 </div>
               </div>
-              
+
               <label className="flex items-center text-violet-900">
                 <input
                   type="checkbox"
@@ -168,7 +257,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
         {/* Summary and Continue */}
         <div className="bg-gray-50 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-lg mb-3">Task Summary</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <div className="flex justify-between text-sm mb-1">
@@ -184,7 +273,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
                 <span className="font-medium">{taskData.taskSize}</span>
               </div>
             </div>
-            
+
             <div>
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Date:</span>
@@ -203,7 +292,7 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
               </div>
             </div>
           </div>
-          
+
           <div className="mt-4">
             <button
               onClick={handleContinue}

@@ -159,6 +159,7 @@ export const CheckCityAvailability = async (city: string,category:string,subCate
   try {
     const response = await api.get(`/neighbors/service-availability?city=${city}&category=${category}&subCategory=${subCategory}`,{ withCredentials: true })
     console.log(response.data.data, "check service availble")
+    if (response.data.data.length === 0) return false 
     return response.data.data
     
   } catch (error) {

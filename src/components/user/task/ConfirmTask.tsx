@@ -4,7 +4,7 @@ import { NeighborInfo } from "../../../types/neighbor";
 
 interface ConfirmTaskProps {
   onConfirm: () => void;
-  taskData: { location: string; taskSize: string; taskDetails: string ,category:string,subCategory:string};
+  taskData: { location: string; taskSize: string; taskDetails: string; category: string; subCategory: string };
   selectedHelper: NeighborInfo;
   schedule: { date: string; time: string };
 }
@@ -15,20 +15,43 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
   selectedHelper,
   schedule,
 }) => {
-  console.log(taskData,"Task Details")
-
   if (!selectedHelper) {
     return <div>Error: Helper not found.</div>;
   }
 
   // Calculate estimated time and cost based on task size
   const estimatedTimeMap: { [key: string]: number } = {
-    Small: 1, 
-    Medium: 3, 
+    Small: 1,
+    Medium: 3,
     Large: 6,
   };
-  const estimatedTime = estimatedTimeMap[taskData.taskSize] || 2; 
+  const estimatedTime = estimatedTimeMap[taskData.taskSize] || 2;
   const estimatedCost = selectedHelper.skills[0].hourlyRate * estimatedTime;
+
+  // Function to determine time preference (Morning, Afternoon, Evening)
+  const getTimePreference = (time: string): string => {
+    // Check if time already contains a preference label
+    if (time.includes("Morning")) return "Morning";
+    if (time.includes("Afternoon")) return "Afternoon";
+    if (time.includes("Evening")) return "Evening";
+
+    // Parse specific time (e.g., "2:00pm") to determine preference
+    const match = time.match(/(\d+):(\d{2})(am|pm)/i);
+    if (match) {
+      let hours = parseInt(match[1]);
+      const period = match[3].toLowerCase();
+      if (period === "pm" && hours !== 12) hours += 12;
+      if (period === "am" && hours === 12) hours = 0;
+
+      if (hours >= 8 && hours < 12) return "Morning";
+      if (hours >= 12 && hours < 17) return "Afternoon";
+      if (hours >= 17 && hours < 21) return "Evening";
+    }
+
+    return time; 
+  };
+
+  const timePreference = getTimePreference(schedule.time);
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
@@ -65,7 +88,7 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
             <div className="flex items-center gap-2">
               <Clock size={18} className="text-gray-600" />
               <span className="text-gray-700">
-                <span className="font-medium">Time:</span> {schedule.time}
+                <span className="font-medium">Time:</span> {timePreference}
               </span>
             </div>
             <div className="flex items-center gap-2">
