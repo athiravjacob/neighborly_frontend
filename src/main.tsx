@@ -30,6 +30,6 @@ createRoot(document.getElementById('root')!).render(
           </QueryClientProvider>
         </BrowserRouter>
       </PersistGate>
-    </Provider>
+    </Provider>a
   </StrictMode>,
 )

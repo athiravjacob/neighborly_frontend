@@ -29,9 +29,9 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
 
   // New state for task acceptance form
   const [taskAcceptanceForm, setTaskAcceptanceForm] = useState({
-    estimatedHours: '',
-    paymentAmount: '',
-    extraCharges: '',
+    estimatedHours: 0,
+    paymentAmount: 0,
+    extraCharges: 0,
     arrivalTime: '',
     materialsCoverage: 'none', // 'none', 'user' or 'helper'
     notes: ''
@@ -73,7 +73,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
       
       // Clear extra charges if not providing materials
       if (field === 'materialsCoverage' && value !== 'helper') {
-        updated.extraCharges = '';
+        updated.extraCharges = 0;
       }
       
       return updated;
@@ -90,7 +90,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
         return;
       }
 
-      const accept = await acceptTask(taskId);
+      const accept = await acceptTask(taskId,user?.id!,taskAcceptanceForm);
       if (accept) {
         toast.success("Task accepted successfully! The user has been notified.");
         // You might want to send the form data to the backend here as well
@@ -173,51 +173,184 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
           </div>
 
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Task Details</h3>
-                <div className="space-y-3">
-                  <p className="flex items-start">
-                    <span className="w-24 text-gray-600 font-medium">Description:</span>
-                    <span className="text-gray-900">{selectedTask.description}</span>
-                  </p>
-                  <p className="flex items-start">
-                    <span className="w-24 text-gray-600 font-medium">Location:</span>
-                    <span className="text-gray-900">{selectedTask.location}</span>
-                  </p>
-                  <p className="flex items-start">
-                    <span className="w-24 text-gray-600 font-medium">Est. Hours:</span>
-                    <span className="text-gray-900">{selectedTask.est_hours}</span>
-                  </p>
-                  <p className="flex items-start">
-                    <span className="w-24 text-gray-600 font-medium">Rate:</span>
-                    <span className="text-gray-900">₹{selectedTask.ratePerHour}/hour</span>
-                  </p>
-                  <p className="flex items-start">
-                    <span className="w-24 text-gray-600 font-medium">Total:</span>
-                    <span className="text-gray-900 font-semibold">₹{selectedTask.ratePerHour * selectedTask.est_hours}</span>
-                  </p>
-                  <p className="flex items-start">
-                    <span className="w-24 text-gray-600 font-medium">Payment:</span>
-                    <span className="text-gray-900 capitalize">{selectedTask.payment_status || PaymentStatus.PENDING}</span>
-                  </p>
-                </div>
-              </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+  <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+    {/* Task Details Section */}
+    <div className="p-6 lg:p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
+        <h3 className="text-lg font-semibold text-gray-900">Task Details</h3>
+      </div>
+      
+      <div className="space-y-5">
+        <div className="group">
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+            Description
+          </dt>
+          <dd className="text-gray-900 font-medium leading-relaxed">
+            {selectedTask.description}
+          </dd>
+        </div>
 
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Schedule & Helper</h3>
-                <div className="space-y-3">
-                  <p className="flex items-start">
-                    <span className="w-24 text-gray-600 font-medium">Scheduled:</span>
-                    <span className="text-gray-900">{formatDateTime(selectedTask.prefferedTime, selectedTask.prefferedDate)}</span>
-                  </p>
-                  <p className="flex items-start">
-                    <span className="w-24 text-gray-600 font-medium">Created By:</span>
-                    <span className="text-gray-900">{selectedTask.createdBy ? selectedTask.createdBy?.name : 'Unknown'}</span>
-                  </p>
-                </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="group">
+            <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+              Location
+            </dt>
+            <dd className="text-gray-900 font-medium">
+              {selectedTask.location}
+            </dd>
+          </div>
+
+          <div className="group">
+            <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+              Est. Hours
+            </dt>
+            <dd className="text-gray-900 font-medium">
+              {selectedTask.est_hours}
+            </dd>
+          </div>
+        </div>
+
+        {/* Pricing Breakdown */}
+        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+          {!selectedTask.baseAmount && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Service Charge</span>
+              <span className="font-semibold text-gray-900">
+                ₹{selectedTask.ratePerHour * selectedTask.est_hours}
+              </span>
+            </div>
+          )}
+          
+          {selectedTask.baseAmount && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Service Charge</span>
+              <span className="font-semibold text-gray-900">
+                ₹{selectedTask.baseAmount}
+              </span>
+            </div>
+          )}
+
+          {selectedTask.extra_charges && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Extra Charges</span>
+              <span className="font-semibold text-gray-900">
+                ₹{selectedTask.extra_charges}
+              </span>
+            </div>
+          )}
+
+          {selectedTask.platform_fee && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Platform Fee</span>
+              <span className="font-semibold text-gray-900">
+                ₹{selectedTask.platform_fee}
+              </span>
+            </div>
+          )}
+
+          <div className="border-t border-gray-200 pt-3">
+            <div className="flex justify-between items-center">
+              <span className="text-base font-semibold text-gray-900">Total Amount</span>
+              <span className="text-xl font-bold text-blue-600">
+                ₹{selectedTask.final_amount || selectedTask.ratePerHour * selectedTask.est_hours}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Status */}
+        <div className="group">
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+            Payment Status
+          </dt>
+          <dd>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium capitalize ${
+               selectedTask.payment_status === 'paid'
+                ? 'bg-green-100 text-green-800'
+                : selectedTask.payment_status === 'pending'
+                ? 'bg-yellow-100 text-yellow-800'
+                : selectedTask.payment_status === 'disputed'
+                ? 'bg-red-100 text-red-800'
+                : 'bg-gray-100 text-gray-800'
+            }`}>
+              {selectedTask.payment_status || PaymentStatus.PENDING}
+            </span>
+          </dd>
+        </div>
+      </div>
+    </div>
+
+    {/* Schedule & Helper Section */}
+    <div className="p-6 lg:p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-2 h-8 bg-green-500 rounded-full"></div>
+        <h3 className="text-lg font-semibold text-gray-900">Schedule & Helper</h3>
+      </div>
+      
+      <div className="space-y-5">
+        <div className="group">
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+            Scheduled Time
+          </dt>
+          <dd className="text-gray-900 font-medium">
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+              <div className="text-lg font-semibold text-blue-900">
+                {formatDateTime(selectedTask.prefferedTime, selectedTask.prefferedDate)}
               </div>
             </div>
+          </dd>
+        </div>
+
+        <div className="group">
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+            Task Creator
+          </dt>
+          <dd>
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-gray-700">
+                  {selectedTask.createdBy?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </span>
+              </div>
+              <div>
+                <div className="font-medium text-gray-900">
+                  {selectedTask.createdBy?.name || 'Unknown User'}
+                </div>
+                {selectedTask.createdBy?.email && (
+                  <div className="text-sm text-gray-500">
+                    {selectedTask.createdBy.email}
+                  </div>
+                )}
+              </div>
+            </div>
+          </dd>
+        </div>
+
+        {/* Additional Info Section */}
+        <div className="group">
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+            Task Status
+          </dt>
+          <dd>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium capitalize ${
+              selectedTask.task_status === 'completed'
+                ? 'bg-green-100 text-green-800'
+                : selectedTask.task_status === 'in_progress'
+                ? 'bg-blue-100 text-blue-800'
+                : selectedTask.task_status === 'pending'
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-gray-100 text-gray-800'
+            }`}>
+              {selectedTask.task_status || 'Pending'}
+            </span>
+          </dd>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
            {/* Enhanced Task Actions Section */}
 {selectedTask.task_status === "pending" && (
@@ -422,7 +555,16 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
       </div>
     </div>
   </div>
-)}
+            )}
+            
+
+
+
+
+
+
+
+            
 
             {/* Start Task Section */}
             {selectedTask.task_status === "assigned" && (

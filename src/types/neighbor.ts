@@ -22,6 +22,7 @@ export interface NeighborInfo {
     timeSlots: {
       startTime: number;
       endTime: number;
+      note: "available" | "booked";
     }[];
     }[];
     isVerified: Boolean;

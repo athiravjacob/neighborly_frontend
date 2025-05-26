@@ -22,11 +22,15 @@ export interface newTaskDetails {
   timeSlot?: {
     startTime?: number; 
     endTime?: number;
+    note:"available"|"booked"
+
   };
   ratePerHour: number;
   baseAmount?: number;
   platform_fee?: number;
   final_amount?: number;
+  extra_charges?: number;
+  additional_notes?: string;
   task_status?: TaskStatus; 
   payment_status?: PaymentStatus;
   task_code?:string

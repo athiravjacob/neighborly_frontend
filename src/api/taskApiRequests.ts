@@ -1,6 +1,7 @@
 import axios from "axios";
 import api from "./apiConfig"
 import { newTaskDetails ,TaskStatus} from "../types/newTaskDetails";
+import { TaskAcceptForm } from "../types/taskAcceptForm";
 
 //**************create new task ************************ */
 export const createTask = async (newTask: newTaskDetails): Promise<void>=>{
@@ -53,9 +54,21 @@ export const showTasks = async (userId: string, role: string): Promise<newTaskDe
 };
 
 //************************ Neighbor Accept Task  **************** */
-export const acceptTask = async (taskId:string): Promise<Boolean> => {
-    try {
-      const response = await api.patch(`/tasks/${taskId}/accept`)
+export const acceptTask = async (taskId:string,neighborId:string,taskAcceptanceForm:TaskAcceptForm): Promise<Boolean> => {
+  try {
+    console.log(taskAcceptanceForm)
+    
+    const date = new Date(taskAcceptanceForm.arrivalTime);
+    const startTime = Math.floor(date.getTime() / 1000); 
+    const taskAcceptDetails = {
+      startTime,
+      est_hours: taskAcceptanceForm.estimatedHours,
+      extra_charges: taskAcceptanceForm.extraCharges,
+      additional_notes: taskAcceptanceForm.notes,
+      baseAmount :taskAcceptanceForm.paymentAmount
+    }
+
+      const response = await api.patch(`/tasks/${taskId}/accept`,{taskAcceptDetails,neighborId})
       console.log(response)
       if(response)
         return true

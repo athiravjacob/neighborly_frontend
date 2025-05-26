@@ -44,7 +44,7 @@ export const signup = async (
 ): Promise<AuthResponse> => {
   try {
     const user={name,email,phone,password}
-    const response = await api.post("/auth/users", { user});
+    const response = await api.post("/auth/users", {user});
     return response.data; 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
