@@ -14,8 +14,8 @@ import {
   Star,
   Shield,
 } from "lucide-react";
-import neighbors from "../../assets/team.png";
-import group from '../../assets/group-help.png'
+import neighbors from "../../assets/images/team.png";
+import group from '../../assets/images/group-help.png'
 import { NeighborLogin, NeighborSignup } from "../../api/neighborApiRequests";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";

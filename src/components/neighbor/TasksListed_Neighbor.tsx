@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { PaymentStatus, TaskStatus, newTaskDetails } from '../../types/newTaskDetails';
 import { RootState } from '../../redux/store';
 import { useTasks } from '../../hooks/useTasks';
-import NavbarLanding from '../user/common/Navbar-Landing';
+import NavbarLanding from '../layout/Navbar-Landing';
 import Chat from '../user/task/ChatWithHelper';
 import { acceptTask } from '../../api/taskApiRequests';
 import { toast } from 'react-toastify';

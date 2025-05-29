@@ -1,34 +1,20 @@
 import React, { useState } from 'react';
-import signupImage from '../../assets/Team work-bro.png';
+import signupImage from '../../assets/images/Team work-bro.png';
 import SignupForm from '../../components/user/auth/SignupForm';
 import LoginForm from '../../components/user/auth/LoginForm';
 import { useLocation, useNavigate } from 'react-router-dom';
-import NavbarLanding from '../../components/user/common/Navbar-Landing';
+import NavbarLanding from '../../components/layout/Navbar-Landing';
 
 const SignUpPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isLogin = location.pathname === '/login';
-  const [showLoader, setShowLoader] = useState<boolean>(false);
-  const [hasLoggedIn, setHasLoggedIn] = useState<boolean>(false); // New state to track login completion
-
-  const handleLoginSuccess = () => {
-    setShowLoader(true);
-    setHasLoggedIn(true); 
-    setTimeout(() => {
-      setShowLoader(false);
-      navigate('/home');
-    }, 500); 
-  };
+  
+  const handleLoginSuccess = () => navigate('/home');
 
   return (
     <div className="min-h-screen w-full bg-gray-100 flex flex-col">
-      {showLoader ? (
-        <div className='m-auto bg-gray-100'>
-          {/* <Loader></Loader> */}
-        </div>
-      ): hasLoggedIn ? null : ( // If login is complete but loader is off, show nothing until navigation
-        <>
+      <>
           <NavbarLanding />
           <div className="w-full flex-grow flex flex-col md:flex-row">
             <div className="w-full md:w-1/2 flex">
@@ -43,7 +29,7 @@ const SignUpPage: React.FC = () => {
             </div>
           </div>
         </>
-      )}
+      
     </div>
   );
 };

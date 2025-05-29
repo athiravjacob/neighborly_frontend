@@ -1,90 +1,54 @@
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UserInfo } from '../../../types/settings';
-import { updateBanStatus } from '../../../api/adminApiRequests'; // Add fetchUser
-import { fetchProfile } from '../../../api/apiRequests';
+
+import { useLocation, useNavigate } from "react-router-dom";
+import { userGeneralInfo } from "../../../types/UserDTO";
+import { useProfileSettings } from "../../../hooks/useProfileSettings";
+import BanButton from "../../../components/admin/common/BanButton";
+
+const ROUTES = {
+  ADMIN_USERS: '/admin/dashboard/users',
+};
 
 const UserDetails: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const initialUser = location.state?.user as UserInfo | undefined;
+  const initialUser = location.state?.user as userGeneralInfo | undefined;
 
-  // Fetch user data with useQuery
-  const { data: user, isLoading, error: queryError } = useQuery({
-    queryKey: ['user', initialUser?._id],
-    queryFn: () => fetchProfile(initialUser!._id), // API call to fetch user
-    enabled: !!initialUser?._id, // Only fetch if _id exists
-    initialData: initialUser, // Use location.state.user as initial data
-  });
-
-  if (isLoading) {
+  if (!initialUser) {
     return (
-      <main className="flex-1 p-8">
-        <p>Loading user data...</p>
-      </main>
-    );
-  }
-
-  if (!user || queryError) {
-    return (
-      <main className="flex-1 p-8">
-        <p className="text-red-500">No user data available. Please select a user from the list.</p>
+      <div className="p-8">
+        <p className="text-red-500">User data not found.</p>
         <button
-          className="mt-4 px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700"
-          onClick={() => navigate('/admin/dashboard/users')}
+          className="px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700"
+          onClick={() => navigate(ROUTES.ADMIN_USERS)}
+          aria-label="Back to users list"
         >
-          Back to User List
+          Back to Users
         </button>
-      </main>
+      </div>
     );
   }
+  
+  const { userDetails, isLoading, error } = useProfileSettings(initialUser._id!);
+  console.log(userDetails)
+  console.log(initialUser)
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  // React Query mutation for ban/unban
-  const { mutate, isPending, isError, error } = useMutation({
-    mutationFn: () => updateBanStatus(user._id, 'user'),
-    onMutate: async () => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['user', user._id] });
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
 
-      // Snapshot the previous user data
-      const previousUser = queryClient.getQueryData<UserInfo>(['user', user._id]);
-
-      // Optimistically update the user data
-      queryClient.setQueryData(['user', user._id], (old: UserInfo | undefined) => {
-        if (!old) return old;
-        return { ...old, isBanned: !old.isBanned }; // Toggle isBanned
-      });
-
-      // Return context for rollback
-      return { previousUser };
-    },
-    onError: (err, variables, context) => {
-      // Rollback to previous user data on error
-      if (context?.previousUser) {
-        queryClient.setQueryData(['user', user._id], context.previousUser);
-      }
-      alert(err.message || 'Failed to ban/unban user'); // Fix: Use err instead of error
-    },
-    onSuccess: (result) => {
-      alert(`User ${user.name} has been ${result ? 'banned' : 'unbanned'}`);
-    },
-    onSettled: () => {
-      // Invalidate queries to sync with server state
-      queryClient.invalidateQueries({ queryKey: ['user', user._id] });
-    },
-  });
-
-  const handleBanUser = () => {
-    mutate();
-  };
+  if (!userDetails) {
+    return <div>No user data found</div>;
+  }
 
   return (
     <main className="flex-1 p-8">
       <button
         className="px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 mb-6 flex items-center"
-        onClick={() => navigate('/admin/dashboard/users')}
+        onClick={() => navigate(ROUTES.ADMIN_USERS)}
+        aria-label="Back to users list"
       >
         <span className="text-xl mr-2">←</span>
         <span>Back to Users</span>
@@ -96,12 +60,11 @@ const UserDetails: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Larger Image Section */}
           <div className="lg:col-span-1">
-            {user.profilePicture ? (
+            {userDetails.profilePicture ? (
               <img
-                src={user.profilePicture}
-                alt={`${user.name}'s profile`}
+                src={userDetails.profilePicture}
+                alt={`${userDetails.name || 'User'}'s profile`}
                 className="w-64 h-64 rounded-full object-cover mx-auto mb-4 shadow-lg"
               />
             ) : (
@@ -111,39 +74,23 @@ const UserDetails: React.FC = () => {
             )}
           </div>
 
-          {/* Details Section */}
           <div className="lg:col-span-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="mb-4">
                 <span className="font-semibold text-white block">Name:</span>
-                <span>{user.name}</span>
+                <span>{userDetails.name || 'Not provided'}</span>
               </div>
               <div className="mb-4">
                 <span className="font-semibold text-white block">Email:</span>
-                <span>{user.email}</span>
+                <span>{userDetails.email || 'Not provided'}</span>
               </div>
               <div className="mb-4">
                 <span className="font-semibold text-white block">Phone:</span>
-                <span>{user.phone || 'Not provided'}</span>
-              </div>
-              <div className="mb-4">
-                <span className="font-semibold text-white block">Date of Birth:</span>
-                <span>{user.DOB ? new Date(user.DOB).toLocaleDateString() : 'Not provided'}</span>
+                <span>{userDetails.phone || 'Not provided'}</span>
               </div>
             </div>
 
-            <button
-              className={`mt-6 px-6 py-2 ${
-                isPending ? 'bg-gray-600' : 'bg-red-600 hover:bg-red-700'
-              } text-white rounded`}
-              onClick={handleBanUser}
-              disabled={isPending}
-            >
-              {isPending ? 'Processing...' : user.isBanned ? 'Unban User' : 'Ban User'}
-            </button>
-            {isError && (
-              <p className="mt-2 text-red-500">{error?.message || 'An error occurred'}</p>
-            )}
+            <BanButton userId={initialUser._id!} isBanned={userDetails.isBanned!} />
           </div>
         </div>
       </div>

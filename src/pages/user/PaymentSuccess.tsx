@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CheckCircle, ArrowLeft, Copy, ClipboardCheck } from "lucide-react";
-import NavbarLanding from "../../components/user/common/Navbar-Landing";
+import NavbarLanding from "../../components/layout/Navbar-Landing";
 import { newTaskDetails } from "../../types/newTaskDetails";
 
 interface TransactionDetails {

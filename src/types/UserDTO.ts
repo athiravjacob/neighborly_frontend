@@ -11,5 +11,6 @@ export interface userGeneralInfo{
   email: string,
   phone?: string,
   dob?:Date|string,
-  profilePicture?:string
+  profilePicture?: string,
+  isBanned?:boolean
 }

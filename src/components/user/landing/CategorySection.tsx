@@ -3,12 +3,12 @@
 import React, { useState } from "react"
 import { motion } from "framer-motion"
 import { Sparkles, Truck, Wrench, Leaf, PackageOpen, ClipboardList, ChevronRight } from "lucide-react"
-import cleaning from '../../../assets/categories/Cleaning.jpg'
-import gardening from '../../../assets/categories/gardening.jpg'
-import drive from '../../../assets/categories/drive.jpg'
-import handyman from '../../../assets/categories/handyman.jpg'
-import delivery from '../../../assets/categories/delivery.jpg'
-import moving from '../../../assets/categories/moving.jpg'
+import cleaning from '../../../assets/images/categories/Cleaning.jpg'
+import gardening from '../../../assets/images/categories/gardening.jpg'
+import drive from '../../../assets/images/categories/drive.jpg'
+import handyman from '../../../assets/images/categories/handyman.jpg'
+import delivery from '../../../assets/images/categories/delivery.jpg'
+import moving from '../../../assets/images/categories/moving.jpg'
 import { useNavigate } from "react-router-dom"
 
 // Define category data with Lucide icons instead of emojis

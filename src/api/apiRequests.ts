@@ -1,7 +1,6 @@
-import { current } from "@reduxjs/toolkit";
-import { UserInfo, UserProfile } from "../types/settings";
 import api from "./apiConfig";
 import axios from "axios";
+import { userGeneralInfo } from "../types/UserDTO";
 
 interface AuthResponse {
   id: string,
@@ -57,7 +56,9 @@ export const signup = async (
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
   try {
-      const response = await api.post("/auth/users/login", { email, password },{ withCredentials: true });
+    console.log("login")
+    const response = await api.post("/auth/users/login", { email, password }, { withCredentials: true });
+    console.log(response)
       return response.data.data;
       
   } catch (error) {
@@ -136,7 +137,7 @@ export const resetPassword = async (email:string,token: string,newPassword:strin
 // };
 
 //*****************************Save Profile Details ****************** */
-export const saveProfile = async (userId:string,profileDetails: UserProfile): Promise<any> => {
+export const saveProfile = async (userId:string,profileDetails: userGeneralInfo): Promise<any> => {
   try {
     const response = await api.patch(`/users/${userId}`, { profileDetails });
     console.log(response.data.data,"save profile function")
@@ -151,7 +152,7 @@ export const saveProfile = async (userId:string,profileDetails: UserProfile): Pr
 
 //****************************Get Profile Details****************************/
 
-export const fetchProfile = async (userId:string): Promise<any> => {
+export const fetchProfile = async (userId:string): Promise<userGeneralInfo> => {
   try {
     const response = await api.get(`/users/${userId}`);
     console.log(response.data.data,"fetch profile")

@@ -1,29 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchProfile, saveProfile } from '../api/apiRequests';
 import { uploadImageToCloudinary } from '../utilis/UploadImageTocloudinary';
+import { userGeneralInfo } from '../types/UserDTO';
 
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  dob: string;
-  profilePicture: string | null;
-}
+
 
 export const useProfileSettings = (userId: string) => {
   const queryClient = useQueryClient();
 
-  const { data: userDetails, isLoading, error } = useQuery<UserProfile, Error>({
+  const { data: userDetails, isLoading, error } = useQuery<userGeneralInfo, Error>({
     queryKey: ['userProfile', userId],
     queryFn: () => fetchProfile(userId!),
     enabled: !!userId,
   });
 
   const updateProfileMutation = useMutation<
-    UserProfile,
+  userGeneralInfo,
     Error,
-    { profile: UserProfile; file?: File } // Accept profile and optional file
+    { profile: userGeneralInfo; file?: File } // Accept profile and optional file
   >({
     mutationFn: async ({ profile, file }) => {
       console.log('Starting profile update mutation...');
@@ -41,7 +35,7 @@ export const useProfileSettings = (userId: string) => {
         console.log('No new image provided, using existing profile picture:', profilePicture);
       }
 
-      const updatedProfile: UserProfile = {
+      const updatedProfile: userGeneralInfo = {
         ...profile,
         profilePicture: profilePicture,
       };
@@ -63,7 +57,7 @@ export const useProfileSettings = (userId: string) => {
     userDetails,
     isLoading,
     error,
-    updateProfile: (profile: UserProfile, file?: File) =>
+    updateProfile: (profile: userGeneralInfo, file?: File) =>
       updateProfileMutation.mutate({ profile, file }),
     isUpdating: updateProfileMutation.isPending,
     updateError: updateProfileMutation.error,

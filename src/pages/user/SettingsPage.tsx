@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import NavbarLanding from '../../components/user/common/Navbar-Landing';
+import NavbarLanding from '../../components/layout/Navbar-Landing';
 import { RootState } from '../../redux/store';
 import { useProfileSettings } from '../../hooks/useProfileSettings';
 import { uploadImageToCloudinary } from '../../utilis/UploadImageTocloudinary';

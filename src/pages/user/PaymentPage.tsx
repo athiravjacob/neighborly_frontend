@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import NavbarLanding from "../../components/user/common/Navbar-Landing";
+import NavbarLanding from "../../components/layout/Navbar-Landing";
 import { CreditCard, Calendar, User, ClipboardList } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import { useState } from "react";

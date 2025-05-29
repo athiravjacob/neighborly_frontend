@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { getAllUsers } from '../../../api/adminApiRequests';
 import { RootState } from '../../../redux/store';
-import { UserInfo } from '../../../types/settings';
 import { format } from 'date-fns';
+import { userGeneralInfo } from '../../../types/UserDTO';
 
 const UserList: React.FC = () => {
-    const [users, setUsers] = useState<UserInfo[]>([]);
+    const [users, setUsers] = useState<userGeneralInfo[]>([]);
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const {  user } = useSelector((state: RootState) => state.auth);
@@ -29,7 +29,7 @@ const UserList: React.FC = () => {
     }, [ user, navigate]);
 
     // Add click handler function
-    const handleUserClick = (user: UserInfo) => {
+    const handleUserClick = (user: userGeneralInfo) => {
         // console.log(user)
         navigate('/admin/dashboard/users/details', { state: { user } });
     };
@@ -57,7 +57,7 @@ const UserList: React.FC = () => {
                                     <th className="py-3 px-4">Name</th>
                                     <th className="py-3 px-4">Email</th>
                                     <th className="py-3 px-4">Phone</th>
-                                    <th className="py-3 px-4">Dob</th>
+                                    <th className="py-3 px-4">User Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -70,7 +70,7 @@ const UserList: React.FC = () => {
                                         <td className="py-3 px-4">{user.name}</td>
                                         <td className="py-3 px-4">{user.email}</td>
                                         <td className="py-3 px-4">{user.phone}</td>
-                                        <td className="py-3 px-4">{user.DOB ? formatDOB(user.DOB) : 'N/A'}</td>
+                                        <td className="py-3 px-4">{user.isBanned ?"Banned":"Active"}</td>
                                         
                                     </tr>
                                 ))}

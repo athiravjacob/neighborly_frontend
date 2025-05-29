@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
-import NavbarLanding from '../common/Navbar-Landing';
+import NavbarLanding from '../../layout/Navbar-Landing';
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../../hooks/useTasks';
 import { newTaskDetails, TaskStatus, PaymentStatus } from '../../../types/newTaskDetails';

@@ -1,4 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
+import { clearCredentials } from "../redux/slices/authSlice";
+import { store } from "../redux/store";
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URI
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
@@ -31,7 +33,21 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
+  
 
+    if (
+      error.response?.status === 403 &&
+      error.response?.data &&
+      typeof error.response.data === 'object' &&
+      'message' in error.response.data &&
+      error.response.data.message === 'Your account has been banned by Admin'
+    ) {
+      console.log("banned")
+      store.dispatch(clearCredentials());
+      // Redirect to banned page
+      window.location.href = '/banned';
+      return Promise.reject(error);
+    }
     if (
       error.response?.status === 401 &&
       error.response.data &&
@@ -60,6 +76,7 @@ api.interceptors.response.use(
         processQueue(null); // Retry all failed requests
         return api(originalRequest); // Retry original request
       } catch (refreshError) {
+        
         processQueue(refreshError, null);
         window.location.href = '/login';
         return Promise.reject(refreshError);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import NavbarLanding from '../../components/user/common/Navbar-Landing';
+import NavbarLanding from '../../components/layout/Navbar-Landing';
 import { DescribeTask } from '../../components/user/task/DescribeTask';
 import { BrowseNeighbors } from '../../components/user/task/BrowseHelpers';
 import { ScheduleTask } from '../../components/user/task/ScheduleTask';

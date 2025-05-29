@@ -1,5 +1,7 @@
+import moment from "moment";
+import { WeeklyAvailability } from "../pages/neighbor/Schedules/DayAvailability";
 import { UserDTO } from "../types/UserDTO";
-import { AvailabilityEvent } from "../types/availabilityEvent";
+import { AvailabilityEvent, BackendAvailability } from "../types/availabilityEvent";
 import { Location } from "../types/locationDTO";
 import { NeighborInfo } from "../types/neighbor";
 import { skillsDTO } from "../types/skillsDTO";
@@ -7,6 +9,7 @@ import { Transaction } from "../types/transactions";
 import { WalletDetails } from "../types/wallet";
 import api from "./apiConfig";
 import axios from "axios";
+import { Availability } from "../pages/neighbor/Schedules/FetchAvailability";
 
 interface AuthResponse {
   id: string,
@@ -49,10 +52,28 @@ export const NeighborLogin = async (email: string, password: string): Promise<Us
 };
 
 //************************ Schedule date and time ************************** */
+const dayMap: { [key: string]: "sun"|"mon" | "tue" | "wed" | "thur" | "fri" | "sat"  } = {
+  Monday: "mon",
+  Tuesday: "tue",
+  Wednesday: "wed",
+  Thursday: "thur",
+  Friday: "fri",
+  Saturday: "sat",
+  Sunday: "sun",
+};
+// Convert HH:mm to minutes past midnight
+const timeToMinutes = (time: string): number => {
+  const momentTime = moment(time, "HH:mm");
+  if (!momentTime.isValid()) {
+    throw new Error(`Invalid time format: ${time}`);
+  }
+  return momentTime.hours() * 60 + momentTime.minutes();
+};
 
-export const ScheduleTimeslots = async (neighborId:string,availability:any): Promise<void> => {
+export const ScheduleTimeslots = async (neighborId:string,availability:Availability[]): Promise<void> => {
   try {
-      const response = await api.post(`/neighbors/${neighborId}/timeslots`, {availability});
+    
+      const response = await api.post(`/neighbors/${neighborId}/timeslots`, {availability:availability});
       console.log(response.data.data)
       // return response.data.data;
       
@@ -63,23 +84,18 @@ export const ScheduleTimeslots = async (neighborId:string,availability:any): Pro
     throw new Error("An unexpected error occurred");
   }
 };
-
-
 //******************** Fetch Availabilty *********************** */
 
-export const FetchAvailability = async (neighborId: string): Promise<AvailabilityEvent[]> => {
+
+
+export const FetchAvailability = async (neighborId: string): Promise<Availability[]> => {
   try {
-    const response = await api.get(`/neighbors/${neighborId}/timeslots`,{withCredentials:true});
-    const availabilityData = response.data.data; 
-    const events = availabilityData.flatMap((item: any) =>
-      item.timeSlots.map((slot: any) => ({
-        id: `${item.date}-${slot.startTime}`, 
-        start: new Date(slot.startTime * 1000), 
-        end: new Date(slot.endTime * 1000),
-        title: "Available",
-      }))
-    );
-    return events;
+    const response = await api.get(`/neighbors/${neighborId}/timeslots`, { withCredentials: true });
+    const availabilityData = response.data.data; // Object with availability array
+    console.log(availabilityData);
+
+
+    return availabilityData;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message || "Failed to fetch availability");

@@ -8,7 +8,7 @@ import { clearCredentials } from "../../../redux/slices/authSlice";
 
 const ProtectedRoutes: React.FC = () => {
   const { user,isAuthenticated } = useSelector((state: RootState) => state.auth);
-  
+  console.log(user)
 
   if (!isAuthenticated || user?.type !== 'user' ) {
     return <Navigate to="/" replace />;

@@ -73,7 +73,7 @@ export const verifyNeighbor = async (neighborId:string): Promise<Boolean> => {
   }
 }
 
-export const updateBanStatus = async (id: string, type: 'neighbor' | 'user'): Promise<Boolean> => {
+export const updateBanStatus = async (id: string, type: 'neighbor' | 'user'): Promise<boolean> => {
   try {
     const endpoint = type === 'neighbor' ? `/admin/neighbors/${id}/ban` : `/admin/users/${id}/ban`;
     const banResult = await api.patch(endpoint);

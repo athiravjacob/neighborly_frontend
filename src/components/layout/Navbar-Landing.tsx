@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { RootState } from '../../../redux/store';
+import { RootState } from '../../redux/store';
 import { User } from 'lucide-react'; // assuming you're using lucide-react icons
-import { logout } from '../../../api/apiRequests';
-import { clearCredentials } from '../../../redux/slices/authSlice';
-import { showTasks } from '../../../api/taskApiRequests';
+import { logout } from '../../api/apiRequests';
+import { clearCredentials } from '../../redux/slices/authSlice';
+import { showTasks } from '../../api/taskApiRequests';
 
 const NavbarLanding: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

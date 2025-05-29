@@ -19,7 +19,6 @@ import NeighborHome from './pages/neighbor/Neighbor-home';
 import CompleteYourProfile from './pages/neighbor/CompleteProfile';
 import TaskListPage from './components/user/task/ListTask';
 import SettingsPage from './pages/user/SettingsPage';
-import KYCProcess from './pages/user/Kyc';
 import Chat from './components/Chat'
 import NeighborList from './pages/admin/Main/NeighborList';
 import ChatWithHelper from './components/user/task/ChatWithHelper';
@@ -27,6 +26,7 @@ import NeighborDetails from './pages/admin/Main/NeighborDetailedView';
 import TaskList from './pages/admin/Main/TaskList';
 import { PaymentPage } from './pages/user/PaymentPage';
 import { PaymentSuccess } from './pages/user/PaymentSuccess';
+import AccountBanned from './pages/Banned';
 // import NeighborProfile from './pages/neighbor/Profile';
 const AppRoutes: React.FC = () => {
   return (
@@ -37,7 +37,8 @@ const AppRoutes: React.FC = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} /> 
       <Route path="/reset-password" element={<ResetPassword />} /> 
       <Route path="/create-task" element={<TaskCreationPage />} /> 
-      <Route path="/neighbor" element={<BecomeANeighbor />}/>   
+      <Route path="/neighbor" element={<BecomeANeighbor />} />  
+      <Route path="/banned" element={<AccountBanned/>}/>
       
       <Route path="/neighbor/home" element={<NeighborHome/>}></Route>
       <Route path="/neighbor/complete-your-profile" element={<CompleteYourProfile/>}></Route>
@@ -52,7 +53,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/home" element={<HomePage />}/>
         <Route path="/home/taskList" element={<TaskListPage />} />
         <Route path="/home/settings" element={<SettingsPage />} />
-        <Route path="/home/kyc" element={<KYCProcess />} />
+        {/* <Route path="/home/kyc" element={<KYCProcess />} /> */}
         <Route path="/payment/:taskId" element={<PaymentPage />} />
         <Route path='/payment_success' element={<PaymentSuccess/>}/>
     
