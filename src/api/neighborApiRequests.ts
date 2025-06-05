@@ -1,7 +1,4 @@
-import moment from "moment";
-import { WeeklyAvailability } from "../pages/neighbor/Schedules/DayAvailability";
 import { UserDTO } from "../types/UserDTO";
-import { AvailabilityEvent, BackendAvailability } from "../types/availabilityEvent";
 import { Location } from "../types/locationDTO";
 import { NeighborInfo } from "../types/neighbor";
 import { skillsDTO } from "../types/skillsDTO";
@@ -52,23 +49,23 @@ export const NeighborLogin = async (email: string, password: string): Promise<Us
 };
 
 //************************ Schedule date and time ************************** */
-const dayMap: { [key: string]: "sun"|"mon" | "tue" | "wed" | "thur" | "fri" | "sat"  } = {
-  Monday: "mon",
-  Tuesday: "tue",
-  Wednesday: "wed",
-  Thursday: "thur",
-  Friday: "fri",
-  Saturday: "sat",
-  Sunday: "sun",
-};
-// Convert HH:mm to minutes past midnight
-const timeToMinutes = (time: string): number => {
-  const momentTime = moment(time, "HH:mm");
-  if (!momentTime.isValid()) {
-    throw new Error(`Invalid time format: ${time}`);
-  }
-  return momentTime.hours() * 60 + momentTime.minutes();
-};
+// const dayMap: { [key: string]: "sun"|"mon" | "tue" | "wed" | "thur" | "fri" | "sat"  } = {
+//   Monday: "mon",
+//   Tuesday: "tue",
+//   Wednesday: "wed",
+//   Thursday: "thur",
+//   Friday: "fri",
+//   Saturday: "sat",
+//   Sunday: "sun",
+// };
+// // Convert HH:mm to minutes past midnight
+// const timeToMinutes = (time: string): number => {
+//   const momentTime = moment(time, "HH:mm");
+//   if (!momentTime.isValid()) {
+//     throw new Error(`Invalid time format: ${time}`);
+//   }
+//   return momentTime.hours() * 60 + momentTime.minutes();
+// };
 
 export const ScheduleTimeslots = async (neighborId:string,availability:Availability[]): Promise<void> => {
   try {
@@ -91,7 +88,7 @@ export const ScheduleTimeslots = async (neighborId:string,availability:Availabil
 export const FetchAvailability = async (neighborId: string): Promise<Availability[]> => {
   try {
     const response = await api.get(`/neighbors/${neighborId}/timeslots`, { withCredentials: true });
-    const availabilityData = response.data.data; // Object with availability array
+    const availabilityData = response.data.data;
     console.log(availabilityData);
 
 

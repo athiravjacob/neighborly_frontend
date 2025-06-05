@@ -123,18 +123,7 @@ export const resetPassword = async (email:string,token: string,newPassword:strin
     throw new Error("An unexpected error occurred");
   }
 }
-//************************* Get User **************************** */
-// export const getUser = async (userId: string): Promise<UserInfo> => {
-//   try {
-//     const response = await api.get(`/users/${userId}`,{ withCredentials: true });
-//     return response.data.data; 
-//   } catch (error) {
-//     if (axios.isAxiosError(error) && error.response) {
-//       throw new Error(error.response.data.message || "Unable to fetch user details");
-//     }
-//     throw new Error("An unexpected error occurred");
-//   }
-// };
+
 
 //*****************************Save Profile Details ****************** */
 export const saveProfile = async (userId:string,profileDetails: userGeneralInfo): Promise<any> => {

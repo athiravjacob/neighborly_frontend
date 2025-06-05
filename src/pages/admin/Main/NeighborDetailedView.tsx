@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { NeighborInfo } from '../../../types/neighbor';
 import { verifyNeighbor } from '../../../api/adminApiRequests';
 import { toast } from 'react-toastify';
+import BanButton from '../../../components/admin/common/BanButton';
 
 const NeighborDetails: React.FC = () => {
     const location = useLocation();
@@ -155,13 +156,8 @@ const NeighborDetails: React.FC = () => {
                       <div className="mt-8 pt-6 border-t border-gray-700">
                           <h3 className="text-lg font-semibold text-gray-300 mb-4">Admin Actions</h3>
                           <div className="flex flex-wrap gap-3">
-                              <button
-                                  className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center"
-                                  onClick={handleBanUser}
-                              >
-                                  <span className="mr-2">🚫</span>
-                                  Ban Neighbor
-                              </button>
+                                    <BanButton userId={user._id} isBanned={user.isBanned!} type={'neighbor'} />
+
   
                               {(!user.isVerified && user.idCardImage)&& (
                                   <>

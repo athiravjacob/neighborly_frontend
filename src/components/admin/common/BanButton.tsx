@@ -4,15 +4,16 @@ import { updateBanStatus } from '../../../api/adminApiRequests';
 
 interface BanButtonProps {
   userId: string;
-  isBanned: boolean;
+    isBanned: boolean;
+    type:'neighbor'|'user'
 }
 
-const BanButton: React.FC<BanButtonProps> = ({ userId, isBanned }) => {
+const BanButton: React.FC<BanButtonProps> = ({ userId, isBanned,type }) => {
   const queryClient = useQueryClient();
 
   // Define the mutation
   const mutation = useMutation({
-    mutationFn: () => updateBanStatus(userId, 'user'),
+    mutationFn: () => updateBanStatus(userId, type),
     onSuccess: (data: boolean) => {
       // Invalidate the userProfile query to refetch user details
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] });

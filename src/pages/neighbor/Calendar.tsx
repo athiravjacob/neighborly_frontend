@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { CalendarPreview } from './Schedules/CalendarPreview';
 import { AvailabilitySetter } from './Schedules/AvailabilitySetter';
 import { RootState } from '../../redux/store';
-import { Availability, FetchAvailability, daysOfWeek } from './Schedules/FetchAvailability';
-import { ScheduleTimeslots } from '../../api/neighborApiRequests';
+import { Availability, daysOfWeek } from './Schedules/FetchAvailability';
+import { FetchAvailability, ScheduleTimeslots } from '../../api/neighborApiRequests';
 
 const CalendarSection: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -78,7 +78,6 @@ const CalendarSection: React.FC = () => {
     queryClient.setQueryData(['availability', user?.id], newAvailability);
   };
 
-  // Prevent rendering if user is not logged in
   if (!user?.id) {
     return <div>Please log in to manage availability</div>;
   }

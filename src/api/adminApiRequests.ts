@@ -1,13 +1,9 @@
 // src/api/adminApi.ts
-import { UserDTO } from '../types/UserDTO';
+import { UserDTO, userGeneralInfo } from '../types/UserDTO';
 import { NeighborInfo } from '../types/neighbor';
 import { newTaskDetails } from '../types/newTaskDetails';
-import { UserInfo } from '../types/settings';
 import api from './apiConfig';
 import axios from 'axios';
-
-
-
 
 
 export const adminLogin = async (email: string, password: string): Promise<UserDTO> => {
@@ -22,7 +18,7 @@ export const adminLogin = async (email: string, password: string): Promise<UserD
   }
 };
 
-export const getAllUsers = async (): Promise<UserInfo[]> => {
+export const getAllUsers = async (): Promise<userGeneralInfo[]> => {
   try {
     const response = await api.get('/admin/users');
     return response.data.data; 
