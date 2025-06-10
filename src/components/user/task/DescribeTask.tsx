@@ -1,16 +1,20 @@
-import React, { useMemo, useState } from 'react';
-import useServiceAvailability from '../../../hooks/useServiceAvailability';
+import React, { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { LocationPicker } from '../../common/LocationPicker';
+import { ListAvailableNeighbors } from '../../../api/neighborApiRequests';
+import { NeighborInfo } from '../../../types/neighbor';
 
 interface DescribeTaskProps {
   onContinue: (data: {
-    location: string;
+    lat: number;
+    lng: number;
+    address: string;
     taskSize: string;
     taskDetails: string;
     category: string;
-    subcategory: string;
-    preferredTiming?: string; // Added to include timing in the data passed to onContinue
+    subCategory: string;
+    preferredTiming?: string;
+    neighbors: NeighborInfo[];
   }) => void;
 }
 
@@ -24,40 +28,47 @@ const skillCategories: { [key: string]: string[] } = {
 };
 
 export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
-  const [location, setLocation] = useState('');
-  const [searchLocation, setSearchLocation] = useState('');
+  const [address, setAddress] = useState('');
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
   const [taskSize, setTaskSize] = useState('');
   const [taskDetails, setTaskDetails] = useState('');
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
-  const [preferredTiming, setPreferredTiming] = useState(''); // New state for timing
+  const [preferredTiming, setPreferredTiming] = useState('');
   const [showValidation, setShowValidation] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [neighbors, setNeighbors] = useState<NeighborInfo[]>([]);
+  const [isServiceAvailable, setIsServiceAvailable] = useState<boolean | null>(null);
 
-  const availabilityParams = useMemo(
-    () => ({ searchLocation, category, subcategory }),
-    [searchLocation, category, subcategory]
-  );
-
-  const { data: isServiceAvailable, isLoading, error } = useServiceAvailability(
-    availabilityParams.searchLocation,
-    availabilityParams.category,
-    availabilityParams.subcategory
-  );
-
-  const handleCheckAvailability = (e: React.FormEvent) => {
+  const handleCheckAvailability = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (location.trim() === '') {
+    if (!lat || !lng) {
       toast.info('Please select a location on the map.');
       setShowValidation(true);
       return;
     }
-    setSearchLocation(location);
-    setShowValidation(false);
-  };
+    if (!subcategory) {
+      toast.info('Please select a subcategory.');
+      setShowValidation(true);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const neighborsList = await ListAvailableNeighbors(lng, lat, subcategory);
+      setNeighbors(neighborsList);
+      setIsServiceAvailable(neighborsList.length > 0);
+      setShowValidation(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to check availability.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [lat, lng, subcategory]);
 
-  const handleContinue = () => {
+  const handleContinue = useCallback(() => {
     setShowValidation(true);
-    if (isServiceAvailable === null || isServiceAvailable === undefined) {
+    if (isServiceAvailable === null) {
       toast.error('Please check service availability for your location.');
       return;
     }
@@ -85,15 +96,22 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
       toast.error('Please select when you want the task to be done.');
       return;
     }
+    if (!lat || !lng) {
+      toast.error('Please select a location.');
+      return;
+    }
     onContinue({
-      location,
+      lat,
+      lng,
+      address,
       taskSize,
       taskDetails,
       category,
-      subcategory,
-      preferredTiming, // Include preferredTiming in the data
+      subCategory: subcategory,
+      preferredTiming,
+      neighbors,
     });
-  };
+  }, [lat, lng, address, taskSize, taskDetails, category, subcategory, preferredTiming, neighbors, isServiceAvailable]);
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
@@ -104,7 +122,6 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
       </div>
 
       <div className="p-6 space-y-6">
-        {/* Location Selection */}
         <div>
           <label className="block text-gray-700 font-medium mb-2" htmlFor="location-input">
             Where do you need help?
@@ -113,11 +130,11 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
             <input
               id="location-input"
               type="text"
-              value={location}
+              value={address}
               readOnly
               placeholder="Select a location on the map"
               className={`flex-1 px-4 py-3 border rounded-lg bg-gray-50 text-gray-700 ${
-                showValidation && !location ? 'border-red-600' : 'border-gray-300'
+                showValidation && !address ? 'border-red-600' : 'border-gray-300'
               } focus:outline-none focus:ring-2 focus:ring-violet-600`}
               aria-label="Selected task location"
             />
@@ -125,13 +142,16 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
           <LocationPicker
             height="16rem"
             initialCoordinates={{ lat: 40.7128, lng: -74.006 }}
-            onLocationChange={(data) => setLocation(data.address)}
+            onLocationChange={(data) => {
+              setAddress(data.address);
+              setLat(data.coordinates.lat);
+              setLng(data.coordinates.lng);
+            }}
             showRadius={false}
             showAddressInput={false}
           />
         </div>
 
-        {/* Category Selection */}
         <div>
           <label className="block text-gray-700 font-medium mb-2" htmlFor="category-select">
             Select Task Category
@@ -142,6 +162,8 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
             onChange={(e) => {
               setCategory(e.target.value);
               setSubcategory('');
+              setNeighbors([]);
+              setIsServiceAvailable(null);
             }}
             className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 ${
               showValidation && !category ? 'border-red-600' : 'border-gray-300'
@@ -157,7 +179,6 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
           </select>
         </div>
 
-        {/* Subcategory Selection */}
         <div>
           <label className="block text-gray-700 font-medium mb-2" htmlFor="subcategory-select">
             Select Task Subcategory
@@ -165,7 +186,11 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
           <select
             id="subcategory-select"
             value={subcategory}
-            onChange={(e) => setSubcategory(e.target.value)}
+            onChange={(e) => {
+              setSubcategory(e.target.value);
+              setNeighbors([]);
+              setIsServiceAvailable(null);
+            }}
             disabled={!category}
             className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 disabled:bg-gray-100 ${
               showValidation && !subcategory && category ? 'border-red-600' : 'border-gray-300'
@@ -182,7 +207,6 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
           </select>
         </div>
 
-        {/* Preferred Timing Selection */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">
             When do you want the task to be done?
@@ -218,32 +242,21 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
           <button
             onClick={handleCheckAvailability}
             className="px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading}
+            disabled={isLoading || !lat || !lng || !subcategory}
             aria-label="Check service availability"
           >
             {isLoading ? 'Checking...' : 'Check Availability'}
           </button>
-          {error && (
-            <p className="text-red-600">
-              Error: {error.message}.{' '}
-              <button
-                onClick={handleCheckAvailability}
-                className="underline text-violet-600 hover:text-violet-700"
-                aria-label="Retry checking service availability"
-              >
-                Retry
-              </button>
-            </p>
-          )}
           {isServiceAvailable === false && (
-            <p className="text-red-600">Service not available in this location.</p>
+            <p className="text-red-600">No neighbors available in this location for the selected subcategory.</p>
           )}
           {isServiceAvailable === true && (
-            <p className="text-green-600">Service available in {location}!</p>
+            <p className="text-green-600">
+              Service available at {address}! {neighbors.length} neighbors found.
+            </p>
           )}
         </div>
 
-        {/* Task Size Options */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">How big is your task?</label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -271,7 +284,6 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
           </div>
         </div>
 
-        {/* Task Details */}
         <div>
           <label className="block text-gray-700 font-medium mb-2" htmlFor="task-details">
             Tell us the details of your task
@@ -297,6 +309,7 @@ export const DescribeTask: React.FC<DescribeTaskProps> = ({ onContinue }) => {
             onClick={handleContinue}
             className="w-full sm:w-auto px-8 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition font-medium"
             aria-label="Continue to see helpers and prices"
+            disabled={isLoading}
           >
             See Helpers and Prices
           </button>

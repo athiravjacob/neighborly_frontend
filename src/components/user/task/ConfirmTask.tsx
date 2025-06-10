@@ -1,10 +1,10 @@
-import React from "react";
-import { MapPin, Calendar, Clock, User, Hammer, IndianRupee } from "lucide-react";
-import { NeighborInfo } from "../../../types/neighbor";
+import React from 'react';
+import { MapPin, Calendar, Clock, User, Hammer, IndianRupee } from 'lucide-react';
+import { NeighborInfo } from '../../../types/neighbor';
 
 interface ConfirmTaskProps {
   onConfirm: () => void;
-  taskData: { location: string; taskSize: string; taskDetails: string; category: string; subCategory: string };
+  taskData: { lat: number; lng: number; address: string; taskSize: string; taskDetails: string; category: string; subCategory: string };
   selectedHelper: NeighborInfo;
   schedule: { date: string; time: string };
 }
@@ -19,36 +19,32 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
     return <div>Error: Helper not found.</div>;
   }
 
-  // Calculate estimated time and cost based on task size
   const estimatedTimeMap: { [key: string]: number } = {
     Small: 1,
     Medium: 3,
     Large: 6,
   };
-  const estimatedTime = estimatedTimeMap[taskData.taskSize] || 2;
+  const estimatedTime = estimatedTimeMap[taskData.taskSize] || 1;
   const estimatedCost = selectedHelper.skills[0].hourlyRate * estimatedTime;
 
-  // Function to determine time preference (Morning, Afternoon, Evening)
   const getTimePreference = (time: string): string => {
-    // Check if time already contains a preference label
-    if (time.includes("Morning")) return "Morning";
-    if (time.includes("Afternoon")) return "Afternoon";
-    if (time.includes("Evening")) return "Evening";
+    if (time.includes('Morning')) return 'Morning';
+    if (time.includes('Afternoon')) return 'Afternoon';
+    if (time.includes('Evening')) return 'Evening';
 
-    // Parse specific time (e.g., "2:00pm") to determine preference
     const match = time.match(/(\d+):(\d{2})(am|pm)/i);
     if (match) {
       let hours = parseInt(match[1]);
       const period = match[3].toLowerCase();
-      if (period === "pm" && hours !== 12) hours += 12;
-      if (period === "am" && hours === 12) hours = 0;
+      if (period === 'pm' && hours !== 12) hours += 12;
+      if (period === 'am' && hours === 12) hours = 0;
 
-      if (hours >= 8 && hours < 12) return "Morning";
-      if (hours >= 12 && hours < 17) return "Afternoon";
-      if (hours >= 17 && hours < 21) return "Evening";
+      if (hours >= 8 && hours < 12) return 'Morning';
+      if (hours >= 12 && hours < 17) return 'Afternoon';
+      if (hours >= 17 && hours < 21) return 'Evening';
     }
 
-    return time; 
+    return time;
   };
 
   const timePreference = getTimePreference(schedule.time);
@@ -63,7 +59,6 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
       </div>
 
       <div className="p-6 space-y-6">
-        {/* Task Summary */}
         <div className="border border-gray-200 rounded-lg p-4">
           <h3 className="text-lg font-semibold text-[#2E1065] mb-4">Task Details</h3>
           <div className="space-y-3">
@@ -76,7 +71,7 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
             <div className="flex items-center gap-2">
               <MapPin size={18} className="text-gray-600" />
               <span className="text-gray-700">
-                <span className="font-medium">Location:</span> {taskData.location}
+                <span className="font-medium">Location:</span> {taskData.address}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -100,13 +95,11 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
           </div>
         </div>
 
-        {/* Task Description */}
         <div className="border border-gray-200 rounded-lg p-4">
           <h3 className="text-lg font-semibold text-[#2E1065] mb-4">Task Description</h3>
           <p className="text-gray-700">{taskData.taskDetails}</p>
         </div>
 
-        {/* Cost Summary */}
         <div className="border border-gray-200 rounded-lg p-4">
           <h3 className="text-lg font-semibold text-[#2E1065] mb-4">Estimated Cost</h3>
           <div className="space-y-3">
@@ -134,7 +127,6 @@ export const ConfirmTask: React.FC<ConfirmTaskProps> = ({
           </div>
         </div>
 
-        {/* Request Button */}
         <button
           onClick={onConfirm}
           className="w-full px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"

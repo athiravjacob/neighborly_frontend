@@ -1,49 +1,40 @@
-import { Calendar, Clock, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+export const daysOfWeek = [
+  "mon" , "tue" , "wed" , "thur" , "fri" , "sat" , "sun"
+];
+// export interface Timeslot {
+//   startTime: number;
+//   endTime: number;
+// }
 
-export interface  TimeSlot {
+// export interface Availability {
+//   dayOfWeek: string;
+//   timeslot: Timeslot[];
+// }
+
+// // Placeholder for API functions (replace with actual implementations)
+// export const FetchAvailability = async (userId: string): Promise<Availability[]> => {
+//   // Simulate API call
+//   // Replace with your actual API call (e.g., axios.get(`/api/availability/${userId}`))
+//   return daysOfWeek.map((day) => ({
+//     dayOfWeek: day,
+//     timeslot: day !== 'sunday' && day !== 'saturday' ? [{ startTime: 540, endTime: 1020 }] : [],
+//   }));
+// };
+
+// export const ScheduleTimeslots = async (userId: string, availability: Availability[]): Promise<void> => {
+//   // Simulate API call
+//   // Replace with your actual API call (e.g., axios.post(`/api/availability/${userId}`, availability))
+//   console.log('Saving availability for user:', userId, availability);
+// };
+
+export type DayOfWeek = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
+export interface TimeSlot {
   startTime: number;
   endTime: number;
-  _id?: string;
 }
 
 export interface Availability {
-  dayOfWeek: string;
-  timeslot: TimeSlot[];
-  _id?: string;
-} 
-
-export interface CalendarEvent {
-  id: string;
-  start: Date;
-  end: Date;
-  title: string;
+  dayOfWeek: DayOfWeek;
+  timeslots: TimeSlot[];
 }
-
-export const daysOfWeek = ["sun", "mon", "tue", "wed", "thur", "fri", "sat"];
-
-// // Mock API functions
-// export const FetchAvailability = async (userId: string): Promise<Availability[]> => {
-//   return [
-//     {
-//       dayOfWeek: "mon",
-//       timeslot: [{ startTime: 540, endTime: 720, _id: "1" }, { startTime: 780, endTime: 1020, _id: "2" }],
-//       _id: "68368e1003375a5a7bb73f0a",
-//     },
-//     {
-//       dayOfWeek: "wed",
-//       timeslot: [{ startTime: 480, endTime: 660, _id: "3" }],
-//       _id: "68368e1003375a5a7bb73f0b",
-//     },
-//     {
-//       dayOfWeek: "fri",
-//       timeslot: [{ startTime: 540, endTime: 1020, _id: "4" }],
-//       _id: "68368e1003375a5a7bb73f0c",
-//     },
-//     {
-//       dayOfWeek: "sat",
-//       timeslot: [{ startTime: 600, endTime: 900, _id: "5" }],
-//       _id: "68368e1003375a5a7bb73f0e",
-//     },
-//   ];
-// };

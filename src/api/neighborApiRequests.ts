@@ -69,8 +69,8 @@ export const NeighborLogin = async (email: string, password: string): Promise<Us
 
 export const ScheduleTimeslots = async (neighborId:string,availability:Availability[]): Promise<void> => {
   try {
-    
-      const response = await api.post(`/neighbors/${neighborId}/timeslots`, {availability:availability});
+      console.log(availability)
+      const response = await api.post(`/neighbors/${neighborId}/weekly-schedule`, {availability:availability});
       console.log(response.data.data)
       // return response.data.data;
       
@@ -87,9 +87,8 @@ export const ScheduleTimeslots = async (neighborId:string,availability:Availabil
 
 export const FetchAvailability = async (neighborId: string): Promise<Availability[]> => {
   try {
-    const response = await api.get(`/neighbors/${neighborId}/timeslots`, { withCredentials: true });
-    const availabilityData = response.data.data;
-    console.log(availabilityData);
+    const response = await api.get(`/neighbors/${neighborId}/weekly-schedule`, { withCredentials: true });
+    const availabilityData = response.data.data.availability;
 
 
     return availabilityData;
@@ -185,9 +184,9 @@ export const CheckCityAvailability = async (city: string,category:string,subCate
   
 //****************** available Neighbors ****************** */
 
-export const ListAvailableNeighbors = async (city: string,subCategory:string): Promise<NeighborInfo[]> => {
+export const ListAvailableNeighbors = async (lng: number,lat:number,subCategory:string): Promise<NeighborInfo[]> => {
   try {
-    const response = await api.get(`/neighbors/available?city=${city}&subCategory=${subCategory}`,{ withCredentials: true })
+    const response = await api.get(`/neighbors/available?lng=${lng}&lat=${lat}&subCategory=${subCategory}`,{ withCredentials: true })
     console.log(response.data.data, "list availble neighbors")
     return response.data.data
     
