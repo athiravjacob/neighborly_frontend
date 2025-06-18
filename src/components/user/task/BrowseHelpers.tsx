@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { NeighborInfo } from '../../../types/neighbor';
+import { FetchAvailability } from '../../../api/neighborApiRequests';
+import { Availability } from '../../../pages/neighbor/Schedules/FetchAvailability';
 
 interface BrowseNeighborsProps {
-  onContinue: (selectedNeighbor: NeighborInfo) => void;
+  onContinue: (selectedNeighbor: NeighborInfo, availability: Availability[]) => void; // Updated to include availability
   neighbors: NeighborInfo[];
   taskData: { lat: number; lng: number; address: string; taskSize: string; taskDetails: string };
 }
@@ -13,15 +15,22 @@ export const BrowseNeighbors: React.FC<BrowseNeighborsProps> = ({
   taskData,
 }) => {
   const [selectedNeighbor, setSelectedNeighbor] = useState<NeighborInfo | null>(null);
+  const [selectedNeighborSchedule, setSelectedNeighborSchedule] = useState<Availability[]>([]);
 
-  const handleSelect = (id: string) => {
-    const selected = neighbors.find((n) => n._id === id);
-    if (selected) setSelectedNeighbor(selected);
+  const handleSelect = async (id: string) => {
+    const selected = neighbors.find((neighbor) => neighbor._id === id);
+    if (selected) {
+      setSelectedNeighbor(selected);
+      const availability = await FetchAvailability(id,2);
+      if (availability) {
+        setSelectedNeighborSchedule(availability);
+      }
+    }
   };
 
   const handleContinue = () => {
-    if (selectedNeighbor) {
-      onContinue(selectedNeighbor);
+    if (selectedNeighbor && selectedNeighborSchedule) {
+      onContinue(selectedNeighbor, selectedNeighborSchedule); // Pass both neighbor and availability
     }
   };
 
@@ -96,9 +105,9 @@ export const BrowseNeighbors: React.FC<BrowseNeighborsProps> = ({
           <div className="mt-8 flex justify-center">
             <button
               onClick={handleContinue}
-              disabled={!selectedNeighbor}
+              disabled={!selectedNeighbor || !selectedNeighborSchedule.length}
               className={`px-8 py-4 rounded-lg text-lg font-medium ${
-                selectedNeighbor
+                selectedNeighbor && selectedNeighborSchedule.length
                   ? 'bg-violet-600 text-white hover:bg-violet-700'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}

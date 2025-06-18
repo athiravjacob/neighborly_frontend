@@ -273,7 +273,7 @@ const TaskListPage: React.FC = () => {
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
-                      {formatDateTime(task.prefferedTime, task.prefferedDate)}
+                      {task.prefferedDate}
                     </div>
 
                     <div className="mt-2 flex items-center text-sm text-gray-500">
@@ -477,7 +477,7 @@ const TaskListPage: React.FC = () => {
                 </div>
                 <div className="bg-white p-3 rounded-lg border border-violet-100 w-full lg:w-auto">
                   <span className="text-xs text-gray-500 block mb-1">Total Amount</span>
-                  <p className="text-gray-900 text-xl font-semibold">₹{selectedTask.ratePerHour * selectedTask.est_hours}</p>
+                  <p className="text-gray-900 text-xl font-semibold">₹{selectedTask.est_amount }</p>
                 </div>
               </div>
             </div>
@@ -543,7 +543,7 @@ const TaskListPage: React.FC = () => {
                     </div>
                     <div className="ml-12">
                       <p className="text-sm font-medium text-gray-800">Task Scheduled</p>
-                      <p className="text-xs text-gray-500 mt-1">{formatDateTime(selectedTask.prefferedTime, selectedTask.prefferedDate)}</p>
+                      {/* <p className="text-xs text-gray-500 mt-1">{formatDateTime(selectedTask.prefferedTime, selectedTask.prefferedDate)}</p> */}
                     </div>
                   </div>
                 )}

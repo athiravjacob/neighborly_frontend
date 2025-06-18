@@ -1,13 +1,14 @@
 import axios from "axios";
 import api from "./apiConfig"
-import { newTaskDetails ,TaskStatus} from "../types/newTaskDetails";
+import { newTaskDetails ,TaskRequestDetails,TaskStatus} from "../types/newTaskDetails";
 import { TaskAcceptForm } from "../types/taskAcceptForm";
+import { category, subCategory } from "../types/category";
 
 //**************create new task ************************ */
-export const createTask = async (newTask: newTaskDetails): Promise<void>=>{
+export const createTask = async (newTask: TaskRequestDetails): Promise<void>=>{
   try {
+    console.log(newTask)
     const sanitizedTask = { ...newTask };
-    delete sanitizedTask._id
         const response = await api.post("/tasks", { newTask: sanitizedTask },{ withCredentials: true })
         console.log(response)
     } catch (error) {
@@ -16,10 +17,41 @@ export const createTask = async (newTask: newTaskDetails): Promise<void>=>{
             throw new Error(error.response.data.message || "Failed to create task");
           }
           throw new Error("An unexpected error occurred");
-    }
-    
+    }   
     
 }
+
+//******************fetch Category ***************************/
+export const fetchCategory = async (): Promise<category[]>=>{
+  try {
+    
+    const response = await api.get("/categories")
+    console.log(response)
+        return response.data.data
+    } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+          console.log(error)
+            throw new Error(error.response.data.message || "Failed to fetch category");
+          }
+          throw new Error("An unexpected error occurred");
+    }    
+}
+
+// *********************** fetch subcategory ***********************
+export const fetchSubcategory = async (categoryId:string): Promise<subCategory[]>=>{
+  try {
+    
+        const response = await api.get(`/categories/${categoryId}/sub-category`)
+        return response.data.data
+    } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+          console.log(error)
+            throw new Error(error.response.data.message || "Failed to fetch sub category");
+          }
+          throw new Error("An unexpected error occurred");
+    }    
+}
+
 //*****************Fetch tasks of specific user or neighbor************ */
 
 export const showTasks = async (userId: string, role: string): Promise<newTaskDetails[]> => {
@@ -43,7 +75,7 @@ export const showTasks = async (userId: string, role: string): Promise<newTaskDe
     if (!response.data?.data || !Array.isArray(response.data.data)) {
       throw new Error('Invalid response format: tasks data is missing or not an array');
     }
-
+    console.log(response.data.data)
     return response.data.data as newTaskDetails[];
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {

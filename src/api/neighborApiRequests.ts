@@ -66,7 +66,7 @@ export const NeighborLogin = async (email: string, password: string): Promise<Us
 //   }
 //   return momentTime.hours() * 60 + momentTime.minutes();
 // };
-
+//****** post weekly schedule********** */
 export const ScheduleTimeslots = async (neighborId:string,availability:Availability[]): Promise<void> => {
   try {
       console.log(availability)
@@ -81,15 +81,31 @@ export const ScheduleTimeslots = async (neighborId:string,availability:Availabil
     throw new Error("An unexpected error occurred");
   }
 };
-//******************** Fetch Availabilty *********************** */
 
-
-
-export const FetchAvailability = async (neighborId: string): Promise<Availability[]> => {
+// ******************Fetch weekly schedule****************************/
+export const fetchWeeklySchedule = async (neighborId: string): Promise<Availability[]> => {
   try {
     const response = await api.get(`/neighbors/${neighborId}/weekly-schedule`, { withCredentials: true });
     const availabilityData = response.data.data.availability;
+    console.log(availabilityData)
 
+    return availabilityData;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to fetch availability");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+//******************** Fetch Availabile  days and timeslot *********************** */
+
+
+
+export const FetchAvailability = async (neighborId: string,duration:number): Promise<Availability[]> => {
+  try {
+    const response = await api.get(`/neighbors/${neighborId}/available-days?duration=${120}`, { withCredentials: true });
+    const availabilityData = response.data.data;
+    console.log(availabilityData)
 
     return availabilityData;
   } catch (error) {

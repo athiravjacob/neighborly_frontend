@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RootState } from '../../redux/store';
 import { AvailabilitySetter } from './Schedules/AvailabilitySetter';
-import { FetchAvailability, ScheduleTimeslots } from '../../api/neighborApiRequests';
+import {  ScheduleTimeslots, fetchWeeklySchedule } from '../../api/neighborApiRequests';
 import type { Availability } from './Schedules/FetchAvailability';
 
 // Define DayOfWeek type
@@ -25,7 +25,7 @@ const CalendarSection: React.FC = () => {
   const { data, isLoading, error } = useQuery<Availability[], Error>({
     queryKey: ['availability', user?.id] as [string, string | undefined],
     queryFn: async () => {
-      const response = await FetchAvailability(user!.id);
+      const response = await fetchWeeklySchedule(user!.id);
       console.log('FetchAvailability response:', response); // Debug log
       return response;
     },

@@ -16,16 +16,18 @@ export interface newTaskDetails {
   category: string;
   subCategory: string;
   description: string;
-  est_hours: number;
+  est_hours: string;
   prefferedDate: Date | string;
-  prefferedTime: "morning" | "afternoon" | "evening";
-  timeSlot?: {
-    startTime?: number; 
-    endTime?: number;
-    note:"available"|"booked"
+  // prefferedTime: "morning" | "afternoon" | "evening";
+  // timeSlot?: {
+  //   startTime?: number; 
+  //   endTime?: number;
+  //   note:"available"|"booked"
 
-  };
+  // };
   ratePerHour: number;
+  est_amount:string
+
   baseAmount?: number;
   platform_fee?: number;
   final_amount?: number;
@@ -34,5 +36,18 @@ export interface newTaskDetails {
   task_status?: TaskStatus; 
   payment_status?: PaymentStatus;
   task_code?:string
- 
+}
+
+export interface TaskRequestDetails{
+  createdBy: userGeneralInfo | string; 
+  assignedNeighbor?: NeighborInfo | string; 
+  location: string;
+  category: string;
+  subCategory: string;
+  description: string;
+  est_hours: string;
+  prefferedDate: Date | string;
+  ratePerHour: number;
+  est_amount:string
+
 }
