@@ -17,7 +17,7 @@ export interface newTaskDetails {
   subCategory: string;
   description: string;
   est_hours: string;
-  prefferedDate: Date | string;
+  prefferedDate: Date ;
   // prefferedTime: "morning" | "afternoon" | "evening";
   // timeSlot?: {
   //   startTime?: number; 

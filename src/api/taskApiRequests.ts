@@ -93,10 +93,7 @@ export const acceptTask = async (taskId:string,neighborId:string,taskAcceptanceF
     const date = new Date(taskAcceptanceForm.arrivalTime);
     const startTime = Math.floor(date.getTime() / 1000); 
     const taskAcceptDetails = {
-      startTime,
       est_hours: taskAcceptanceForm.estimatedHours,
-      extra_charges: taskAcceptanceForm.extraCharges,
-      additional_notes: taskAcceptanceForm.notes,
       baseAmount :taskAcceptanceForm.paymentAmount
     }
 
@@ -169,5 +166,19 @@ export const TaskComplete = async (taskId:string): Promise<Boolean> => {
     throw new Error("An unexpected error occurred while verifying task code");
   }
 
+  
+}
+//****************************** Fetch Arrival Time ****************************** */
+
+export const fetchArrivalTime = async (taskID: string, neighborId: string, date: Date,hours_needed:number): Promise<number> => {
+  try {
+    const response = await api.get(`/tasks/${taskID}/neighbors/${neighborId}/arrival-time?date=${date}&hours_needed=${hours_needed}`)
+    return response.data.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed tofetch arrival Time");
+    }
+    throw new Error("An unexpected error occurred while fetching arrival time of neighbor");
+  }
   
 }

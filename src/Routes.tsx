@@ -19,7 +19,6 @@ import NeighborHome from './pages/neighbor/Neighbor-home';
 import CompleteYourProfile from './pages/neighbor/CompleteProfile';
 import TaskListPage from './components/user/task/ListTask';
 import SettingsPage from './pages/user/SettingsPage';
-import Chat from './components/Chat'
 import NeighborList from './pages/admin/Main/NeighborList';
 import ChatWithHelper from './components/user/task/ChatWithHelper';
 import NeighborDetails from './pages/admin/Main/NeighborDetailedView';
@@ -45,7 +44,7 @@ const AppRoutes: React.FC = () => {
       {/* <Route path="/neighbor/profile" element={<NeighborProfile/>}></Route> */}
 
       <Route path="/" element={<LandingPage />} />
-      <Route path="/message" element={<Chat />} />
+      {/* <Route path="/message" element={<Chat />} /> */}
 
 
       {/* Protected User Routes */}

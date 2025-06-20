@@ -1,0 +1,74 @@
+import React from 'react';
+import { DetailItem } from './DetailItem';
+import { newTaskDetails } from '../../../types/newTaskDetails';
+
+interface TaskDetailsSectionProps {
+  task: newTaskDetails;
+}
+
+export const TaskDetailsSection: React.FC<TaskDetailsSectionProps> = ({ task }) => (
+  <section className="p-6 lg:p-8">
+    <div className="flex items-center gap-3 mb-6">
+      <div className="w-2 h-8 bg-blue-500 rounded-full" />
+      <h3 className="text-lg font-semibold text-gray-900">Task Details</h3>
+    </div>
+    <div className="space-y-5">
+      <DetailItem label="Description" value={task.description} />
+      <div className="grid grid-cols-2 gap-4">
+        <DetailItem label="Location" value={task.location} />
+        <DetailItem label="Est. Hours" value={task.est_hours} />
+      </div>
+      <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+        {task.baseAmount ? (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Service Charge</span>
+            <span className="font-semibold text-gray-900">₹{task.baseAmount}</span>
+          </div>
+        ) : (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Service Charge</span>
+            <span className="font-semibold text-gray-900">₹{task.est_amount}</span>
+          </div>
+        )}
+        {task.extra_charges && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Extra Charges</span>
+            <span className="font-semibold text-gray-900">₹{task.extra_charges}</span>
+          </div>
+        )}
+        {task.platform_fee && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Platform Fee</span>
+            <span className="font-semibold text-gray-900">₹{task.platform_fee}</span>
+          </div>
+        )}
+        <div className="border-t border-gray-200 pt-3">
+          <div className="flex justify-between items-center">
+            <span className="text-base font-semibold text-gray-900">Total Amount</span>
+            <span className="text-xl font-bold text-blue-600">
+              ₹{task.final_amount || task.ratePerHour * parseFloat(task.est_hours.split('-')[1])}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="group">
+        <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Payment Status</dt>
+        <dd>
+          <span
+            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium capitalize ${
+              task.payment_status === 'paid'
+                ? 'bg-green-100 text-green-800'
+                : task.payment_status === 'pending'
+                ? 'bg-yellow-100 text-yellow-800'
+                : task.payment_status === 'disputed'
+                ? 'bg-red-100 text-red-800'
+                : 'bg-gray-100 text-gray-800'
+            }`}
+          >
+            {task.payment_status || 'pending'}
+          </span>
+        </dd>
+      </div>
+    </div>
+  </section>
+);
