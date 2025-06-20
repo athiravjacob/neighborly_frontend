@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Icon } from './Icon';
 import { newTaskDetails } from '../../../types/newTaskDetails';
 
@@ -36,11 +36,27 @@ export const TaskActionsSection: React.FC<TaskActionsSectionProps> = ({
   cancelCodeVerification,
   handleChat,
 }) => {
+
+
+  const [tempHours, setTempHours] = useState<string>(
+    taskAcceptanceForm.estimatedHours ? taskAcceptanceForm.estimatedHours.toString() : ''
+  );
   // Helper function to format arrivalTime if formattedArrivalTime isn't provided
   const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
+    let hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+    const isPM = hours >= 12;
+    const displayHours = hours % 12 === 0 ? 12 : hours % 12; // convert 0 or 12 to 12
+    const ampm = isPM ? 'PM' : 'AM';
+  
+    return `${displayHours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')} ${ampm}`;
+  };
+  
+  // Handle OK button click to trigger API call
+  const handleOkClick = () => {
+    if (tempHours) {
+      handleFormChange('estimatedHours', tempHours);
+    }
   };
 
   return (
@@ -93,12 +109,18 @@ export const TaskActionsSection: React.FC<TaskActionsSectionProps> = ({
                         min="0.5"
                         step="0.5"
                         max={parseFloat(task.est_hours.split('-')[1]) || undefined}
-                        value={taskAcceptanceForm.estimatedHours || ''}
-                        onChange={(e) => handleFormChange('estimatedHours', e.target.value)}
+                        value={tempHours}
+                        onChange={(e) => setTempHours(e.target.value)}
                         className="w-full pl-12 pr-4 py-4 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all duration-200 shadow-sm hover:shadow-md"
                         placeholder="Enter hours (e.g., 4.0)"
                       />
-                    </div>
+<button
+                          onClick={handleOkClick}
+                          disabled={!tempHours || parseFloat(tempHours) <= 0}
+                          className="px-4 py-2 bg-violet-600 text-white font-medium text-sm rounded-xl shadow-sm hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                        >
+                          OK
+                        </button>                    </div>
                     <p className="text-xs text-gray-500 mt-2 ml-1">
                       Estimated range: <span className="font-medium">{task.est_hours} hours</span>
                     </p>
