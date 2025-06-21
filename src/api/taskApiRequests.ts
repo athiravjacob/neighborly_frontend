@@ -86,17 +86,10 @@ export const showTasks = async (userId: string, role: string): Promise<newTaskDe
 };
 
 //************************ Neighbor Accept Task  **************** */
-export const acceptTask = async (taskId:string,neighborId:string,taskAcceptanceForm:TaskAcceptForm): Promise<Boolean> => {
+export const acceptTask = async (taskId:string,neighborId:string,taskAcceptDetails:TaskAcceptForm): Promise<Boolean> => {
   try {
-    console.log(taskAcceptanceForm)
+    console.log(taskAcceptDetails)
     
-    const date = new Date(taskAcceptanceForm.arrivalTime);
-    const startTime = Math.floor(date.getTime() / 1000); 
-    const taskAcceptDetails = {
-      est_hours: taskAcceptanceForm.estimatedHours,
-      baseAmount :taskAcceptanceForm.paymentAmount
-    }
-
       const response = await api.patch(`/tasks/${taskId}/accept`,{taskAcceptDetails,neighborId})
       console.log(response)
       if(response)
