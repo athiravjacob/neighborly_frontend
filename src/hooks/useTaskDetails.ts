@@ -5,12 +5,12 @@ import { RootState } from '../redux/store';
 import { newTaskDetails } from '../types/newTaskDetails';
 import { useTasks } from '../hooks/useTasks';
 import { acceptTask, fetchArrivalTime, VerifyCode } from '../api/taskApiRequests';
+import { TaskAcceptForm } from '../types/taskAcceptForm';
 
 interface TaskAcceptanceForm {
   estimatedHours: number;
   paymentAmount: number;
-  arrivalTime: number | null; // Fixed capitalization and made nullable
-  formattedArrivalTime?: string; // Optional for formatted time (e.g., "14:00")
+  arrivalTime: number | null; 
 }
 
 interface UseTaskDetailsReturn {
@@ -37,7 +37,7 @@ export const useTaskDetails = (taskId: string): UseTaskDetailsReturn => {
   const { tasks } = useTasks(user?.id, user?.type!);
   const task = tasks.find((t) => t._id === taskId);
 
-  const [taskAcceptanceForm, setTaskAcceptanceForm] = useState<TaskAcceptanceForm>({
+  const [taskAcceptanceForm, setTaskAcceptanceForm] = useState<TaskAcceptForm>({
     estimatedHours: 0,
     paymentAmount: 0,
     arrivalTime: null, // Initialize as null
@@ -96,7 +96,6 @@ export const useTaskDetails = (taskId: string): UseTaskDetailsReturn => {
           estimatedHours: hours,
           paymentAmount,
           arrivalTime,
-          formattedArrivalTime,
         });
       }).catch((error) => {
         toast.error('Error calculating arrival time.');

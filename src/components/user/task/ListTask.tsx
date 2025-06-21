@@ -9,63 +9,11 @@ import Chat from './ChatWithHelper';
 import PaymentButton from '../payment/PaymentButton';
 import { TaskComplete } from '../../../api/taskApiRequests';
 import { toast } from 'react-toastify';
+import { CategoryIcon } from '../../neighbor/CategoryIcon';
+import { StatusBadge } from '../../neighbor/StatusBadge';
+import { formatDateTime, formatTime } from '../../../utilis/formatDate';
 
-// Status badge component for better visual distinction
-const StatusBadge = ({ status }: { status: TaskStatus }) => {
-  let bgColor = '';
-  let textColor = '';
-  
-  switch (status) {
-    case "completed":
-      bgColor = 'bg-green-100';
-      textColor = 'text-green-800';
-      break;
-    case "assigned":
-      bgColor = 'bg-blue-100';
-      textColor = 'text-blue-800';
-      break;
-    case "in_progress":
-      bgColor = 'bg-violet-100';
-      textColor = 'text-violet-800';
-      break;
-    case "cancelled":
-      bgColor = 'bg-red-100';
-      textColor = 'text-red-800';
-      break;
-    case "pending":
-    default:
-      bgColor = 'bg-yellow-100';
-      textColor = 'text-yellow-800';
-      break;
-  }
-  
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${bgColor} ${textColor}`}>
-      {status || "pending"}
-    </span>
-  );
-};
 
-// Category icon component to add visual cues
-const CategoryIcon = ({ category }: { category: string }) => {
-  let icon = '📋'; // Default icon
-  
-  switch (category.toLowerCase()) {
-    case 'handyman':
-      icon = '🔧';
-      break;
-    case 'cleaning':
-      icon = '🧹';
-      break;
-    case 'garden':
-      icon = '🌱';
-      break;
-    default:
-      icon = '📋';
-  }
-  
-  return <span className="text-xl mr-2">{icon}</span>;
-};
 
 const TaskListPage: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<newTaskDetails | null>(null);
@@ -79,7 +27,7 @@ const TaskListPage: React.FC = () => {
   const [chatTaskId, setChatTaskId] = useState<string>('');
   const [chatHelperId, setChatHelperId] = useState<string>('');
   const [HelperName, setHelperName] = useState<string>('');
-
+console.log(selectedTask)
   // Debug tasks with missing IDs
   useEffect(() => {
     tasks.forEach(task => {
@@ -89,9 +37,10 @@ const TaskListPage: React.FC = () => {
     });
   }, [tasks]);
 
-  const formatDateTime = (time:string, date: string | Date) => {
+  const formatDateTime = (date: string | Date, time : number) => {
+    let formattedTime =time ? `at ${formatTime(time)}`: "" 
     const dateObj = new Date(date);
-    return `${dateObj.toLocaleDateString()} at ${time}`;
+    return `${dateObj.toDateString()}  ${formattedTime}`;
   };
 
   const formatCreatedAt = (isoString: string) => {
@@ -273,7 +222,7 @@ const TaskListPage: React.FC = () => {
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
-                      {task.prefferedDate}
+                     {formatDateTime(task.prefferedDate,task.timeSlot?.startTime!)}
                     </div>
 
                     <div className="mt-2 flex items-center text-sm text-gray-500">
@@ -390,7 +339,7 @@ const TaskListPage: React.FC = () => {
                       <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
-                      <p className="text-gray-800 font-medium">{formatDateTime(selectedTask.prefferedTime, selectedTask.prefferedDate)}</p>
+                      <p className="text-gray-800 font-medium">{formatDateTime( selectedTask.prefferedDate,selectedTask?.timeSlot?.startTime!)}</p>
                     </div>
                   </div>
                   <div>
@@ -441,15 +390,26 @@ const TaskListPage: React.FC = () => {
             <div className="bg-gradient-to-r from-violet-50 to-white rounded-xl p-5 border border-violet-100">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-4 lg:mb-0">
-                  <div>
-                    <span className="text-xs text-gray-500 block mb-1">Est. Hours</span>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      <p className="text-gray-800 font-medium">{selectedTask.est_hours}</p>
-                    </div>
-                  </div>
+                <div>
+    <span className="text-xs text-gray-500 block mb-1">Task Duration</span>
+    {selectedTask?.actual_hours ? (
+      <div className="flex items-center gap-2">
+        <svg className="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p className="text-gray-800 font-medium">{selectedTask.actual_hours} hours</p>
+      </div>
+    ) : (
+      <>
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p className="text-gray-800 font-medium">{selectedTask?.est_hours || 'N/A'} </p>
+        </div>
+      </>
+    )}
+  </div>
                   <div>
                     <span className="text-xs text-gray-500 block mb-1">Rate</span>
                     <div className="flex items-center gap-2">
@@ -476,8 +436,14 @@ const TaskListPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="bg-white p-3 rounded-lg border border-violet-100 w-full lg:w-auto">
-                  <span className="text-xs text-gray-500 block mb-1">Total Amount</span>
-                  <p className="text-gray-900 text-xl font-semibold">₹{selectedTask.est_amount }</p>
+                  <span className="text-xs text-gray-500 block mb-1">Total Service Charge</span>
+                        {(selectedTask.base_amount && selectedTask.base_amount !==0) ? (
+                          <>
+                            <p>{selectedTask.base_amount }</p>
+                          </>
+                  ):(                  <p className="text-gray-900 text-xl font-semibold">₹{selectedTask.est_amount }</p>
+                  )}
+                        
                 </div>
               </div>
             </div>

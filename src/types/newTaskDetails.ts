@@ -18,17 +18,16 @@ export interface newTaskDetails {
   description: string;
   est_hours: string;
   prefferedDate: Date ;
-  // prefferedTime: "morning" | "afternoon" | "evening";
-  // timeSlot?: {
-  //   startTime?: number; 
-  //   endTime?: number;
-  //   note:"available"|"booked"
+  timeSlot?: {
+    startTime?: number; 
+    endTime?: number;
+    note:"available"|"booked"
 
-  // };
+  };
   ratePerHour: number;
   est_amount:string
-
-  baseAmount?: number;
+  actual_hours:number
+  base_amount?: number;
   platform_fee?: number;
   final_amount?: number;
   extra_charges?: number;

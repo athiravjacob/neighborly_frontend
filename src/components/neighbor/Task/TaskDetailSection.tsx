@@ -19,10 +19,10 @@ export const TaskDetailsSection: React.FC<TaskDetailsSectionProps> = ({ task }) 
         <DetailItem label="Est. Hours" value={task.est_hours} />
       </div>
       <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-        {task.baseAmount ? (
+        {task.base_amount ? (
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Service Charge</span>
-            <span className="font-semibold text-gray-900">₹{task.baseAmount}</span>
+            <span className="font-semibold text-gray-900">₹{task.base_amount}</span>
           </div>
         ) : (
           <div className="flex justify-between items-center">
@@ -30,23 +30,23 @@ export const TaskDetailsSection: React.FC<TaskDetailsSectionProps> = ({ task }) 
             <span className="font-semibold text-gray-900">₹{task.est_amount}</span>
           </div>
         )}
-        {task.extra_charges && (
+        {/* {task.extra_charges && (
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Extra Charges</span>
             <span className="font-semibold text-gray-900">₹{task.extra_charges}</span>
           </div>
-        )}
-        {task.platform_fee && (
+        )} */}
+        {/* {task.platform_fee && (
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Platform Fee</span>
             <span className="font-semibold text-gray-900">₹{task.platform_fee}</span>
           </div>
-        )}
+        )} */}
         <div className="border-t border-gray-200 pt-3">
           <div className="flex justify-between items-center">
-            <span className="text-base font-semibold text-gray-900">Total Amount</span>
+            <span className="text-base font-semibold text-gray-900">Price</span>
             <span className="text-xl font-bold text-blue-600">
-              ₹{task.final_amount || task.ratePerHour * parseFloat(task.est_hours.split('-')[1])}
+              ₹{task.base_amount || task.ratePerHour * parseFloat(task.est_hours.split('-')[1])}
             </span>
           </div>
         </div>
