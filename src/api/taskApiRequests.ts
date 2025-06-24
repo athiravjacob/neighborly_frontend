@@ -3,6 +3,7 @@ import api from "./apiConfig"
 import { newTaskDetails ,TaskRequestDetails,TaskStatus} from "../types/newTaskDetails";
 import { TaskAcceptForm } from "../types/taskAcceptForm";
 import { category, subCategory } from "../types/category";
+import {  DisputeDetails } from "../types/complaintDetails";
 
 //**************create new task ************************ */
 export const createTask = async (newTask: TaskRequestDetails): Promise<void>=>{
@@ -19,6 +20,22 @@ export const createTask = async (newTask: TaskRequestDetails): Promise<void>=>{
           throw new Error("An unexpected error occurred");
     }   
     
+}
+
+// ********** fetch task by id *******************************/
+export const fetchTaskById = async (taskId:string): Promise<newTaskDetails>=>{
+  try {
+    
+    const response = await api.get(`/tasks/${taskId}`)
+    console.log(response)
+        return response.data.data
+    } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+          console.log(error)
+            throw new Error(error.response.data.message || "Failed to fetch task");
+          }
+          throw new Error("An unexpected error occurred");
+    }    
 }
 
 //******************fetch Category ***************************/
@@ -174,4 +191,33 @@ export const fetchArrivalTime = async (taskID: string, neighborId: string, date:
     throw new Error("An unexpected error occurred while fetching arrival time of neighbor");
   }
   
+}
+
+// *************************** Report a complaint **************************
+
+export const reportAnIssue = async (disputeDetails: DisputeDetails): Promise<void> => {
+  try {
+    console.log(disputeDetails)
+    const response = await api.post('/disputes', { disputeDetails })
+    console.log(response)
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to report");
+    }
+    throw new Error("An unexpected error occurred while registering complaint");
+  }
+}
+
+// *************************** fetch complaint details **************************
+
+export const fetchComplaintDetails = async (taskID: string): Promise<DisputeDetails> => {
+  try {
+    const response = await api.get(`/disputes?taskId=${taskID}`)
+    return response.data.data
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || "Failed to report");
+    }
+    throw new Error("An unexpected error occurred while registering complaint");
+  }
 }

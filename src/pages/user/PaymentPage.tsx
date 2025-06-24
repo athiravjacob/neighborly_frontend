@@ -138,7 +138,7 @@ export const PaymentPage = () => {
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex justify-between text-gray-700 py-2">
                   <span>Base Amount</span>
-                  <span className="font-medium">${task?.baseAmount?.toFixed(2)}</span>
+                  <span className="font-medium">${task?.base_amount?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-700 py-2">
                   <span>Platform Fee (5%)</span>

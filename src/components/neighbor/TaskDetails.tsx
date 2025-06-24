@@ -9,6 +9,7 @@ import { TaskActionsSection } from './Task/TaskActionSection';
 import { TaskTimeline } from './Task/TaskTimeline';
 import { TaskFooterActions } from './Task/TaskFooterActions';
 import Chat from '../user/task/ChatWithHelper';
+import { RaiseComplaint } from './Task/RaiseComplaint';
 
 
 interface TaskDetailsProps {
@@ -22,6 +23,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
     taskAcceptanceForm,
     isCodeInputOpen,
     codeInput,
+    setCodeInput,
     verifying,
     chatOpen,
     chatTaskId,
@@ -73,21 +75,24 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
             taskAcceptanceForm={taskAcceptanceForm}
             isCodeInputOpen={isCodeInputOpen}
             codeInput={codeInput}
+            setCodeInput={setCodeInput}
             verifying={verifying}
             handleFormChange={handleFormChange}
             handleAcceptTask={handleAcceptTask}
             handleStartTask={handleStartTask}
             verifyCodeAndStartTask={verifyCodeAndStartTask}
             cancelCodeVerification={cancelCodeVerification}
-            handleChat={handleChat}
           />
           <TaskTimeline task={task} formatDateTime={formatDateTime} formatCreatedAt={formatCreatedAt} />
         </div>
+        <RaiseComplaint task={task}  />
         <TaskFooterActions task={task} handleChat={handleChat} onBack={onBack} />
+
       </div>
+
       {chatOpen && (
         <Chat
-          userId={task.createdBy?.id!}
+          userId={task.createdBy?._id!}
           helperId={chatHelperId}
           helperName={helperName}
           onClose={() => setChatOpen(false)}

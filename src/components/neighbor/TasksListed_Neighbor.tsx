@@ -9,6 +9,7 @@ import { acceptTask } from '../../api/taskApiRequests';
 import { toast } from 'react-toastify';
 import { StatusBadge } from './StatusBadge';
 import { CategoryIcon } from './CategoryIcon';
+import { formatDateTime } from '../../utilis/formatDate';
 
 
 
@@ -40,13 +41,9 @@ const TaskListed_Neighbor: React.FC<TaskListedNeighborProps> = ({ onTaskSelect }
     });
   }, [tasks]);
 
-  const formatDateTime = (time: string, date: string | Date) => {
-    const dateObj = new Date(date);
-    // const time = new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    return `${dateObj.toLocaleDateString()} at ${time}`;
-  };
+  
 
-  const handleChat = (taskId: string | undefined, helperId: string | undefined, assignedHelperName: string) => {
+   const handleChat = (taskId: string | undefined, helperId: string | undefined, assignedHelperName: string) => {
     console.log('handleChat called', { taskId, helperId, assignedHelperName });
     if (!taskId || !helperId || !user?.id) {
       console.warn('Cannot open chat: Invalid taskId, helperId, or userId', { taskId, helperId, assignedHelperName, userId: user?.id });
@@ -75,15 +72,7 @@ const TaskListed_Neighbor: React.FC<TaskListedNeighborProps> = ({ onTaskSelect }
   const pendingTasks = tasks.filter(task => task.task_status === "pending").length;
   const scheduledTasks = tasks.filter(task => task.task_status === "assigned" || task.task_status === "in_progress").length;
 
-  async function handleAcceptTask(taskId: string | undefined): Promise<void> {
-    try {
-      if (!taskId) throw new Error("task Id is required to accept task");
-      const accept = await acceptTask(taskId);
-      if (accept) toast.info("You accepted this task. Let the user make payment");
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  
 
   return (
     <div className="min-h-screen ">
@@ -233,7 +222,7 @@ const TaskListed_Neighbor: React.FC<TaskListedNeighborProps> = ({ onTaskSelect }
                         <svg className="w-4 h-4 mr-2 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        {formatDateTime(task.prefferedTime, task.prefferedDate)}
+                        {formatDateTime(task.prefferedDate, task?.timeSlot?.startTime)}
                       </div>
 
                       <div className="flex items-center text-sm text-gray-500">

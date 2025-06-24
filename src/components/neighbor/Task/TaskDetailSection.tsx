@@ -16,8 +16,15 @@ export const TaskDetailsSection: React.FC<TaskDetailsSectionProps> = ({ task }) 
       <DetailItem label="Description" value={task.description} />
       <div className="grid grid-cols-2 gap-4">
         <DetailItem label="Location" value={task.location} />
-        <DetailItem label="Est. Hours" value={task.est_hours} />
-      </div>
+        <DetailItem
+  label={task?.actual_hours ? "Task Duration" : "Est. Hours"}
+  value={
+    task?.actual_hours != null && task.actual_hours !== 0
+      ? `${task.actual_hours} hours`
+      : task?.est_hours != null && task.est_hours !== ""
+      ? `${task.est_hours} hours`
+      : "N/A"
+  }/>      </div>
       <div className="bg-gray-50 rounded-lg p-4 space-y-3">
         {task.base_amount ? (
           <div className="flex justify-between items-center">
@@ -30,26 +37,19 @@ export const TaskDetailsSection: React.FC<TaskDetailsSectionProps> = ({ task }) 
             <span className="font-semibold text-gray-900">₹{task.est_amount}</span>
           </div>
         )}
-        {/* {task.extra_charges && (
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Extra Charges</span>
-            <span className="font-semibold text-gray-900">₹{task.extra_charges}</span>
-          </div>
-        )} */}
-        {/* {task.platform_fee && (
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Platform Fee</span>
-            <span className="font-semibold text-gray-900">₹{task.platform_fee}</span>
-          </div>
-        )} */}
-        <div className="border-t border-gray-200 pt-3">
+        
+        {task.base_amount && (
+          <div className="border-t border-gray-200 pt-3">
           <div className="flex justify-between items-center">
             <span className="text-base font-semibold text-gray-900">Price</span>
             <span className="text-xl font-bold text-blue-600">
-              ₹{task.base_amount || task.ratePerHour * parseFloat(task.est_hours.split('-')[1])}
+              ₹{task.base_amount}
             </span>
           </div>
-        </div>
+          </div>
+        )}
+        
+        
       </div>
       <div className="group">
         <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Payment Status</dt>

@@ -3,7 +3,7 @@ import { newTaskDetails } from '../../../types/newTaskDetails';
 
 interface ScheduleHelperSectionProps {
   task: newTaskDetails;
-  formatDateTime: (date: string | Date) => string;
+  formatDateTime: (date:  Date,time?:number) => string;
 }
 
 export const ScheduleHelperSection: React.FC<ScheduleHelperSectionProps> = ({ task, formatDateTime }) => (
@@ -17,7 +17,7 @@ export const ScheduleHelperSection: React.FC<ScheduleHelperSectionProps> = ({ ta
         <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Scheduled Date</dt>
         <dd className="text-gray-900 font-medium">
           <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-            <div className="text-lg font-semibold text-blue-900">{formatDateTime(task.prefferedDate)}</div>
+            <div className="text-lg font-semibold text-blue-900">{formatDateTime(task.prefferedDate,task.timeSlot?.startTime)}</div>
           </div>
         </dd>
       </div>

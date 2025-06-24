@@ -29,8 +29,10 @@ const Chat: React.FC<ChatProps> = ({ userId, helperId, helperName, onClose }) =>
 
     setChatStarted(true);
     try {
-      const res = await axios.get(`http://localhost:4000/messages/${userId}/${helperId}`);
-      setMessages(res.data.map((m: any) => ({ sender: m.senderId, text: m.content })));
+      console.log(helperId,userId)
+      const res = await axios.get(`http://localhost:4000/v1/messages/${userId}/${helperId}`);
+      console.log(res)
+      setMessages(res.data.data.map((m: any) => ({ sender: m.senderId, text: m.content })));
     } catch (err) {
       console.error('Error fetching messages:', err);
     }
@@ -102,7 +104,7 @@ const Chat: React.FC<ChatProps> = ({ userId, helperId, helperName, onClose }) =>
     socketRef.current.emit('send-message', userId, helperId, newMessage);
     setNewMessage('');
 
-    axios.post("http://localhost:4000/messages", {
+    axios.post("http://localhost:4000/v1/messages", {
       senderId: userId,
       receiverId: helperId,
       content: newMessage,

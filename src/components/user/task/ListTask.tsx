@@ -37,11 +37,7 @@ console.log(selectedTask)
     });
   }, [tasks]);
 
-  const formatDateTime = (date: string | Date, time : number) => {
-    let formattedTime =time ? `at ${formatTime(time)}`: "" 
-    const dateObj = new Date(date);
-    return `${dateObj.toDateString()}  ${formattedTime}`;
-  };
+  
 
   const formatCreatedAt = (isoString: string) => {
     return new Date(isoString).toLocaleString();
@@ -486,7 +482,7 @@ console.log(selectedTask)
                   </div>
                   <div className="ml-12">
                     <p className="text-sm font-medium text-gray-800">Task Created</p>
-                    <p className="text-xs text-gray-500 mt-1">{formatCreatedAt(selectedTask.prefferedDate.toString())}</p>
+                    <p className="text-xs text-gray-500 mt-1">{formatDateTime(selectedTask.createdAt)}</p>
                   </div>
                 </div>
 

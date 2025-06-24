@@ -18,6 +18,7 @@ interface UseTaskDetailsReturn {
   taskAcceptanceForm: TaskAcceptanceForm;
   isCodeInputOpen: boolean;
   codeInput: string;
+  setCodeInput: (code:string) => void;
   verifying: boolean;
   chatOpen: boolean;
   chatTaskId: string;
@@ -40,7 +41,8 @@ export const useTaskDetails = (taskId: string): UseTaskDetailsReturn => {
   const [taskAcceptanceForm, setTaskAcceptanceForm] = useState<TaskAcceptForm>({
     estimatedHours: 0,
     paymentAmount: 0,
-    arrivalTime: null, // Initialize as null
+    date:task?.prefferedDate!,
+    arrivalTime: null, 
   });
   const [isCodeInputOpen, setIsCodeInputOpen] = useState(false);
   const [codeInput, setCodeInput] = useState('');
@@ -95,6 +97,7 @@ export const useTaskDetails = (taskId: string): UseTaskDetailsReturn => {
         setTaskAcceptanceForm({
           estimatedHours: hours,
           paymentAmount,
+          date:task.prefferedDate,
           arrivalTime,
         });
       }).catch((error) => {
@@ -152,14 +155,14 @@ export const useTaskDetails = (taskId: string): UseTaskDetailsReturn => {
   }, [task]);
 
   const verifyCodeAndStartTask = useCallback(async () => {
-    if (!task?._id || !task.createdBy?.id) {
+    if (!task?._id || !task.createdBy?._id) {
       toast.error('Task ID or Helper ID is missing');
       return;
     }
 
     try {
       setVerifying(true);
-      const isVerified = await VerifyCode(task._id, task.createdBy.id!, codeInput);
+      const isVerified = await VerifyCode(task._id, task.createdBy._id!, codeInput);
       if (isVerified) {
         toast.success('Code verified successfully. Task started!');
         setIsCodeInputOpen(false);
@@ -185,6 +188,7 @@ export const useTaskDetails = (taskId: string): UseTaskDetailsReturn => {
     taskAcceptanceForm,
     isCodeInputOpen,
     codeInput,
+    setCodeInput,
     verifying,
     chatOpen,
     chatTaskId,

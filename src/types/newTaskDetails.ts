@@ -34,7 +34,8 @@ export interface newTaskDetails {
   additional_notes?: string;
   task_status?: TaskStatus; 
   payment_status?: PaymentStatus;
-  task_code?:string
+  task_code?: string,
+  createdAt:Date
 }
 
 export interface TaskRequestDetails{

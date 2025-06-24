@@ -1,5 +1,8 @@
-export const formatDateTime = (date: string | Date): string => new Date(date).toLocaleDateString();
-
+export const formatDateTime = (date: string | Date, time : number) => {
+    let formattedTime =time ? `at ${formatTime(time)}`: "" 
+    const dateObj = new Date(date);
+    return `${dateObj.toDateString()}  ${formattedTime}`;
+  };
 export const formatCreatedAt = (isoString: string): string => new Date(isoString).toLocaleString();
 
 export const formatTime = (minutes: number) => {

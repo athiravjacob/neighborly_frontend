@@ -15,13 +15,13 @@ interface TaskActionsSectionProps {
   taskAcceptanceForm: TaskAcceptanceForm;
   isCodeInputOpen: boolean;
   codeInput: string;
+  setCodeInput: (code:string) => void;
   verifying: boolean;
   handleFormChange: (field: string, value: string) => void;
   handleAcceptTask: (taskId: string | undefined) => void;
   handleStartTask: () => void;
   verifyCodeAndStartTask: () => void;
   cancelCodeVerification: () => void;
-  handleChat: (taskId: string | undefined, helperId: string | undefined, name: string) => void;
 }
 
 export const TaskActionsSection: React.FC<TaskActionsSectionProps> = ({
@@ -29,20 +29,19 @@ export const TaskActionsSection: React.FC<TaskActionsSectionProps> = ({
   taskAcceptanceForm,
   isCodeInputOpen,
   codeInput,
+  setCodeInput,
   verifying,
   handleFormChange,
   handleAcceptTask,
   handleStartTask,
   verifyCodeAndStartTask,
   cancelCodeVerification,
-  handleChat,
 }) => {
-
-
   const [tempHours, setTempHours] = useState<string>(
     taskAcceptanceForm.estimatedHours ? taskAcceptanceForm.estimatedHours.toString() : ''
   );
-  // Helper function to format arrivalTime if formattedArrivalTime isn't provided
+
+  // const [codeInput,setCodeInput] = useState('')
  
   // Handle OK button click to trigger API call
   const handleOkClick = () => {
@@ -50,6 +49,8 @@ export const TaskActionsSection: React.FC<TaskActionsSectionProps> = ({
       handleFormChange('estimatedHours', tempHours);
     }
   };
+
+  
 
   return (
     <>
@@ -230,7 +231,7 @@ export const TaskActionsSection: React.FC<TaskActionsSectionProps> = ({
                     maxLength={6}
                     placeholder="000000"
                     value={codeInput}
-                    className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-center text-2xl font-mono tracking-widest bg-white hover:shadow-md transition-all duration-200"
+                    onChange={(e) => setCodeInput(e.target.value)}                    className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-center text-2xl font-mono tracking-widest bg-white hover:shadow-md transition-all duration-200"
                   />
                 </div>
 

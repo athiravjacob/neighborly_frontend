@@ -3,7 +3,7 @@ import { newTaskDetails } from '../../../types/newTaskDetails';
 
 interface TaskTimelineProps {
   task: newTaskDetails;
-  formatDateTime: (date: string | Date) => string;
+  formatDateTime: (date: string | Date,time?:number) => string;
   formatCreatedAt: (isoString: string) => string;
 }
 
@@ -17,7 +17,7 @@ export const TaskTimeline: React.FC<TaskTimelineProps> = ({ task, formatDateTime
           <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white" />
           <div className="ml-12">
             <p className="text-sm font-medium text-gray-900">Task Created</p>
-            <p className="text-xs text-gray-500">{formatCreatedAt(task.prefferedDate.toString())}</p>
+            <p className="text-xs text-gray-500">{formatDateTime(task.createdAt)}</p>
           </div>
         </div>
         {task.createdBy && (
@@ -33,7 +33,7 @@ export const TaskTimeline: React.FC<TaskTimelineProps> = ({ task, formatDateTime
             <div className="absolute mt-1 ml-1 h-6 w-6 rounded-full border-2 border-violet-700 bg-white" />
             <div className="ml-12">
               <p className="text-sm font-medium text-gray-900">Task Scheduled</p>
-              <p className="text-xs text-gray-500">{formatDateTime(task.prefferedDate)}</p>
+              <p className="text-xs text-gray-500">{formatDateTime(task.prefferedDate,task?.timeSlot?.startTime!)}</p>
             </div>
           </div>
         )}
