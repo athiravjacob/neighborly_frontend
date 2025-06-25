@@ -1,4 +1,4 @@
-export const formatDateTime = (date: string | Date, time : number) => {
+export const formatDateTime = (date: string | Date, time? : number) => {
     let formattedTime =time ? `at ${formatTime(time)}`: "" 
     const dateObj = new Date(date);
     return `${dateObj.toDateString()}  ${formattedTime}`;

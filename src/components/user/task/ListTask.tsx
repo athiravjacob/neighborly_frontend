@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import { CategoryIcon } from '../../neighbor/CategoryIcon';
 import { StatusBadge } from '../../neighbor/StatusBadge';
 import { formatDateTime, formatTime } from '../../../utilis/formatDate';
+import { RaiseComplaint } from '../../neighbor/Task/RaiseComplaint';
 
 
 
@@ -550,7 +551,7 @@ console.log(selectedTask)
           </div>
         </div>
       </div>
-
+        <RaiseComplaint task={selectedTask} />
       {/* Footer Actions */}
       <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
         {!selectedTask.assignedNeighbor && selectedTask.task_status === "pending" && (
@@ -564,7 +565,7 @@ console.log(selectedTask)
             Find Helper
           </button>
         )}
-        {selectedTask.assignedNeighbor && (
+        {/* {selectedTask.assignedNeighbor && (
           <button
             className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-md hover:shadow-lg"
             onClick={() => handleChat(selectedTask._id, selectedTask.assignedNeighbor?._id!, selectedTask.assignedNeighbor?.name!)}
@@ -574,7 +575,7 @@ console.log(selectedTask)
             </svg>
             Chat with Helper
           </button>
-        )}
+        )} */}
         <button
           className="border border-gray-200 text-gray-700 hover:bg-gray-100 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
           onClick={() => setSelectedTask(null)}

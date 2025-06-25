@@ -216,8 +216,8 @@ export const fetchComplaintDetails = async (taskID: string): Promise<DisputeDeta
     return response.data.data
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message || "Failed to report");
+      throw new Error(error.response.data.message || "Failed to fetch dispute details");
     }
-    throw new Error("An unexpected error occurred while registering complaint");
+    throw new Error("An unexpected error occurred while fetching deispute details");
   }
 }
