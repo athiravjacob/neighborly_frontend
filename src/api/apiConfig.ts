@@ -33,7 +33,12 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
-  
+    console.log('Initial Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      url: originalRequest.url,
+      retry: originalRequest._retry,
+    });
 
     if (
       error.response?.status === 403 &&
@@ -42,21 +47,23 @@ api.interceptors.response.use(
       'message' in error.response.data &&
       error.response.data.message === 'Your account has been banned by Admin'
     ) {
-      console.log("banned")
+      console.log('User banned');
       store.dispatch(clearCredentials());
-      // Redirect to banned page
       window.location.href = '/banned';
       return Promise.reject(error);
     }
+
     if (
       error.response?.status === 401 &&
       error.response.data &&
       typeof error.response.data === 'object' &&
-      'error' in error.response.data &&
-      error.response.data.error === 'Access token expired' &&
+      'message' in error.response.data &&
+      error.response.data.message === 'Access token expired' &&
       !originalRequest._retry
     ) {
+      console.log('Triggering refresh, _retry:', originalRequest._retry);
       if (isRefreshing) {
+        console.log('Queueing request, queue length:', failedQueue.length);
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: () => resolve(api(originalRequest)),
@@ -69,27 +76,31 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        console.log("before refresh req")
-        await api.post('/auth/tokens/refresh');
-        console.log("after refresh req")
-        // Refresh token
-        processQueue(null); // Retry all failed requests
-        return api(originalRequest); // Retry original request
-      } catch (refreshError) {
-        
+        console.log('Sending refresh request to /auth/tokens/refresh');
+        const refreshResponse = await api.post('/auth/tokens/refresh');
+        console.log('Refresh response:', refreshResponse.data);
+        processQueue(null);
+        console.log('Retrying original request:', originalRequest.url);
+        return api(originalRequest);
+      } catch (refreshError: any) {
+        console.error('Refresh failed:', {
+          status: refreshError.response?.status,
+          data: refreshError.response?.data,
+        });
         processQueue(refreshError, null);
-        window.location.href = '/login';
+        window.location.href = '/login'; // Re-enable redirect
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
-    // Other 401s (not token expired)
     if (error.response?.status === 401) {
+      console.log('Other 401 error, redirecting to login:', error.response?.data);
       window.location.href = '/login';
     }
 
+    console.error('Unhandled error:', error.response?.status, error.response?.data);
     return Promise.reject(error);
   }
 );

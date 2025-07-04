@@ -3,7 +3,7 @@ import api from "./apiConfig"
 import { newTaskDetails ,TaskRequestDetails,TaskStatus} from "../types/newTaskDetails";
 import { TaskAcceptForm } from "../types/taskAcceptForm";
 import { category, subCategory } from "../types/category";
-import {  DisputeDetails } from "../types/complaintDetails";
+import {  DisputeDetails, populated_disputeDetails } from "../types/complaintDetails";
 
 //**************create new task ************************ */
 export const createTask = async (newTask: TaskRequestDetails): Promise<void>=>{
@@ -210,7 +210,7 @@ export const reportAnIssue = async (disputeDetails: DisputeDetails): Promise<voi
 
 // *************************** fetch complaint details **************************
 
-export const fetchComplaintDetails = async (taskID: string): Promise<DisputeDetails> => {
+export const fetchComplaintDetails = async (taskID: string): Promise<populated_disputeDetails> => {
   try {
     const response = await api.get(`/disputes?taskId=${taskID}`)
     return response.data.data

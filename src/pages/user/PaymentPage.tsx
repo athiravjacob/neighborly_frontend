@@ -37,7 +37,9 @@ export const PaymentPage = () => {
           metadata: {
             userId: task?.createdBy?._id, 
             neighborId: task?.assignedNeighbor?._id,
-            taskId: task?._id ,
+            taskId: task?._id,
+            base_amount: task.base_amount,
+            platform_fee :task.platform_fee
           },
         }),
       });

@@ -8,9 +8,10 @@ import { AlertTriangle, Eye, FileText, User, Clock, X, Send, Shield } from 'luci
 
 interface RaiseComplaintProps {
   task: newTaskDetails;
+  role:"Neighbor"|"User"
 }
 
-export const RaiseComplaint: React.FC<RaiseComplaintProps> = ({ task }) => {
+export const RaiseComplaint: React.FC<RaiseComplaintProps> = ({ task ,role}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [issue, setIssue] = useState('');
@@ -50,11 +51,14 @@ export const RaiseComplaint: React.FC<RaiseComplaintProps> = ({ task }) => {
       toast.error('Cannot report issue: Missing required task details.');
       return;
     }
-
+    let reporter
+    if (role === "Neighbor") {
+       reporter = task.assignedNeighbor._id
+    }else reporter = task.createdBy._id
     const complaintDetails: DisputeDetails = {
       taskId: task._id,
-      reporter_role: 'Neighbor',
-      reportedBy: task.assignedNeighbor._id,
+      reporter_role: role,
+      reportedBy: reporter,
       details: issue,
     };
 
@@ -231,7 +235,7 @@ export const RaiseComplaint: React.FC<RaiseComplaintProps> = ({ task }) => {
                     <span>Task ID</span>
                   </label>
                   <p className="text-gray-900 font-mono text-sm bg-white px-3 py-2 rounded-lg border">
-                    {dispute.taskId}
+                    {dispute.taskId._id}
                   </p>
                 </div>
 

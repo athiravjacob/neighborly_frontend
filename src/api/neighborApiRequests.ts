@@ -48,24 +48,7 @@ export const NeighborLogin = async (email: string, password: string): Promise<Us
   }
 };
 
-//************************ Schedule date and time ************************** */
-// const dayMap: { [key: string]: "sun"|"mon" | "tue" | "wed" | "thur" | "fri" | "sat"  } = {
-//   Monday: "mon",
-//   Tuesday: "tue",
-//   Wednesday: "wed",
-//   Thursday: "thur",
-//   Friday: "fri",
-//   Saturday: "sat",
-//   Sunday: "sun",
-// };
-// // Convert HH:mm to minutes past midnight
-// const timeToMinutes = (time: string): number => {
-//   const momentTime = moment(time, "HH:mm");
-//   if (!momentTime.isValid()) {
-//     throw new Error(`Invalid time format: ${time}`);
-//   }
-//   return momentTime.hours() * 60 + momentTime.minutes();
-// };
+
 //****** post weekly schedule********** */
 export const ScheduleTimeslots = async (neighborId:string,availability:Availability[]): Promise<void> => {
   try {
@@ -103,7 +86,8 @@ export const fetchWeeklySchedule = async (neighborId: string): Promise<Availabil
 
 export const FetchAvailability = async (neighborId: string,duration:number): Promise<Availability[]> => {
   try {
-    const response = await api.get(`/neighbors/${neighborId}/available-days?duration=${120}`, { withCredentials: true });
+    let hours_needed = duration*60
+    const response = await api.get(`/neighbors/${neighborId}/available-days?duration=${hours_needed}`, { withCredentials: true });
     const availabilityData = response.data.data;
     console.log(availabilityData)
 

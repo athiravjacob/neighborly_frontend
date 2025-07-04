@@ -1,7 +1,9 @@
 // src/api/adminApi.ts
 import { UserDTO, userGeneralInfo } from '../types/UserDTO';
+import { DisputeDetails, populated_disputeDetails } from '../types/complaintDetails';
 import { NeighborInfo } from '../types/neighbor';
 import { newTaskDetails } from '../types/newTaskDetails';
+import { Transaction } from '../types/transactions';
 import api from './apiConfig';
 import axios from 'axios';
 
@@ -58,7 +60,7 @@ export const getAllTasks = async (): Promise<newTaskDetails[]> => {
 
 export const verifyNeighbor = async (neighborId:string): Promise<Boolean> => {
   try {
-    const verificationResult = await api.patch(`/admin/neighbors/${neighborId}/verification`, {});
+    const verificationResult = await api.patch(`/admin/neighbors/${neighborId}/verify`);
     if (verificationResult) return true
     return false
   } catch (error) {
@@ -79,5 +81,49 @@ export const updateBanStatus = async (id: string, type: 'neighbor' | 'user'): Pr
       throw new Error(error.response.data.message || 'Error Banned/Unbanned');
     }
     throw new Error('An unexpected error occurred');
+  }
+}
+
+
+export const fetchAllDisputes = async (): Promise<populated_disputeDetails[]> => {
+  try {
+    const response = await api.get('/admin/disputes')
+    return  response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || 'Error Banned/Unbanned');
+    }
+    throw new Error('An unexpected error occurred');
+  
+  }
+}
+
+export const updateDisputeStatus = async (disputeId:string,status:string): Promise<DisputeDetails[]> => {
+  try {
+    const response = await api.patch(`/admin/disputes/${disputeId}/status`,{ status })
+    console.log(response)
+    return  response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || 'error updating dispute status');
+    }
+    throw new Error('An unexpected error occurred');
+  
+  }
+}
+export const fetchAllTransactions = async (): Promise<Transaction[]> => {
+  try {
+    const response = await api.get('/admin/transactions')
+    console.log(response)
+    return  response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || 'eror fecting transaction history');
+    }
+    throw new Error('An unexpected error occurred');
+  
   }
 }

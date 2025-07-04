@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { Transaction } from '../../types/transactions'; // Adjust path to Transaction interface
 import { FetchTransactionDetails } from '../../api/neighborApiRequests';
+import { formatDateTime } from '../../utilis/formatDate';
 
 // Register Chart.js components (Bar component removed if not used)
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -14,7 +15,7 @@ interface TableTransaction {
   transactionId: string;
   taskId: string;
   amount: number;
-  type: 'earnings';
+  type: string;
   date: string;
 }
 
@@ -42,16 +43,12 @@ const EarningsDashboard = () => {
         const fetchedTransactions = await FetchTransactionDetails(user.id); // Using user.id as neighborId
         // Map API transactions to table format
         const mappedTransactions: TableTransaction[] = fetchedTransactions.map((transaction) => ({
-          transactionId: transaction.id|| 'N/A', // Handle optional id
+          transactionId: transaction.id || 'N/A', // Handle optional id
           taskId: transaction.taskId,
-          amount: transaction.amount,
+          amount: transaction.base_amount,
           type: 'earnings', // Hardcoded as per requirement
-          date: new Date(transaction.transactionDate).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-          }), // Format as MM/DD/YYYY
-        }));
+          date:  formatDateTime(transaction.transactionDate)
+      }));
         setTransactions(mappedTransactions);
       } catch (err) {
         setTransactionError(err instanceof Error ? err.message : 'Failed to load transactions');

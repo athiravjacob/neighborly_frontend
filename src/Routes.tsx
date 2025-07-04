@@ -20,12 +20,14 @@ import CompleteYourProfile from './pages/neighbor/CompleteProfile';
 import TaskListPage from './components/user/task/ListTask';
 import SettingsPage from './pages/user/SettingsPage';
 import NeighborList from './pages/admin/Main/NeighborList';
-import ChatWithHelper from './components/user/task/ChatWithHelper';
 import NeighborDetails from './pages/admin/Main/NeighborDetailedView';
 import TaskList from './pages/admin/Main/TaskList';
 import { PaymentPage } from './pages/user/PaymentPage';
 import { PaymentSuccess } from './pages/user/PaymentSuccess';
 import AccountBanned from './pages/Banned';
+import DisputeList from './pages/admin/Main/DisputeList';
+import DisputeDetails from './pages/admin/Main/DisputeDetailedView';
+import TransactionsList from './pages/admin/Main/TransactionsList';
 // import NeighborProfile from './pages/neighbor/Profile';
 const AppRoutes: React.FC = () => {
   return (
@@ -68,6 +70,11 @@ const AppRoutes: React.FC = () => {
           <Route path="neighbors" element={<NeighborList />} />
           <Route path="neighbors/details" element={<NeighborDetails />} />
           <Route path="tasks" element={<TaskList />} />
+          <Route path="disputes" element={<DisputeList />} />
+          <Route path="disputes/details" element={<DisputeDetails />} />
+          <Route path="transactions" element={<TransactionsList />} />
+          {/* <Route path="disputes/details" element={<DisputeDetails />} /> */}
+
 
 
           

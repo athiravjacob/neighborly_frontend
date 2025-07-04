@@ -28,7 +28,7 @@ const UserDetails: React.FC = () => {
     );
   }
   
-  const { userDetails, isLoading, error } = useProfileSettings(initialUser.id!);
+  const { userDetails, isLoading, error } = useProfileSettings(initialUser._id!);
   console.log(userDetails)
   console.log(initialUser)
   if (isLoading) {
@@ -90,7 +90,7 @@ const UserDetails: React.FC = () => {
               </div>
             </div>
 
-            <BanButton userId={initialUser.id!} isBanned={userDetails.isBanned!} type={'user'} />
+            <BanButton userId={initialUser._id!} isBanned={userDetails.isBanned!} type={'user'} />
           </div>
         </div>
       </div>

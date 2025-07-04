@@ -85,7 +85,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ taskId, onBack }) => {
           />
           <TaskTimeline task={task} formatDateTime={formatDateTime} formatCreatedAt={formatCreatedAt} />
         </div>
-        <RaiseComplaint task={task}  />
+        <RaiseComplaint task={task} role={"Neighbor"}  />
         <TaskFooterActions task={task} handleChat={handleChat} onBack={onBack} />
 
       </div>

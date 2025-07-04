@@ -551,7 +551,7 @@ console.log(selectedTask)
           </div>
         </div>
       </div>
-        <RaiseComplaint task={selectedTask} />
+            <RaiseComplaint task={selectedTask} role={"User"} />
       {/* Footer Actions */}
       <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
         {!selectedTask.assignedNeighbor && selectedTask.task_status === "pending" && (
