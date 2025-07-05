@@ -235,7 +235,7 @@ const TaskCreationPage: React.FC = () => {
   const steps = ['Describe Your Task', 'Browse Helpers & Prices', 'Schedule', 'Confirm'];
   const { user } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
-
+  console.log(schedule)
   const handleDescribeTaskContinue = useCallback((data: TaskData) => {
     setTaskData(data);
     setNeighborsList(data.neighbors);
@@ -267,6 +267,8 @@ const TaskCreationPage: React.FC = () => {
       toast.error('Missing required data. Please complete all steps.');
       return;
     }
+    const dateString = schedule.date
+    const date = new Date(dateString)
     const taskDetails = {
       createdBy: user.id,
       assignedNeighbor: selectedHelper._id,
@@ -277,7 +279,7 @@ const TaskCreationPage: React.FC = () => {
       subCategory: taskData.subCategory,
       description: taskData.taskDetails,
       est_hours: taskData.taskSize,
-      prefferedDate: schedule.date,
+      prefferedDate: date.toISOString(),
       ratePerHour: selectedHelper.skills[0].hourlyRate,
       est_amount:calculateEstAmount(taskData.taskSize)
 

@@ -19,7 +19,7 @@ const NeighborDetails: React.FC = () => {
                 </div>
                 <button 
                     className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors duration-200"
-                    onClick={() => navigate('/admin/dashboard/neighbors')}
+                    onClick={() => navigate('/admin/home/neighbors')}
                 >
                     Back to Neighbors List
                 </button>
@@ -50,7 +50,7 @@ const NeighborDetails: React.FC = () => {
       <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto bg-gray-900 text-gray-200">
       <button
           className="group flex items-center mb-6 text-violet-400 hover:text-violet-300 font-medium transition-colors duration-200"
-          onClick={() => navigate("/admin/dashboard/neighbors")}
+          onClick={() => navigate("/admin/home/neighbors")}
       >
           <span className="text-xl mr-2 group-hover:transform group-hover:-translate-x-1 transition-transform duration-200">←</span>
           <span>Back to Neighbors</span>

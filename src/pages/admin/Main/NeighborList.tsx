@@ -51,7 +51,7 @@ const NeighborList: React.FC = () => {
   }, [searchTerm, users]);
 
   const handleUserClick = (user: NeighborInfo) => {
-    navigate('/admin/dashboard/neighbors/details', { state: { user } });
+    navigate('/admin/home/neighbors/details', { state: { user } });
   };
 
   const formatDOB = (dob: string | Date): string => {

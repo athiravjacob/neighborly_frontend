@@ -28,6 +28,7 @@ import AccountBanned from './pages/Banned';
 import DisputeList from './pages/admin/Main/DisputeList';
 import DisputeDetails from './pages/admin/Main/DisputeDetailedView';
 import TransactionsList from './pages/admin/Main/TransactionsList';
+import { Dashboard } from './pages/admin/Main/Dashboard';
 // import NeighborProfile from './pages/neighbor/Profile';
 const AppRoutes: React.FC = () => {
   return (
@@ -64,7 +65,8 @@ const AppRoutes: React.FC = () => {
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLogin />} />
       <Route element={<ProtectedRoutes_admin />}>
-        <Route path="/admin/dashboard" element={<Home />}>
+        <Route path="/admin/home" element={<Home />}>
+          <Route path = "dashboard" element={<Dashboard/>}/>
           <Route path="users" element={<UserList />} />
           <Route path="users/details" element={<UserDetails />} />
           <Route path="neighbors" element={<NeighborList />} />

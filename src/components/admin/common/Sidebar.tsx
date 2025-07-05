@@ -58,6 +58,15 @@ const Sidebar: React.FC = () => {
 
       {/* Menu Items */}
       <nav className="flex flex-col h-[calc(100%-8rem)] justify-between py-6">
+      <div className="space-y-1">
+        <MenuItem
+          icon={<PersonIcon />}
+          label="Dashboard"
+          isCollapsed={isCollapsed}
+          onClick={() => navigate("dashboard")} 
+          />
+          </div>
+      
         <div className="space-y-1">
         <MenuItem
           icon={<PersonIcon />}
@@ -84,6 +93,25 @@ const Sidebar: React.FC = () => {
           label="Tasks"
           isCollapsed={isCollapsed}
           onClick={() => navigate("tasks")} 
+        />
+       
+        </div>
+
+        <div className="space-y-1">
+        <MenuItem
+          icon={<PersonIcon />}
+          label="Disputes"
+          isCollapsed={isCollapsed}
+          onClick={() => navigate("disputes")} 
+        />
+       
+        </div>
+        <div className="space-y-1">
+        <MenuItem
+          icon={<PersonIcon />}
+          label="Transactions"
+          isCollapsed={isCollapsed}
+          onClick={() => navigate("transactions")} 
         />
        
         </div>

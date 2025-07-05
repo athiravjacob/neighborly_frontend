@@ -63,7 +63,7 @@ const TransactionsList: React.FC = () => {
   }, [searchTerm, transactions]);
 
   const handleTransactionClick = (transaction: Transaction) => {
-    navigate('/admin/dashboard/transactions/details', { state: { transaction } });
+    navigate('/admin/home/transactions/details', { state: { transaction } });
   };
 
   const formatDate = (date: Date | string): string => {

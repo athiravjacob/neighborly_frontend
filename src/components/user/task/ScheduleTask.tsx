@@ -285,9 +285,11 @@ export const ScheduleTask: React.FC<ScheduleTaskProps> = ({
       toast.error('Invalid date selected');
       return;
     }
+    console.log(selectedDate,"selected date")
 
     onContinue({
-      date: selectedDateObj.toISOString().split('T')[0],
+  
+      date: selectedDate,
     });
   };
 

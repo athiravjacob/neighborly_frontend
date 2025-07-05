@@ -50,7 +50,7 @@ const UserList: React.FC = () => {
   }, [searchTerm, users]);
 
   const handleUserClick = (user: userGeneralInfo) => {
-    navigate('/admin/dashboard/users/details', { state: { user } });
+    navigate('/admin/home/users/details', { state: { user } });
   };
 
   const columns = [

@@ -19,7 +19,7 @@ const DisputeDetailedView: React.FC = () => {
         </div>
         <button
           className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors duration-200"
-          onClick={() => navigate('/admin/dashboard/disputes')}
+          onClick={() => navigate('/admin/home/disputes')}
         >
           Back to Disputes List
         </button>
@@ -34,7 +34,7 @@ const DisputeDetailedView: React.FC = () => {
       console.log(updatedDispute)
       toast.success(`Dispute status updated to ${status}`);
       // Optionally refresh dispute data or update local state
-      navigate('/admin/dashboard/disputes', { replace: true }); // Navigate back after update
+      navigate('/admin/home/disputes', { replace: true }); // Navigate back after update
       } catch (error) {
           console.log(error)
       toast.error('Failed to update dispute status');
@@ -54,7 +54,7 @@ const DisputeDetailedView: React.FC = () => {
     <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto bg-gray-900 text-gray-200">
       <button
         className="group flex items-center mb-6 text-violet-400 hover:text-violet-300 font-medium transition-colors duration-200"
-        onClick={() => navigate('/admin/dashboard/disputes')}
+        onClick={() => navigate('/admin/home/disputes')}
       >
         <span className="text-xl mr-2 group-hover:transform group-hover:-translate-x-1 transition-transform duration-200">←</span>
         <span>Back to Disputes</span>

@@ -5,7 +5,7 @@ import { useProfileSettings } from "../../../hooks/useProfileSettings";
 import BanButton from "../../../components/admin/common/BanButton";
 
 const ROUTES = {
-  ADMIN_USERS: '/admin/dashboard/users',
+  ADMIN_USERS: '/admin/home/users',
 };
 
 const UserDetails: React.FC = () => {

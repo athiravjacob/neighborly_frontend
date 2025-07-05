@@ -54,7 +54,7 @@ const DisputeList: React.FC = () => {
   }, [searchTerm, disputes]);
 
   const handleDisputeClick = (dispute: populated_disputeDetails) => {
-    navigate('/admin/dashboard/disputes/details', { state: { dispute } });
+    navigate('/admin/home/disputes/details', { state: { dispute } });
   };
 
   const formatDate = (date: string | Date): string => {

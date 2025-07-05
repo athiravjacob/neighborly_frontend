@@ -18,7 +18,7 @@ const AdminLogin = () => {
       const response = await adminLogin(email, password);
       const adminDetails = {id:response.id,name:response.name,email:response.email,type:response.type}
       dispatch(setCredentials({user:adminDetails}))      
-      navigate('/admin/dashboard');
+      navigate('/admin/home');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
     }

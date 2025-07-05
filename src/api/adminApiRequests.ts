@@ -1,6 +1,7 @@
 // src/api/adminApi.ts
 import { UserDTO, userGeneralInfo } from '../types/UserDTO';
 import { DisputeDetails, populated_disputeDetails } from '../types/complaintDetails';
+import { RevenueSummary, taskStats, top_neighbors } from '../types/dashboard';
 import { NeighborInfo } from '../types/neighbor';
 import { newTaskDetails } from '../types/newTaskDetails';
 import { Transaction } from '../types/transactions';
@@ -121,7 +122,48 @@ export const fetchAllTransactions = async (): Promise<Transaction[]> => {
     
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.message || 'eror fecting transaction history');
+      throw new Error(error.response.data.message || 'error fetching transaction history');
+    }
+    throw new Error('An unexpected error occurred');
+  
+  }
+}
+export const fetchRevenueSummary = async (): Promise<RevenueSummary> => {
+  try {
+    const response = await api.get('/admin/revenue-summary')
+    return  response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || 'eror fetching revenue summary');
+    }
+    throw new Error('An unexpected error occurred');
+  
+  }
+}
+
+export const fetchTaskStats = async (): Promise<taskStats> => {
+  try {
+    const response = await api.get('/admin/task-stats')
+    return  response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || 'eror fetching tasks stats');
+    }
+    throw new Error('An unexpected error occurred');
+  
+  }
+}
+
+export const fetchTopNeighbors = async (): Promise<top_neighbors[]> => {
+  try {
+    const response = await api.get('/admin/top-neighbors')
+    return  response.data.data
+    
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.message || 'eror fetching top neighbors');
     }
     throw new Error('An unexpected error occurred');
   
